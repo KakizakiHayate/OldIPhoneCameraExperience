@@ -31,7 +31,7 @@ platform :ios do
     build_for_distribution
 
     review_info = nil
-    if ENV["REVIEW_FIRST_NAME"] && ENV["REVIEW_EMAIL"]
+    if ENV["REVIEW_FIRST_NAME"] && ENV["REVIEW_LAST_NAME"] && ENV["REVIEW_PHONE_NUMBER"] && ENV["REVIEW_EMAIL"]
       review_info = {
         first_name: ENV["REVIEW_FIRST_NAME"],
         last_name: ENV["REVIEW_LAST_NAME"],
