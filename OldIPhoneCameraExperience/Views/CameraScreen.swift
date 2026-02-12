@@ -98,13 +98,8 @@ struct CameraScreen: View {
     // MARK: - Camera Preview
 
     private var cameraPreview: some View {
-        Rectangle()
-            .fill(Color.gray.opacity(0.3))
-            .overlay(
-                Text("Camera Preview")
-                    .foregroundColor(.white.opacity(0.5))
-                    .font(.title2)
-            )
+        CameraPreviewView(session: viewModel.captureSession)
+            .background(Color.black)
     }
 
     // MARK: - Bottom Toolbar

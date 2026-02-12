@@ -17,6 +17,11 @@ final class CameraViewModel: ObservableObject {
     // MARK: - Published Properties
 
     @Published private(set) var state: CameraState
+    
+    /// カメラセッション（プレビュー用）
+    var captureSession: AVCaptureSession {
+        cameraService.captureSession
+    }
 
     // MARK: - Dependencies
 
