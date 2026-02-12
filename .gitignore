@@ -16,3 +16,6 @@ xcuserdata/
 fastlane/.env
 fastlane/report.xml
 fastlane/README.md
+
+# Claude Code
+.claude/settings.local.json
