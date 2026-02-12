@@ -1,0 +1,7 @@
+# 認証情報は .env ファイルから読み込む（.envはgitignore対象）
+# ローカル実行時: fastlane/.env に値を設定してください
+# CI実行時: GitHub Secrets から自動で読み込まれます
+app_identifier(ENV["APP_IDENTIFIER"] || "com.example.app")
+apple_id(ENV["APPLE_ID"] || "your-apple-id@example.com")
+team_id(ENV["TEAM_ID"] || "YOUR_TEAM_ID")
+itc_team_id(ENV["ITC_TEAM_ID"] || "YOUR_ITC_TEAM_ID")

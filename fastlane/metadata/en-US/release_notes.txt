@@ -1,0 +1,4 @@
+Initial release
+- iPhone 4-style camera filter (warm tones, focal crop, motion blur simulation)
+- iOS 4-6 skeuomorphic UI
+- Iris shutter animation
