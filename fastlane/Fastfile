@@ -1,0 +1,53 @@
+default_platform(:ios)
+
+platform :ios do
+  before_all do
+    setup_ci if ENV["CI"]
+  end
+
+  private_lane :build_for_distribution do
+    match(type: "appstore", readonly: is_ci)
+
+    build_app(
+      project: "OldIPhoneCameraExperience.xcodeproj",
+      scheme: "OldIPhoneCameraExperience",
+      export_method: "app-store",
+      output_directory: "./build",
+      output_name: "OldIPhoneCameraExperience.ipa"
+    )
+  end
+
+  desc "TestFlight にアップロード"
+  lane :beta do
+    build_for_distribution
+
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  desc "App Store Connect にアップロード（メタデータ含む、審査提出は手動）"
+  lane :release do
+    build_for_distribution
+
+    review_info = nil
+    if ENV["REVIEW_FIRST_NAME"] && ENV["REVIEW_LAST_NAME"] && ENV["REVIEW_PHONE_NUMBER"] && ENV["REVIEW_EMAIL"]
+      review_info = {
+        first_name: ENV["REVIEW_FIRST_NAME"],
+        last_name: ENV["REVIEW_LAST_NAME"],
+        phone_number: ENV["REVIEW_PHONE_NUMBER"],
+        email_address: ENV["REVIEW_EMAIL"],
+        notes: ENV["REVIEW_NOTES"] || ""
+      }
+    end
+
+    upload_to_app_store(
+      submit_for_review: false,
+      automatic_release: false,
+      force: true,
+      skip_screenshots: true,
+      precheck_include_in_app_purchases: false,
+      app_review_information: review_info
+    )
+  end
+end
