@@ -37,10 +37,10 @@ extension ShakeEffect {
         let rotationRange = FilterParameters.shakeRotationRange
         let blurRange = FilterParameters.motionBlurRadiusRange
 
-        let shiftX = Double.random(in: Double(shiftRange.lowerBound) ... Double(shiftRange.upperBound))
-        let shiftY = Double.random(in: Double(shiftRange.lowerBound) ... Double(shiftRange.upperBound))
-        let rotation = Double.random(in: Double(rotationRange.lowerBound) ... Double(rotationRange.upperBound))
-        let motionBlurRadius = Double.random(in: Double(blurRange.lowerBound) ... Double(blurRange.upperBound))
+        let shiftX = Double.random(in: shiftRange)
+        let shiftY = Double.random(in: shiftRange)
+        let rotation = Double.random(in: rotationRange)
+        let motionBlurRadius = Double.random(in: blurRange)
 
         // ジャイロデータからブレ角度を算出（nilの場合はランダム）
         let motionBlurAngle: Double
