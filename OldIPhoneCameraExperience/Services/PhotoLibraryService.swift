@@ -5,8 +5,8 @@
 //  Created by Manus on 2026-02-13.
 //
 
-import UIKit
 import Photos
+import UIKit
 
 /// フォトライブラリへの保存を提供するプロトコル
 protocol PhotoLibraryServiceProtocol {
@@ -16,7 +16,6 @@ protocol PhotoLibraryServiceProtocol {
 
 /// フォトライブラリへの保存の実装
 final class PhotoLibraryService: PhotoLibraryServiceProtocol {
-
     func saveToPhotoLibrary(_ image: UIImage) async throws {
         // フォトライブラリの権限チェック
         let status = PHPhotoLibrary.authorizationStatus(for: .addOnly)
@@ -39,9 +38,9 @@ final class PhotoLibraryService: PhotoLibraryServiceProtocol {
 
         // フォトライブラリに保存
         return try await withCheckedThrowingContinuation { continuation in
-            PHPhotoLibrary.shared().performChanges({
+            PHPhotoLibrary.shared().performChanges {
                 PHAssetChangeRequest.creationRequestForAsset(from: image)
-            }) { success, error in
+            } completionHandler: { success, error in
                 if success {
                     continuation.resume()
                 } else {

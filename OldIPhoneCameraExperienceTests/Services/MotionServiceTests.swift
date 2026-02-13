@@ -5,9 +5,9 @@
 //  Created by Manus on 2026-02-13.
 //
 
-import XCTest
 import CoreMotion
 @testable import OldIPhoneCameraExperience
+import XCTest
 
 /// モックMotionService（テスト用）
 final class MockMotionService: MotionServiceProtocol {
@@ -28,7 +28,6 @@ final class MockMotionService: MotionServiceProtocol {
 }
 
 final class MotionServiceTests: XCTestCase {
-
     var sut: MockMotionService!
 
     override func setUp() {
@@ -42,6 +41,7 @@ final class MotionServiceTests: XCTestCase {
     }
 
     // MARK: - S-M1: startMonitoringでモニタリング開始
+
     func test_startMonitoring_setsIsMonitoringTrue() {
         XCTAssertFalse(sut.isMonitoring, "初期状態ではモニタリングは停止している必要があります")
 
@@ -51,6 +51,7 @@ final class MotionServiceTests: XCTestCase {
     }
 
     // MARK: - S-M2: stopMonitoringでモニタリング停止
+
     func test_stopMonitoring_setsIsMonitoringFalse() {
         sut.startMonitoring()
         XCTAssertTrue(sut.isMonitoring)
@@ -61,6 +62,7 @@ final class MotionServiceTests: XCTestCase {
     }
 
     // MARK: - S-M3: getCurrentMotionがnilを返すことができる
+
     func test_getCurrentMotion_canReturnNil() {
         let motion = sut.getCurrentMotion()
 
@@ -69,6 +71,7 @@ final class MotionServiceTests: XCTestCase {
     }
 
     // MARK: - S-M4: getCurrentMotionがCMDeviceMotionを返すことができる
+
     func test_getCurrentMotion_canReturnDeviceMotion() {
         // モックデータを設定
         // 注: CMDeviceMotionは直接インスタンス化できないため、実際のテストではモックを使用
