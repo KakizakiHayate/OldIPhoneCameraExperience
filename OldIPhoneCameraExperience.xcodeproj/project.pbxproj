@@ -39,6 +39,7 @@
 		D3260D603D0AB4497DA6784E /* FilterParametersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A9AC7ECF55E5C36A1C442D0 /* FilterParametersTests.swift */; };
 		D59312F892B394FB32D0CE9A /* CameraService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0E84FE8BD5CDAF752C2E4DF /* CameraService.swift */; };
 		D957EFBE9FEE0A8D9DDA06B2 /* CameraConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = D666FBEA7FBD263F5D8FBD84 /* CameraConfig.swift */; };
+		DF400A80349392D5E26B0CC7 /* CameraScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACAEC967D06F4FD216FBF3E1 /* CameraScreen.swift */; };
 		DFB107CC4FE7068FD83C45BF /* FilterConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DBC4E2F447AD3F5FB15B579 /* FilterConfig.swift */; };
 		EA4F1D73805BD2B41D994DD8 /* CameraModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01A192864744D16C969E2BFF /* CameraModelTests.swift */; };
 		F3732B44037C63C0859D2989 /* MotionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4D5540D7E4CC0E227AEC2FF /* MotionService.swift */; };
@@ -81,6 +82,7 @@
 		A1B2C3D4E5F60014A1B2 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		A9899BE0B988345B4F3BE34C /* CaptureResultTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CaptureResultTests.swift; sourceTree = "<group>"; };
 		ABE39405F49468ED6F34AC8F /* ShakeEffectTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShakeEffectTests.swift; sourceTree = "<group>"; };
+		ACAEC967D06F4FD216FBF3E1 /* CameraScreen.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraScreen.swift; sourceTree = "<group>"; };
 		AD80C3C700C020BA4D273BAD /* UIConstantsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UIConstantsTests.swift; sourceTree = "<group>"; };
 		B0E84FE8BD5CDAF752C2E4DF /* CameraService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraService.swift; sourceTree = "<group>"; };
 		B520B638664763F6523960E3 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
@@ -317,6 +319,7 @@
 			isa = PBXGroup;
 			children = (
 				A6F2590ADE86B9172C203F8C /* Components */,
+				ACAEC967D06F4FD216FBF3E1 /* CameraScreen.swift */,
 			);
 			name = Views;
 			path = Views;
@@ -457,6 +460,7 @@
 				A13627BCC2AC98637A20AA9F /* IrisAnimationView.swift in Sources */,
 				4790CE162AB0CD84CC97A702 /* ToolbarButton.swift in Sources */,
 				8A173E11827FB62F32922875 /* ThumbnailView.swift in Sources */,
+				DF400A80349392D5E26B0CC7 /* CameraScreen.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
