@@ -38,16 +38,15 @@ final class PhotoLibraryService: PhotoLibraryServiceProtocol {
 
         // フォトライブラリに保存
         return try await withCheckedThrowingContinuation { continuation in
-            PHPhotoLibrary.shared().performChanges(
-                { PHAssetChangeRequest.creationRequestForAsset(from: image) },
-                completionHandler: { success, error in
-                    if success {
-                        continuation.resume()
-                    } else {
-                        continuation.resume(throwing: error ?? PhotoLibraryError.saveFailed)
-                    }
+            PHPhotoLibrary.shared().performChanges {
+                PHAssetChangeRequest.creationRequestForAsset(from: image)
+            } completionHandler: { success, error in
+                if success {
+                    continuation.resume()
+                } else {
+                    continuation.resume(throwing: error ?? PhotoLibraryError.saveFailed)
                 }
-            )
+            }
         }
     }
 }
