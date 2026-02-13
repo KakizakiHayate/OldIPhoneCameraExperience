@@ -5,9 +5,9 @@
 //  Created by Manus on 2026-02-13.
 //
 
-import XCTest
-import UIKit
 @testable import OldIPhoneCameraExperience
+import UIKit
+import XCTest
 
 /// モックPhotoLibraryService（テスト用）
 final class MockPhotoLibraryService: PhotoLibraryServiceProtocol {
@@ -23,7 +23,6 @@ final class MockPhotoLibraryService: PhotoLibraryServiceProtocol {
 }
 
 final class PhotoLibraryServiceTests: XCTestCase {
-
     var sut: MockPhotoLibraryService!
 
     override func setUp() {
@@ -37,6 +36,7 @@ final class PhotoLibraryServiceTests: XCTestCase {
     }
 
     // MARK: - S-P1: saveToPhotoLibraryが正常に完了する
+
     func test_saveToPhotoLibrary_completesSuccessfully() async throws {
         let testImage = UIImage()
 
@@ -46,6 +46,7 @@ final class PhotoLibraryServiceTests: XCTestCase {
     }
 
     // MARK: - S-P2: 複数回保存できる
+
     func test_saveToPhotoLibrary_canSaveMultipleTimes() async throws {
         let image1 = UIImage()
         let image2 = UIImage()
@@ -57,6 +58,7 @@ final class PhotoLibraryServiceTests: XCTestCase {
     }
 
     // MARK: - S-P3: エラー時にthrowする
+
     func test_saveToPhotoLibrary_throwsErrorOnFailure() async {
         sut.shouldThrowError = true
         let testImage = UIImage()

@@ -1,4 +1,4 @@
-.PHONY: help lint lint-fix test build clean open check ci
+.PHONY: help lint lint-fix format format-check test build clean open check ci
 
 # デフォルトターゲット
 .DEFAULT_GOAL := help
@@ -21,6 +21,17 @@ lint-fix:
 	@echo ""
 	@echo "Running lint check after fix..."
 	@$(MAKE) lint
+
+# ===== フォーマット =====
+## SwiftFormatでコード整形
+format:
+	@echo "Running SwiftFormat..."
+	@swiftformat .
+
+## SwiftFormatのフォーマットチェック（差分があればエラー）
+format-check:
+	@echo "Checking SwiftFormat..."
+	@swiftformat . --lint
 
 # ===== テスト =====
 ## ユニットテスト実行
@@ -59,17 +70,21 @@ open:
 	@open $(PROJECT)
 
 # ===== 品質チェック =====
-## lint + test を一括実行
+## lint + format-check + test を一括実行
 check:
 	@echo "Running full check..."
 	@$(MAKE) lint
 	@echo ""
+	@$(MAKE) format-check
+	@echo ""
 	@$(MAKE) test
 
-## CI用全チェック(lint + test + build)
+## CI用全チェック(lint + format-check + test + build)
 ci:
 	@echo "Running CI pipeline..."
 	@$(MAKE) lint
+	@echo ""
+	@$(MAKE) format-check
 	@echo ""
 	@$(MAKE) test
 	@echo ""
@@ -86,6 +101,10 @@ help:
 	@echo "    make lint          - Run SwiftLint"
 	@echo "    make lint-fix      - Auto-fix SwiftLint issues"
 	@echo ""
+	@echo "  Format:"
+	@echo "    make format        - Run SwiftFormat (auto-fix)"
+	@echo "    make format-check  - Check SwiftFormat (no changes, lint mode)"
+	@echo ""
 	@echo "  Test:"
 	@echo "    make test          - Run unit tests"
 	@echo ""
@@ -97,5 +116,5 @@ help:
 	@echo "    make open          - Open project in Xcode"
 	@echo ""
 	@echo "  Quality:"
-	@echo "    make check         - Run lint + test"
-	@echo "    make ci            - Run full CI pipeline (lint + test + build)"
+	@echo "    make check         - Run lint + format-check + test"
+	@echo "    make ci            - Run full CI pipeline (lint + format-check + test + build)"
