@@ -38,6 +38,14 @@
 		C2D3E4F5061728394051A6B7 /* MotionServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E4F506172839405162B7C8 /* MotionServiceTests.swift */; };
 		E4F5061728394051A6B7C8D9 /* CameraViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F506172839405162B7C8D9EA /* CameraViewModel.swift */; };
 		0617283940516273C8D9EAFB /* CameraViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172839405162B7C8D9EAFB0C /* CameraViewModelTests.swift */; };
+		B1B2B3B4B5B6B7B8B9B0B1B2 /* ToolbarButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A2A3A4A5A6A7A8A9A0A1A2 /* ToolbarButton.swift */; };
+		D1D2D3D4D5D6D7D8D9D0D1D2 /* ShutterButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1C2C3C4C5C6C7C8C9C0C1C2 /* ShutterButton.swift */; };
+		F1F2F3F4F5F6F7F8F9F0F1F2 /* ThumbnailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1E2E3E4E5E6E7E8E9E0E1E2 /* ThumbnailView.swift */; };
+		B2C2D2E2F202122232425262 /* IrisAnimationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2B2C2D2E2F2021222324252 /* IrisAnimationView.swift */; };
+		D2E2F2021222324252627282 /* ToolbarButtonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D2E2F20212223242526272 /* ToolbarButtonTests.swift */; };
+		F20212223242526272829202 /* ShutterButtonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2F202122232425262728292 /* ShutterButtonTests.swift */; };
+		122232425262728292021222 /* ThumbnailViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 021222324252627282920212 /* ThumbnailViewTests.swift */; };
+		324252627282920212223242 /* IrisAnimationViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 223242526272829202122232 /* IrisAnimationViewTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -84,6 +92,14 @@
 		D3E4F506172839405162B7C8 /* MotionServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionServiceTests.swift; sourceTree = "<group>"; };
 		F506172839405162B7C8D9EA /* CameraViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewModel.swift; sourceTree = "<group>"; };
 		172839405162B7C8D9EAFB0C /* CameraViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewModelTests.swift; sourceTree = "<group>"; };
+		A1A2A3A4A5A6A7A8A9A0A1A2 /* ToolbarButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarButton.swift; sourceTree = "<group>"; };
+		C1C2C3C4C5C6C7C8C9C0C1C2 /* ShutterButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShutterButton.swift; sourceTree = "<group>"; };
+		E1E2E3E4E5E6E7E8E9E0E1E2 /* ThumbnailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThumbnailView.swift; sourceTree = "<group>"; };
+		A2B2C2D2E2F2021222324252 /* IrisAnimationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IrisAnimationView.swift; sourceTree = "<group>"; };
+		C2D2E2F20212223242526272 /* ToolbarButtonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarButtonTests.swift; sourceTree = "<group>"; };
+		E2F202122232425262728292 /* ShutterButtonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShutterButtonTests.swift; sourceTree = "<group>"; };
+		021222324252627282920212 /* ThumbnailViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThumbnailViewTests.swift; sourceTree = "<group>"; };
+		223242526272829202122232 /* IrisAnimationViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IrisAnimationViewTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -138,6 +154,7 @@
 				C999DF3D11A9A655F29E2242 /* Models */,
 				7EA94002492146F6E83D6456 /* Services */,
 				3940516273B7C8D9EAFB1D2E /* ViewModels */,
+				627282920212223242526272 /* Views */,
 			);
 			name = OldIPhoneCameraExperienceTests;
 			path = OldIPhoneCameraExperienceTests;
@@ -172,6 +189,7 @@
 				E09F2EAE86B75DD59499EC8F /* Models */,
 				D474CD77D24CA7A5F761D223 /* Services */,
 				283940516273B7C8D9EAFB1D /* ViewModels */,
+				425262728292021222324252 /* Views */,
 			);
 			path = OldIPhoneCameraExperience;
 			sourceTree = "<group>";
@@ -277,6 +295,44 @@
 				D3E4F506172839405162B7C8 /* MotionServiceTests.swift */,
 			);
 			path = Services;
+			sourceTree = "<group>";
+		};
+		425262728292021222324252 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				526272829202122232425262 /* Components */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		526272829202122232425262 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				A1A2A3A4A5A6A7A8A9A0A1A2 /* ToolbarButton.swift */,
+				C1C2C3C4C5C6C7C8C9C0C1C2 /* ShutterButton.swift */,
+				E1E2E3E4E5E6E7E8E9E0E1E2 /* ThumbnailView.swift */,
+				A2B2C2D2E2F2021222324252 /* IrisAnimationView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		627282920212223242526272 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				728292021222324252627282 /* Components */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		728292021222324252627282 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				C2D2E2F20212223242526272 /* ToolbarButtonTests.swift */,
+				E2F202122232425262728292 /* ShutterButtonTests.swift */,
+				021222324252627282920212 /* ThumbnailViewTests.swift */,
+				223242526272829202122232 /* IrisAnimationViewTests.swift */,
+			);
+			path = Components;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -388,6 +444,10 @@
 				8A9B0C1D2E3F40516273A4B5 /* PhotoLibraryServiceTests.swift in Sources */,
 				C2D3E4F5061728394051A6B7 /* MotionServiceTests.swift in Sources */,
 				0617283940516273C8D9EAFB /* CameraViewModelTests.swift in Sources */,
+				D2E2F2021222324252627282 /* ToolbarButtonTests.swift in Sources */,
+				F20212223242526272829202 /* ShutterButtonTests.swift in Sources */,
+				122232425262728292021222 /* ThumbnailViewTests.swift in Sources */,
+				324252627282920212223242 /* IrisAnimationViewTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -410,6 +470,10 @@
 				5E6F7A8B9C0D1E2F30415263 /* PhotoLibraryService.swift in Sources */,
 				A0B1C2D3E4F506172839A4B5 /* MotionService.swift in Sources */,
 				E4F5061728394051A6B7C8D9 /* CameraViewModel.swift in Sources */,
+				B1B2B3B4B5B6B7B8B9B0B1B2 /* ToolbarButton.swift in Sources */,
+				D1D2D3D4D5D6D7D8D9D0D1D2 /* ShutterButton.swift in Sources */,
+				F1F2F3F4F5F6F7F8F9F0F1F2 /* ThumbnailView.swift in Sources */,
+				B2C2D2E2F202122232425262 /* IrisAnimationView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
