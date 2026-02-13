@@ -10,7 +10,6 @@ import CoreGraphics
 
 /// カメラ設定に関する定数を管理する enum
 enum CameraConfig {
-
     /// デフォルトのカメラ位置（背面カメラ）
     static let defaultPosition: AVCaptureDevice.Position = .back
 

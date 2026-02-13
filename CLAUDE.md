@@ -396,11 +396,15 @@ xcodebuild build -scheme OldIPhoneCameraExperience -destination 'platform=iOS Si
 # 2. 全テスト実行
 xcodebuild test -scheme OldIPhoneCameraExperience -destination 'platform=iOS Simulator,name=iPhone 16'
 
-# 3. SwiftLint（導入している場合）
+# 3. SwiftLint
 swiftlint
+
+# 4. SwiftFormat（コードフォーマット）
+swiftformat .
 ```
 
 - Lintエラーがある場合は、**自動的に修正してOK**（ユーザー確認不要）
+- SwiftFormatによる整形差分がある場合は、**自動的にコミットしてOK**（ユーザー確認不要）
 - テストが失敗した場合は、修正してから次へ進む
 
 **すべて通過したら** コミット・PR作成へ進む。
