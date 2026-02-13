@@ -24,6 +24,7 @@
 		5D5A93AD1FFDD5C8A5F9B1F2 /* CameraState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE3779F108A19C45C792808B /* CameraState.swift */; };
 		854BB1BCA7BE5B4FB6425440 /* ShakeEffectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABE39405F49468ED6F34AC8F /* ShakeEffectTests.swift */; };
 		8A173E11827FB62F32922875 /* ThumbnailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B530E4F662FD8060173779A /* ThumbnailView.swift */; };
+		8D2986C94930D78E60F26B43 /* CameraScreenTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BE219D6F2320A6D34AED18 /* CameraScreenTests.swift */; };
 		8FD9EFB74A31AC077F652876 /* CameraViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59043C94CB3C95B055274EDC /* CameraViewModel.swift */; };
 		963D9F9C7FF03EE946B5D47E /* ShakeEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9ED7CA7D11F49FAC9D51B78 /* ShakeEffect.swift */; };
 		A02225D5E6DE4EC336A0B109 /* FilterParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7757098C63292DEE1597FEDE /* FilterParameters.swift */; };
@@ -94,6 +95,7 @@
 		AD80C3C700C020BA4D273BAD /* UIConstantsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UIConstantsTests.swift; sourceTree = "<group>"; };
 		B0E84FE8BD5CDAF752C2E4DF /* CameraService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraService.swift; sourceTree = "<group>"; };
 		B520B638664763F6523960E3 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		B5BE219D6F2320A6D34AED18 /* CameraScreenTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraScreenTests.swift; sourceTree = "<group>"; };
 		C32E7A4F6E04359D35EEB906 /* CameraConfigTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraConfigTests.swift; sourceTree = "<group>"; };
 		C4D5540D7E4CC0E227AEC2FF /* MotionService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MotionService.swift; sourceTree = "<group>"; };
 		C5EEA3B2BA8AD2D9F747198D /* CameraServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraServiceTests.swift; sourceTree = "<group>"; };
@@ -123,6 +125,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1D3E1DD4B4F5201641F38726 /* Screens */ = {
+			isa = PBXGroup;
+			children = (
+				B5BE219D6F2320A6D34AED18 /* CameraScreenTests.swift */,
+			);
+			name = Screens;
+			path = Screens;
+			sourceTree = "<group>";
+		};
 		2535251CD7BB30F9EF2AFEE1 /* Core */ = {
 			isa = PBXGroup;
 			children = (
@@ -165,6 +176,7 @@
 			isa = PBXGroup;
 			children = (
 				3877C0C494DB2819EFC94BE3 /* Components */,
+				1D3E1DD4B4F5201641F38726 /* Screens */,
 			);
 			name = Views;
 			path = Views;
@@ -468,6 +480,7 @@
 				2DCEC0227C9AE35F2CF88194 /* ThumbnailViewTests.swift in Sources */,
 				1B4C5967AE9DE04563CF3C21 /* ShutterButtonTests.swift in Sources */,
 				E1CA3F7CBF20F2BD5B6260A4 /* IrisAnimationViewTests.swift in Sources */,
+				8D2986C94930D78E60F26B43 /* CameraScreenTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
