@@ -5,17 +5,20 @@
 //  Created by Manus on 2026-02-13.
 //
 
-import XCTest
-import UIKit
 @testable import OldIPhoneCameraExperience
+import UIKit
+import XCTest
 
 final class CaptureResultTests: XCTestCase {
-
     // MARK: - M-CR1: 全プロパティを指定して生成できること
+
     func test_initialization_withAllProperties() {
         let image = UIImage()
         let filterConfig = FilterConfig.iPhone4
-        let shakeEffect = ShakeEffect(shiftX: 2.0, shiftY: 3.0, rotation: 0.2, motionBlurRadius: 1.5, motionBlurAngle: 45.0)
+        let shakeEffect = ShakeEffect(
+            shiftX: 2.0, shiftY: 3.0, rotation: 0.2,
+            motionBlurRadius: 1.5, motionBlurAngle: 45.0
+        )
         let capturedAt = Date()
         let cameraModel = CameraModel.iPhone4
 
@@ -39,6 +42,7 @@ final class CaptureResultTests: XCTestCase {
     }
 
     // MARK: - M-CR2: shakeEffectがnilの生成ができること
+
     func test_initialization_withNilShakeEffect() {
         let result = CaptureResult(
             image: UIImage(),
@@ -54,6 +58,7 @@ final class CaptureResultTests: XCTestCase {
     }
 
     // MARK: - M-CR3: capturedAtが現在時刻に近い値であること
+
     func test_capturedAt_isCloseToCurrentTime() {
         let before = Date()
         let result = CaptureResult(
