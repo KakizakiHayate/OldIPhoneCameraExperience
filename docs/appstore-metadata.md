@@ -13,7 +13,7 @@
 | **カテゴリ** | 写真/ビデオ（プライマリ）、エンターテインメント（セカンダリ） |
 | **価格** | 無料（MVP段階） |
 | **対象年齢** | 4+ |
-| **バンドルID** | com.yourcompany.oldiPhonecameraexperience |
+| **バンドルID** | com.example.OldIPhoneCameraExperience |
 | **バージョン** | 1.0.0 |
 
 ---

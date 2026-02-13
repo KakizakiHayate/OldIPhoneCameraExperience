@@ -7,6 +7,7 @@
 
 import CoreMotion
 import Foundation
+import os.log
 
 /// ジャイロスコープデータの取得を提供するプロトコル
 protocol MotionServiceProtocol {
@@ -25,6 +26,7 @@ protocol MotionServiceProtocol {
 
 /// ジャイロスコープデータの取得の実装
 final class MotionService: MotionServiceProtocol {
+    private static let logger = Logger(subsystem: "com.oldiPhonecamera", category: "MotionService")
 
     private let motionManager = CMMotionManager()
     private let operationQueue = OperationQueue()
@@ -40,12 +42,12 @@ final class MotionService: MotionServiceProtocol {
 
     func startMonitoring() {
         guard motionManager.isDeviceMotionAvailable else {
-            print("Device motion is not available")
+            Self.logger.warning("Device motion is not available")
             return
         }
 
         guard !motionManager.isDeviceMotionActive else {
-            print("Device motion is already active")
+            Self.logger.info("Device motion is already active")
             return
         }
 
@@ -53,9 +55,9 @@ final class MotionService: MotionServiceProtocol {
         motionManager.deviceMotionUpdateInterval = 1.0 / 60.0
 
         // モーションデータの取得を開始
-        motionManager.startDeviceMotionUpdates(to: operationQueue) { [weak self] motion, error in
+        motionManager.startDeviceMotionUpdates(to: operationQueue) { [weak self] _, error in
             if let error = error {
-                print("Motion update error: \(error)")
+                Self.logger.error("Motion update error: \(error.localizedDescription)")
                 return
             }
             // モーションデータは getCurrentMotion() で取得する

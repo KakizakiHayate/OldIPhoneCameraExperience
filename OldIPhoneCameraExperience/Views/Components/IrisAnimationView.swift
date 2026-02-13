@@ -23,7 +23,7 @@ struct IrisAnimationView: View {
                 .opacity(opacity)
         }
         .allowsHitTesting(false)
-        .onChange(of: isAnimating) { oldValue, newValue in
+        .onChange(of: isAnimating) { _, newValue in
             if newValue {
                 performIrisAnimation()
             }

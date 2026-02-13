@@ -13,12 +13,12 @@ struct CameraScreen: View {
     @State private var isIrisAnimating = false
     @State private var lastCapturedImage: UIImage?
 
-    init() {
-        let cameraService = CameraService()
-        let filterService = FilterService()
-        let photoLibraryService = PhotoLibraryService()
-        let motionService = MotionService()
-
+    init(
+        cameraService: CameraServiceProtocol = CameraService(),
+        filterService: FilterServiceProtocol = FilterService(),
+        photoLibraryService: PhotoLibraryServiceProtocol = PhotoLibraryService(),
+        motionService: MotionServiceProtocol = MotionService()
+    ) {
         _viewModel = StateObject(wrappedValue: CameraViewModel(
             cameraService: cameraService,
             filterService: filterService,

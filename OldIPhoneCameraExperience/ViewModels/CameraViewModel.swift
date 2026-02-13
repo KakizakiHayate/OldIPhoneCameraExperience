@@ -5,15 +5,14 @@
 //  Created by Manus on 2026-02-13.
 //
 
+import AVFoundation
+import CoreImage
 import Foundation
 import SwiftUI
-import CoreImage
-import AVFoundation
 
 /// カメラ画面のViewModel
 @MainActor
 final class CameraViewModel: ObservableObject {
-
     // MARK: - Published Properties
 
     @Published private(set) var state: CameraState
@@ -33,6 +32,7 @@ final class CameraViewModel: ObservableObject {
     // MARK: - Private Properties
 
     private let currentModel: CameraModel = .iPhone4
+    private let ciContext = CIContext()
 
     // MARK: - Initialization
 
@@ -46,7 +46,7 @@ final class CameraViewModel: ObservableObject {
         self.filterService = filterService
         self.photoLibraryService = photoLibraryService
         self.motionService = motionService
-        self.state = CameraState()
+        state = CameraState()
     }
 
     // MARK: - Public Methods
@@ -56,23 +56,9 @@ final class CameraViewModel: ObservableObject {
         do {
             try await cameraService.startSession()
             motionService.startMonitoring()
-            updateState { state in
-                state = CameraState(
-                    isFlashOn: state.isFlashOn,
-                    cameraPosition: state.cameraPosition,
-                    isCapturing: state.isCapturing,
-                    permissionStatus: .authorized
-                )
-            }
+            state.permissionStatus = .authorized
         } catch {
-            updateState { state in
-                state = CameraState(
-                    isFlashOn: state.isFlashOn,
-                    cameraPosition: state.cameraPosition,
-                    isCapturing: state.isCapturing,
-                    permissionStatus: .denied
-                )
-            }
+            state.permissionStatus = .denied
             throw error
         }
     }
@@ -85,43 +71,19 @@ final class CameraViewModel: ObservableObject {
 
     /// フラッシュのオン/オフを切り替える
     func toggleFlash() {
-        let newFlashState = !state.isFlashOn
-        cameraService.setFlash(enabled: newFlashState)
-        updateState { state in
-            state = CameraState(
-                isFlashOn: newFlashState,
-                cameraPosition: state.cameraPosition,
-                isCapturing: state.isCapturing,
-                permissionStatus: state.permissionStatus
-            )
-        }
+        state.isFlashOn.toggle()
+        cameraService.setFlash(enabled: state.isFlashOn)
     }
 
     /// 前面/背面カメラを切り替える
     func switchCamera() async throws {
         try await cameraService.switchCamera()
-        let newPosition: CameraPosition = (state.cameraPosition == .back) ? .front : .back
-        updateState { state in
-            state = CameraState(
-                isFlashOn: state.isFlashOn,
-                cameraPosition: newPosition,
-                isCapturing: state.isCapturing,
-                permissionStatus: state.permissionStatus
-            )
-        }
+        state.cameraPosition = (state.cameraPosition == .back) ? .front : .back
     }
 
     /// 写真を撮影する
     func capturePhoto() async throws {
-        // 撮影中フラグを立てる
-        updateState { state in
-            state = CameraState(
-                isFlashOn: state.isFlashOn,
-                cameraPosition: state.cameraPosition,
-                isCapturing: true,
-                permissionStatus: state.permissionStatus
-            )
-        }
+        state.isCapturing = true
 
         do {
             // 1. カメラから写真をキャプチャ
@@ -145,36 +107,14 @@ final class CameraViewModel: ObservableObject {
             // 5. フォトライブラリに保存
             try await photoLibraryService.saveToPhotoLibrary(uiImage)
 
-            // 撮影完了
-            updateState { state in
-                state = CameraState(
-                    isFlashOn: state.isFlashOn,
-                    cameraPosition: state.cameraPosition,
-                    isCapturing: false,
-                    permissionStatus: state.permissionStatus
-                )
-            }
+            state.isCapturing = false
         } catch {
-            // エラー時も撮影中フラグを下ろす
-            updateState { state in
-                state = CameraState(
-                    isFlashOn: state.isFlashOn,
-                    cameraPosition: state.cameraPosition,
-                    isCapturing: false,
-                    permissionStatus: state.permissionStatus
-                )
-            }
+            state.isCapturing = false
             throw error
         }
     }
 
     // MARK: - Private Methods
-
-    private func updateState(_ update: (inout CameraState) -> Void) {
-        var newState = state
-        update(&newState)
-        state = newState
-    }
 
     private func applyShakeEffect(to image: CIImage, effect: ShakeEffect) -> CIImage {
         var outputImage = image
@@ -183,9 +123,13 @@ final class CameraViewModel: ObservableObject {
         let shiftTransform = CGAffineTransform(translationX: effect.shiftX, y: effect.shiftY)
         outputImage = outputImage.transformed(by: shiftTransform)
 
-        // 2. 回転
+        // 2. 回転（画像中央を軸に回転）
         let rotationRadians = effect.rotation * .pi / 180.0
-        let rotationTransform = CGAffineTransform(rotationAngle: rotationRadians)
+        let centerX = outputImage.extent.midX
+        let centerY = outputImage.extent.midY
+        let rotationTransform = CGAffineTransform(translationX: centerX, y: centerY)
+            .rotated(by: rotationRadians)
+            .translatedBy(x: -centerX, y: -centerY)
         outputImage = outputImage.transformed(by: rotationTransform)
 
         // 3. モーションブラー
@@ -202,8 +146,7 @@ final class CameraViewModel: ObservableObject {
     }
 
     private func convertToUIImage(_ ciImage: CIImage) -> UIImage? {
-        let context = CIContext()
-        guard let cgImage = context.createCGImage(ciImage, from: ciImage.extent) else {
+        guard let cgImage = ciContext.createCGImage(ciImage, from: ciImage.extent) else {
             return nil
         }
         return UIImage(cgImage: cgImage)

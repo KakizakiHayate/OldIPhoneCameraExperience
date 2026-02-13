@@ -9,10 +9,10 @@ import Foundation
 
 /// カメラの現在の動作状態を表すモデル
 struct CameraState {
-    let isFlashOn: Bool
-    let cameraPosition: CameraPosition
-    let isCapturing: Bool
-    let permissionStatus: PermissionStatus
+    var isFlashOn: Bool
+    var cameraPosition: CameraPosition
+    var isCapturing: Bool
+    var permissionStatus: PermissionStatus
 
     init(
         isFlashOn: Bool = false,
@@ -28,14 +28,14 @@ struct CameraState {
 }
 
 /// カメラの位置（前面/背面）
-enum CameraPosition {
+enum CameraPosition: CaseIterable {
     case front
     case back
 }
 
 /// カメラ権限の状態
-enum PermissionStatus {
-    case notDetermined  // 未決定（初回起動前）
-    case authorized     // 許可済み
-    case denied         // 拒否
+enum PermissionStatus: CaseIterable {
+    case notDetermined // 未決定（初回起動前）
+    case authorized // 許可済み
+    case denied // 拒否
 }

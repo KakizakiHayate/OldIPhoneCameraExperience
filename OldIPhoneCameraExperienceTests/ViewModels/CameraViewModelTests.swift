@@ -5,12 +5,12 @@
 //  Created by Manus on 2026-02-13.
 //
 
-import XCTest
 import CoreImage
 @testable import OldIPhoneCameraExperience
+import XCTest
 
+@MainActor
 final class CameraViewModelTests: XCTestCase {
-
     var sut: CameraViewModel!
     var mockCameraService: MockCameraService!
     var mockFilterService: FilterService!
@@ -42,6 +42,7 @@ final class CameraViewModelTests: XCTestCase {
     }
 
     // MARK: - VM-C1: 初期状態のCameraStateが正しい
+
     func test_initialState_isCorrect() {
         XCTAssertFalse(sut.state.isFlashOn, "初期状態ではフラッシュはオフである必要があります")
         XCTAssertEqual(sut.state.cameraPosition, .back, "初期状態では背面カメラである必要があります")
@@ -50,6 +51,7 @@ final class CameraViewModelTests: XCTestCase {
     }
 
     // MARK: - VM-C2: startCameraでカメラセッション開始
+
     func test_startCamera_startsSession() async throws {
         try await sut.startCamera()
 
@@ -59,6 +61,7 @@ final class CameraViewModelTests: XCTestCase {
     }
 
     // MARK: - VM-C3: stopCameraでカメラセッション停止
+
     func test_stopCamera_stopsSession() async throws {
         try await sut.startCamera()
         sut.stopCamera()
@@ -68,6 +71,7 @@ final class CameraViewModelTests: XCTestCase {
     }
 
     // MARK: - VM-C4: toggleFlashでフラッシュ切替
+
     func test_toggleFlash_togglesFlashState() {
         XCTAssertFalse(sut.state.isFlashOn)
 
@@ -79,6 +83,7 @@ final class CameraViewModelTests: XCTestCase {
     }
 
     // MARK: - VM-C5: switchCameraでカメラ位置切替
+
     func test_switchCamera_togglesCameraPosition() async throws {
         try await sut.startCamera()
         XCTAssertEqual(sut.state.cameraPosition, .back)
@@ -91,6 +96,7 @@ final class CameraViewModelTests: XCTestCase {
     }
 
     // MARK: - VM-C6: capturePhotoで撮影処理が実行される
+
     func test_capturePhoto_executesCapture() async throws {
         try await sut.startCamera()
 
@@ -100,6 +106,7 @@ final class CameraViewModelTests: XCTestCase {
     }
 
     // MARK: - VM-C7: capturePhoto中はisCapturingがtrue
+
     func test_capturePhoto_setsIsCapturingTrue() async throws {
         try await sut.startCamera()
 
