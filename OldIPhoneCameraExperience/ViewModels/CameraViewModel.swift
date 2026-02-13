@@ -118,9 +118,13 @@ final class CameraViewModel: ObservableObject {
         let shiftTransform = CGAffineTransform(translationX: effect.shiftX, y: effect.shiftY)
         outputImage = outputImage.transformed(by: shiftTransform)
 
-        // 2. 回転
+        // 2. 回転（画像中央を軸に回転）
         let rotationRadians = effect.rotation * .pi / 180.0
-        let rotationTransform = CGAffineTransform(rotationAngle: rotationRadians)
+        let centerX = outputImage.extent.midX
+        let centerY = outputImage.extent.midY
+        let rotationTransform = CGAffineTransform(translationX: centerX, y: centerY)
+            .rotated(by: rotationRadians)
+            .translatedBy(x: -centerX, y: -centerY)
         outputImage = outputImage.transformed(by: rotationTransform)
 
         // 3. モーションブラー

@@ -14,13 +14,17 @@
 		23970E3D03A3B4EBE8938AB4 /* CaptureResultTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9899BE0B988345B4F3BE34C /* CaptureResultTests.swift */; };
 		2747E22FF2535724BEF79441 /* FilterServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FDFB2984253027E588004A1 /* FilterServiceTests.swift */; };
 		2BE1597EBAF4AD957BD421F8 /* PhotoLibraryServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8988BE080FE2843614155F1D /* PhotoLibraryServiceTests.swift */; };
+		422CF3E3AC2308D162E2CD1F /* ShutterButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A02EE49535C06DF9D45EED1 /* ShutterButton.swift */; };
 		4338E6FF5ABA5BAC401B7F38 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B520B638664763F6523960E3 /* Foundation.framework */; };
+		4790CE162AB0CD84CC97A702 /* ToolbarButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6632B6F99F4D32DD7929F2C6 /* ToolbarButton.swift */; };
 		4EFE9BCB6884A809575C004F /* CameraConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C32E7A4F6E04359D35EEB906 /* CameraConfigTests.swift */; };
 		5D5A93AD1FFDD5C8A5F9B1F2 /* CameraState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE3779F108A19C45C792808B /* CameraState.swift */; };
 		854BB1BCA7BE5B4FB6425440 /* ShakeEffectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABE39405F49468ED6F34AC8F /* ShakeEffectTests.swift */; };
+		8A173E11827FB62F32922875 /* ThumbnailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B530E4F662FD8060173779A /* ThumbnailView.swift */; };
 		8FD9EFB74A31AC077F652876 /* CameraViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59043C94CB3C95B055274EDC /* CameraViewModel.swift */; };
 		963D9F9C7FF03EE946B5D47E /* ShakeEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9ED7CA7D11F49FAC9D51B78 /* ShakeEffect.swift */; };
 		A02225D5E6DE4EC336A0B109 /* FilterParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7757098C63292DEE1597FEDE /* FilterParameters.swift */; };
+		A13627BCC2AC98637A20AA9F /* IrisAnimationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A356728D83DAAC1EC1B8678 /* IrisAnimationView.swift */; };
 		A1B2C3D4E5F60001A1B2 /* OldIPhoneCameraExperienceApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60011A1B2 /* OldIPhoneCameraExperienceApp.swift */; };
 		A1B2C3D4E5F60002A1B2 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60012A1B2 /* ContentView.swift */; };
 		A1B2C3D4E5F60003A1B2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60013A1B2 /* Assets.xcassets */; };
@@ -56,15 +60,19 @@
 		0CFB3382DA65B11B219E58F6 /* CameraViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraViewModelTests.swift; sourceTree = "<group>"; };
 		0DBCB60C3DA33EC1CC08BFF9 /* CameraStateTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraStateTests.swift; sourceTree = "<group>"; };
 		1AF31CC32AB0938BEE77FA46 /* MotionServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MotionServiceTests.swift; sourceTree = "<group>"; };
+		1B530E4F662FD8060173779A /* ThumbnailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ThumbnailView.swift; sourceTree = "<group>"; };
+		2A02EE49535C06DF9D45EED1 /* ShutterButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShutterButton.swift; sourceTree = "<group>"; };
 		2DBC4E2F447AD3F5FB15B579 /* FilterConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FilterConfig.swift; sourceTree = "<group>"; };
 		362DF8AB68FD66687F8ACF7D /* UIConstants.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UIConstants.swift; sourceTree = "<group>"; };
 		3DB316BB04E98413BEA64D1C /* CameraModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraModel.swift; sourceTree = "<group>"; };
 		59043C94CB3C95B055274EDC /* CameraViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraViewModel.swift; sourceTree = "<group>"; };
+		6632B6F99F4D32DD7929F2C6 /* ToolbarButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ToolbarButton.swift; sourceTree = "<group>"; };
 		6FDFB2984253027E588004A1 /* FilterServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FilterServiceTests.swift; sourceTree = "<group>"; };
 		70E0FC1DF29C7787BD2EC201 /* FilterService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FilterService.swift; sourceTree = "<group>"; };
 		7757098C63292DEE1597FEDE /* FilterParameters.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FilterParameters.swift; sourceTree = "<group>"; };
 		8348BD3A77FC46296AC1A10C /* OldIPhoneCameraExperienceTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OldIPhoneCameraExperienceTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8988BE080FE2843614155F1D /* PhotoLibraryServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhotoLibraryServiceTests.swift; sourceTree = "<group>"; };
+		8A356728D83DAAC1EC1B8678 /* IrisAnimationView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IrisAnimationView.swift; sourceTree = "<group>"; };
 		979D5FF9CC294CF1CD271B1E /* CaptureResult.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CaptureResult.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60010A1B2 /* OldIPhoneCameraExperience.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OldIPhoneCameraExperience.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1B2C3D4E5F60011A1B2 /* OldIPhoneCameraExperienceApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OldIPhoneCameraExperienceApp.swift; sourceTree = "<group>"; };
@@ -177,6 +185,7 @@
 			isa = PBXGroup;
 			children = (
 				26F3EC90D72FE5925739F9BD /* ViewModels */,
+				F4791F69784B467F9F563BF6 /* Views */,
 			);
 			name = OldIPhoneCameraExperience;
 			path = OldIPhoneCameraExperience;
@@ -255,6 +264,18 @@
 			path = Constants;
 			sourceTree = "<group>";
 		};
+		A6F2590ADE86B9172C203F8C /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				2A02EE49535C06DF9D45EED1 /* ShutterButton.swift */,
+				8A356728D83DAAC1EC1B8678 /* IrisAnimationView.swift */,
+				6632B6F99F4D32DD7929F2C6 /* ToolbarButton.swift */,
+				1B530E4F662FD8060173779A /* ThumbnailView.swift */,
+			);
+			name = Components;
+			path = Components;
+			sourceTree = "<group>";
+		};
 		BB4BDC2B5D9BD76D84FACF06 /* Constants */ = {
 			isa = PBXGroup;
 			children = (
@@ -290,6 +311,15 @@
 			);
 			name = Models;
 			path = Models;
+			sourceTree = "<group>";
+		};
+		F4791F69784B467F9F563BF6 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A6F2590ADE86B9172C203F8C /* Components */,
+			);
+			name = Views;
+			path = Views;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -423,6 +453,10 @@
 				08A5497077EB44B2AED18BD5 /* PhotoLibraryService.swift in Sources */,
 				F3732B44037C63C0859D2989 /* MotionService.swift in Sources */,
 				8FD9EFB74A31AC077F652876 /* CameraViewModel.swift in Sources */,
+				422CF3E3AC2308D162E2CD1F /* ShutterButton.swift in Sources */,
+				A13627BCC2AC98637A20AA9F /* IrisAnimationView.swift in Sources */,
+				4790CE162AB0CD84CC97A702 /* ToolbarButton.swift in Sources */,
+				8A173E11827FB62F32922875 /* ThumbnailView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
