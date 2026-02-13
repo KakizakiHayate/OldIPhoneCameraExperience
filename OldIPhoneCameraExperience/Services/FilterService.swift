@@ -18,6 +18,9 @@ protocol FilterServiceProtocol {
 
     /// すべてのフィルターを適用する（暖色系 → クロップ）
     func applyFilters(_ image: CIImage, config: FilterConfig) -> CIImage?
+
+    /// 手ブレシミュレーションを適用する
+    func applyShakeEffect(_ image: CIImage, effect: ShakeEffect) -> CIImage?
 }
 
 /// フィルター処理の実装
@@ -83,6 +86,31 @@ final class FilterService: FilterServiceProtocol {
         }
 
         outputImage = applyCrop(outputImage, config: config) ?? outputImage
+
+        return outputImage
+    }
+
+    func applyShakeEffect(_ image: CIImage, effect: ShakeEffect) -> CIImage? {
+        var outputImage = image
+
+        // 1. シフト（平行移動）
+        let shiftTransform = CGAffineTransform(translationX: effect.shiftX, y: effect.shiftY)
+        outputImage = outputImage.transformed(by: shiftTransform)
+
+        // 2. 回転（中心基準）
+        let rotationRadians = effect.rotation * .pi / 180.0
+        let rotationTransform = CGAffineTransform(rotationAngle: rotationRadians)
+        outputImage = outputImage.transformed(by: rotationTransform)
+
+        // 3. モーションブラー
+        if let motionBlurFilter = CIFilter(name: "CIMotionBlur") {
+            motionBlurFilter.setValue(outputImage, forKey: kCIInputImageKey)
+            motionBlurFilter.setValue(effect.motionBlurRadius, forKey: kCIInputRadiusKey)
+            motionBlurFilter.setValue(effect.motionBlurAngle * .pi / 180.0, forKey: kCIInputAngleKey)
+            if let result = motionBlurFilter.outputImage {
+                outputImage = result
+            }
+        }
 
         return outputImage
     }

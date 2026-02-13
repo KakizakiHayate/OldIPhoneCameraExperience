@@ -17,7 +17,18 @@ final class MockCameraService: CameraServiceProtocol {
     var flashEnabled: Bool = false
     var currentPosition: AVCaptureDevice.Position = .back
 
+    // 呼び出し追跡
+    var setFlashCalled = false
+    var setFlashCalledWithValue: Bool = false
+    var switchCameraCalled = false
+    var startSessionCalled = false
+    var shouldThrowOnStart = false
+
     func startSession() async throws {
+        startSessionCalled = true
+        if shouldThrowOnStart {
+            throw CameraError.permissionDenied
+        }
         isSessionRunning = true
     }
 
@@ -31,10 +42,13 @@ final class MockCameraService: CameraServiceProtocol {
     }
 
     func setFlash(enabled: Bool) {
+        setFlashCalled = true
+        setFlashCalledWithValue = enabled
         flashEnabled = enabled
     }
 
     func switchCamera() async throws {
+        switchCameraCalled = true
         currentPosition = (currentPosition == .back) ? .front : .back
     }
 }
