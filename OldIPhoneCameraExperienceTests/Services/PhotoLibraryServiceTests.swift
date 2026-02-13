@@ -13,12 +13,26 @@ import XCTest
 final class MockPhotoLibraryService: PhotoLibraryServiceProtocol {
     var savedImages: [UIImage] = []
     var shouldThrowError = false
+    var permissionStatusToReturn: PermissionStatus = .authorized
+    var latestPhotoToReturn: UIImage?
 
     func saveToPhotoLibrary(_ image: UIImage) async throws {
         if shouldThrowError {
             throw PhotoLibraryError.saveFailed
         }
         savedImages.append(image)
+    }
+
+    func checkPermission() -> PermissionStatus {
+        permissionStatusToReturn
+    }
+
+    func requestPermission() async -> PermissionStatus {
+        permissionStatusToReturn
+    }
+
+    func fetchLatestPhoto() async -> UIImage? {
+        latestPhotoToReturn
     }
 }
 
@@ -69,5 +83,46 @@ final class PhotoLibraryServiceTests: XCTestCase {
         } catch {
             XCTAssertTrue(error is PhotoLibraryError, "PhotoLibraryErrorがthrowされる必要があります")
         }
+    }
+
+    // MARK: - S-PL2: checkPermissionが.authorizedを返す
+
+    func test_checkPermission_returnsAuthorized() {
+        sut.permissionStatusToReturn = .authorized
+
+        let status = sut.checkPermission()
+
+        XCTAssertEqual(status, .authorized, "権限許可済みの場合、.authorizedを返す必要があります")
+    }
+
+    // MARK: - S-PL3: checkPermissionが.deniedを返す
+
+    func test_checkPermission_returnsDenied() {
+        sut.permissionStatusToReturn = .denied
+
+        let status = sut.checkPermission()
+
+        XCTAssertEqual(status, .denied, "権限拒否の場合、.deniedを返す必要があります")
+    }
+
+    // MARK: - S-PL4: requestPermissionが権限リクエストを実行
+
+    func test_requestPermission_executesPermissionRequest() async {
+        sut.permissionStatusToReturn = .authorized
+
+        let status = await sut.requestPermission()
+
+        XCTAssertEqual(status, .authorized, "requestPermissionが権限ステータスを返す必要があります")
+    }
+
+    // MARK: - S-PL5: fetchLatestPhotoがUIImageを返す
+
+    func test_fetchLatestPhoto_returnsImage() async {
+        let expectedImage = UIImage()
+        sut.latestPhotoToReturn = expectedImage
+
+        let result = await sut.fetchLatestPhoto()
+
+        XCTAssertNotNil(result, "fetchLatestPhotoがUIImageを返す必要があります")
     }
 }
