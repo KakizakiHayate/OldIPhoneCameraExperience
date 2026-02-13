@@ -125,4 +125,49 @@ final class FilterServiceTests: XCTestCase {
             )
         }
     }
+
+    // MARK: - S-F7: applyShakeEffectにCIImageとShakeEffectを渡すとnilでない結果が返る
+
+    func test_applyShakeEffect_returnsNonNilResult() {
+        let effect = ShakeEffect(
+            shiftX: 2.0,
+            shiftY: 3.0,
+            rotation: 0.3,
+            motionBlurRadius: 2.0,
+            motionBlurAngle: 45.0
+        )
+
+        let result = sut.applyShakeEffect(testImage, effect: effect)
+
+        XCTAssertNotNil(result, "applyShakeEffectはnilでない結果を返す必要があります")
+    }
+
+    // MARK: - S-F8: 2回applyShakeEffectを呼ぶと異なる結果が返る
+
+    func test_applyShakeEffect_differentEffectsProduceDifferentResults() {
+        let effect1 = ShakeEffect(
+            shiftX: 1.0,
+            shiftY: 1.0,
+            rotation: 0.1,
+            motionBlurRadius: 1.0,
+            motionBlurAngle: 0.0
+        )
+        let effect2 = ShakeEffect(
+            shiftX: 5.0,
+            shiftY: 5.0,
+            rotation: 0.5,
+            motionBlurRadius: 3.0,
+            motionBlurAngle: 180.0
+        )
+
+        let result1 = sut.applyShakeEffect(testImage, effect: effect1)
+        let result2 = sut.applyShakeEffect(testImage, effect: effect2)
+
+        XCTAssertNotNil(result1)
+        XCTAssertNotNil(result2)
+        if let r1 = result1, let r2 = result2 {
+            let extentsAreDifferent = r1.extent != r2.extent
+            XCTAssertTrue(extentsAreDifferent, "異なるShakeEffectを適用すると異なる結果が返る必要があります")
+        }
+    }
 }
