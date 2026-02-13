@@ -5,12 +5,12 @@
 //  Created by Manus on 2026-02-13.
 //
 
-import XCTest
 @testable import OldIPhoneCameraExperience
+import XCTest
 
 final class FilterConfigTests: XCTestCase {
-
     // MARK: - M-FC1: iPhone 4プリセットの色温度が暖色方向であること
+
     func test_iPhone4_warmth_isPositive() {
         XCTAssertGreaterThan(
             FilterConfig.iPhone4.warmth,
@@ -20,6 +20,7 @@ final class FilterConfigTests: XCTestCase {
     }
 
     // MARK: - M-FC2: iPhone 4プリセットの彩度が標準より低いこと
+
     func test_iPhone4_saturation_isLessThanOne() {
         XCTAssertGreaterThan(
             FilterConfig.iPhone4.saturation,
@@ -34,6 +35,7 @@ final class FilterConfigTests: XCTestCase {
     }
 
     // MARK: - M-FC3: iPhone 4プリセットの出力解像度が5MP相当であること
+
     func test_iPhone4_resolution_is5MP() {
         let width = FilterConfig.iPhone4.outputWidth
         let height = FilterConfig.iPhone4.outputHeight
@@ -46,6 +48,7 @@ final class FilterConfigTests: XCTestCase {
     }
 
     // MARK: - M-FC4: iPhone 4プリセットのクロップ率が0〜1の範囲であること
+
     func test_iPhone4_cropRatio_isWithinRange() {
         XCTAssertGreaterThan(
             FilterConfig.iPhone4.cropRatio,
@@ -60,6 +63,7 @@ final class FilterConfigTests: XCTestCase {
     }
 
     // MARK: - M-FC5: iPhone 4プリセットのアスペクト比が4:3であること
+
     func test_iPhone4_aspectRatio_is4to3() {
         let width = Double(FilterConfig.iPhone4.outputWidth)
         let height = Double(FilterConfig.iPhone4.outputHeight)

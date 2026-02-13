@@ -5,11 +5,11 @@
 //  Created by Manus on 2026-02-13.
 //
 
-import Foundation
 import CoreMotion
+import Foundation
 
 /// 手ブレシミュレーションの1回分のパラメータを表すモデル
-struct ShakeEffect {
+struct ShakeEffect: Equatable {
     /// X方向のシフト量（px）
     let shiftX: Double
 
@@ -37,17 +37,17 @@ extension ShakeEffect {
         let rotationRange = FilterParameters.shakeRotationRange
         let blurRange = FilterParameters.motionBlurRadiusRange
 
-        let shiftX = Double.random(in: Double(shiftRange.lowerBound)...Double(shiftRange.upperBound))
-        let shiftY = Double.random(in: Double(shiftRange.lowerBound)...Double(shiftRange.upperBound))
-        let rotation = Double.random(in: Double(rotationRange.lowerBound)...Double(rotationRange.upperBound))
-        let motionBlurRadius = Double.random(in: Double(blurRange.lowerBound)...Double(blurRange.upperBound))
+        let shiftX = Double.random(in: Double(shiftRange.lowerBound) ... Double(shiftRange.upperBound))
+        let shiftY = Double.random(in: Double(shiftRange.lowerBound) ... Double(shiftRange.upperBound))
+        let rotation = Double.random(in: Double(rotationRange.lowerBound) ... Double(rotationRange.upperBound))
+        let motionBlurRadius = Double.random(in: Double(blurRange.lowerBound) ... Double(blurRange.upperBound))
 
         // ジャイロデータからブレ角度を算出（nilの場合はランダム）
         let motionBlurAngle: Double
         if let motion = deviceMotion {
             motionBlurAngle = atan2(motion.rotationRate.y, motion.rotationRate.x) * 180 / .pi
         } else {
-            motionBlurAngle = Double.random(in: 0...360)
+            motionBlurAngle = Double.random(in: 0 ... 360)
         }
 
         return ShakeEffect(

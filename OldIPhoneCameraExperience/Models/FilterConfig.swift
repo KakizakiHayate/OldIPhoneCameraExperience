@@ -5,10 +5,11 @@
 //  Created by Manus on 2026-02-13.
 //
 
+import CoreGraphics
 import Foundation
 
 /// フィルターのパラメータセットを表すモデル
-struct FilterConfig {
+struct FilterConfig: Equatable {
     // MARK: - 暖色系の色味（F2.1）
 
     /// 色温度シフト量（K相当）
@@ -40,12 +41,12 @@ struct FilterConfig {
 extension FilterConfig {
     /// iPhone 4 のフィルター設定（MVP）
     static let iPhone4 = FilterConfig(
-        warmth: 1000,
+        warmth: Double(FilterParameters.warmthShift),
         tint: 10,
-        saturation: 0.9,
-        highlightTintIntensity: 0.1,
-        cropRatio: 0.81,
-        outputWidth: 2592,
-        outputHeight: 1936
+        saturation: Double(FilterParameters.saturation),
+        highlightTintIntensity: Double(FilterParameters.highlightTintAmount),
+        cropRatio: Double(FilterParameters.cropRatio),
+        outputWidth: FilterParameters.outputWidth,
+        outputHeight: FilterParameters.outputHeight
     )
 }
