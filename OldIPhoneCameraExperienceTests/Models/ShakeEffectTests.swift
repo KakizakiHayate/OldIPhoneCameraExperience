@@ -5,13 +5,13 @@
 //  Created by Manus on 2026-02-13.
 //
 
-import XCTest
 import CoreMotion
 @testable import OldIPhoneCameraExperience
+import XCTest
 
 final class ShakeEffectTests: XCTestCase {
-
     // MARK: - M-SE1: 任意の値でShakeEffectを生成できること
+
     func test_initialization() {
         let effect = ShakeEffect(
             shiftX: 2.5,
@@ -29,6 +29,7 @@ final class ShakeEffectTests: XCTestCase {
     }
 
     // MARK: - M-SE2: generateメソッドでShakeEffectが生成されること
+
     func test_generate_returnsNonNilEffect() {
         let effect = ShakeEffect.generate(from: nil)
 
@@ -36,6 +37,7 @@ final class ShakeEffectTests: XCTestCase {
     }
 
     // MARK: - M-SE3: shiftX/shiftYが範囲内であること
+
     func test_generate_shiftValues_areWithinRange() {
         let effect = ShakeEffect.generate(from: nil)
         let range = FilterParameters.shakeShiftRange
@@ -47,6 +49,7 @@ final class ShakeEffectTests: XCTestCase {
     }
 
     // MARK: - M-SE4: rotationが範囲内であること
+
     func test_generate_rotation_isWithinRange() {
         let effect = ShakeEffect.generate(from: nil)
         let range = FilterParameters.shakeRotationRange
@@ -56,6 +59,7 @@ final class ShakeEffectTests: XCTestCase {
     }
 
     // MARK: - M-SE5: motionBlurRadiusが範囲内であること
+
     func test_generate_motionBlurRadius_isWithinRange() {
         let effect = ShakeEffect.generate(from: nil)
         let range = FilterParameters.motionBlurRadiusRange

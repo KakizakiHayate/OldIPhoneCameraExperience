@@ -38,18 +38,15 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
 
-      - name: Check if test target exists
-        id: check_test
+      - name: Verify test target exists
         run: |
-          if xcodebuild -project OldIPhoneCameraExperience.xcodeproj -list 2>/dev/null | grep -q "OldIPhoneCameraExperienceTests"; then
-            echo "has_tests=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has_tests=false" >> "$GITHUB_OUTPUT"
-            echo "⚠️ Test target not found. Skipping tests."
+          if ! xcodebuild -project OldIPhoneCameraExperience.xcodeproj -list 2>/dev/null | grep -q "OldIPhoneCameraExperienceTests"; then
+            echo "::error::Test target 'OldIPhoneCameraExperienceTests' not found in project. Ensure the test target is registered in project.pbxproj."
+            exit 1
           fi
+          echo "Test target found."
 
       - name: Run tests
-        if: steps.check_test.outputs.has_tests == 'true'
         run: |
           xcodebuild test \
             -project OldIPhoneCameraExperience.xcodeproj \
