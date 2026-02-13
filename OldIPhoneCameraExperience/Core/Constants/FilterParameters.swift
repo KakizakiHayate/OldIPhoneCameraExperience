@@ -35,7 +35,7 @@ enum FilterParameters {
     // MARK: - 手ブレシミュレーション（F2.3）
 
     /// X/Y方向のシフト量範囲（px）
-    static let shakeShiftRange: ClosedRange<CGFloat> = 1...5
+    static let shakeShiftRange: ClosedRange<CGFloat> = 1.0...5.0
 
     /// 回転角度範囲（度）
     static let shakeRotationRange: ClosedRange<CGFloat> = -0.5...0.5
