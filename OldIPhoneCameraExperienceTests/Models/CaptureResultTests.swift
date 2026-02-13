@@ -74,8 +74,5 @@ final class CaptureResultTests: XCTestCase {
 
         XCTAssertGreaterThanOrEqual(result.capturedAt, before)
         XCTAssertLessThanOrEqual(result.capturedAt, after)
-
-        let timeDifference = abs(result.capturedAt.timeIntervalSince(Date()))
-        XCTAssertLessThan(timeDifference, 1.0, "capturedAtは現在時刻から1秒以内である必要があります")
     }
 }

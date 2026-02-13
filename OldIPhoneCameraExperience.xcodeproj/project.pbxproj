@@ -32,6 +32,8 @@
 		E63493980956CC57D030E440 /* FilterServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F6A7B8C9D0E1F203142A5B6 /* FilterServiceTests.swift */; };
 		2A3B4C5D6E7F80910213A4B5 /* CameraService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B4C5D6E7F809102A3B4C5D6 /* CameraService.swift */; };
 		4C5D6E7F80910213A4B5C6D7 /* CameraServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D7E8F9001213243A5B6C7D8 /* CameraServiceTests.swift */; };
+		5E6F7A8B9C0D1E2F30415263 /* PhotoLibraryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8A9B0C1D2E3F405162A3B4 /* PhotoLibraryService.swift */; };
+		8A9B0C1D2E3F40516273A4B5 /* PhotoLibraryServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B0C1D2E3F405162A3B4C5D6 /* PhotoLibraryServiceTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -72,6 +74,8 @@
 		5F6A7B8C9D0E1F203142A5B6 /* FilterServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterServiceTests.swift; sourceTree = "<group>"; };
 		3B4C5D6E7F809102A3B4C5D6 /* CameraService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraService.swift; sourceTree = "<group>"; };
 		6D7E8F9001213243A5B6C7D8 /* CameraServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraServiceTests.swift; sourceTree = "<group>"; };
+		7F8A9B0C1D2E3F405162A3B4 /* PhotoLibraryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryService.swift; sourceTree = "<group>"; };
+		9B0C1D2E3F405162A3B4C5D6 /* PhotoLibraryServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryServiceTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -232,6 +236,7 @@
 			children = (
 				1A2B3C4D5E6F70819203A4B5 /* FilterService.swift */,
 				3B4C5D6E7F809102A3B4C5D6 /* CameraService.swift */,
+				7F8A9B0C1D2E3F405162A3B4 /* PhotoLibraryService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -241,6 +246,7 @@
 			children = (
 				5F6A7B8C9D0E1F203142A5B6 /* FilterServiceTests.swift */,
 				6D7E8F9001213243A5B6C7D8 /* CameraServiceTests.swift */,
+				9B0C1D2E3F405162A3B4C5D6 /* PhotoLibraryServiceTests.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -351,6 +357,7 @@
 				EA4F1D73805BD2B41D994DD8 /* CameraModelTests.swift in Sources */,
 				E63493980956CC57D030E440 /* FilterServiceTests.swift in Sources */,
 				4C5D6E7F80910213A4B5C6D7 /* CameraServiceTests.swift in Sources */,
+				8A9B0C1D2E3F40516273A4B5 /* PhotoLibraryServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -370,6 +377,7 @@
 				C0B4415FB10A22D6F6BBF0C6 /* CameraModel.swift in Sources */,
 				F22EFB410D17AA9316BAD1B2 /* FilterService.swift in Sources */,
 				2A3B4C5D6E7F80910213A4B5 /* CameraService.swift in Sources */,
+				5E6F7A8B9C0D1E2F30415263 /* PhotoLibraryService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
