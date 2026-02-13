@@ -16,7 +16,8 @@ final class CameraViewModel: ObservableObject {
     // MARK: - Published Properties
 
     @Published private(set) var state: CameraState
-    
+    @Published private(set) var lastCapturedImage: UIImage?
+
     /// カメラセッション（プレビュー用）
     var captureSession: AVCaptureSession {
         cameraService.captureSession
@@ -107,6 +108,7 @@ final class CameraViewModel: ObservableObject {
             // 5. フォトライブラリに保存
             try await photoLibraryService.saveToPhotoLibrary(uiImage)
 
+            lastCapturedImage = uiImage
             state.isCapturing = false
         } catch {
             state.isCapturing = false

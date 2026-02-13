@@ -29,6 +29,7 @@
 		A1B2C3D4E5F60002A1B2 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60012A1B2 /* ContentView.swift */; };
 		A1B2C3D4E5F60003A1B2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60013A1B2 /* Assets.xcassets */; };
 		A1B2C3D4E5F60004A1B2 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60014A1B2 /* Preview Assets.xcassets */; };
+		AE1723CBE3AC2AD8BA41E69D /* CameraPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E309ED94AA063240745AEC /* CameraPreviewView.swift */; };
 		B1E12DCC51E454A52BCC01AB /* FilterConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C69CB50BD0C3F18C32A9DF7F /* FilterConfigTests.swift */; };
 		B89601441FCB903923151E4C /* CameraViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CFB3382DA65B11B219E58F6 /* CameraViewModelTests.swift */; };
 		B8AEDE2A791BF962F87FFDD5 /* CameraStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DBCB60C3DA33EC1CC08BFF9 /* CameraStateTests.swift */; };
@@ -57,6 +58,7 @@
 
 /* Begin PBXFileReference section */
 		01A192864744D16C969E2BFF /* CameraModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraModelTests.swift; sourceTree = "<group>"; };
+		04E309ED94AA063240745AEC /* CameraPreviewView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraPreviewView.swift; sourceTree = "<group>"; };
 		0A9AC7ECF55E5C36A1C442D0 /* FilterParametersTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FilterParametersTests.swift; sourceTree = "<group>"; };
 		0CFB3382DA65B11B219E58F6 /* CameraViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraViewModelTests.swift; sourceTree = "<group>"; };
 		0DBCB60C3DA33EC1CC08BFF9 /* CameraStateTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraStateTests.swift; sourceTree = "<group>"; };
@@ -273,6 +275,7 @@
 				8A356728D83DAAC1EC1B8678 /* IrisAnimationView.swift */,
 				6632B6F99F4D32DD7929F2C6 /* ToolbarButton.swift */,
 				1B530E4F662FD8060173779A /* ThumbnailView.swift */,
+				04E309ED94AA063240745AEC /* CameraPreviewView.swift */,
 			);
 			name = Components;
 			path = Components;
@@ -461,6 +464,7 @@
 				4790CE162AB0CD84CC97A702 /* ToolbarButton.swift in Sources */,
 				8A173E11827FB62F32922875 /* ThumbnailView.swift in Sources */,
 				DF400A80349392D5E26B0CC7 /* CameraScreen.swift in Sources */,
+				AE1723CBE3AC2AD8BA41E69D /* CameraPreviewView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

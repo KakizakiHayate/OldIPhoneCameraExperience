@@ -5,8 +5,8 @@
 //  Created by Manus on 2026-02-13.
 //
 
-import SwiftUI
 import AVFoundation
+import SwiftUI
 
 /// カメラプレビュー（AVCaptureVideoPreviewLayer を SwiftUI で表示）
 struct CameraPreviewView: UIViewRepresentable {

@@ -12,6 +12,7 @@ import XCTest
 
 /// モックCameraService（テスト用）
 final class MockCameraService: CameraServiceProtocol {
+    var captureSession = AVCaptureSession()
     var isSessionRunning: Bool = false
     var flashEnabled: Bool = false
     var currentPosition: AVCaptureDevice.Position = .back
