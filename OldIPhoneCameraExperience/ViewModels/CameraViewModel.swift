@@ -18,6 +18,11 @@ final class CameraViewModel: ObservableObject {
     @Published private(set) var state: CameraState
     @Published private(set) var lastCapturedImage: UIImage?
 
+    /// カメラセッション（プレビュー用）
+    var captureSession: AVCaptureSession {
+        cameraService.captureSession
+    }
+
     // MARK: - Dependencies
 
     private let cameraService: CameraServiceProtocol

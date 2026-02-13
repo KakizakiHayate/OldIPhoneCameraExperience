@@ -11,7 +11,6 @@ import SwiftUI
 struct CameraScreen: View {
     @StateObject private var viewModel: CameraViewModel
     @State private var isIrisAnimating = false
-    @State private var lastCapturedImage: UIImage?
 
     init(
         cameraService: CameraServiceProtocol = CameraService(),
@@ -98,13 +97,8 @@ struct CameraScreen: View {
     // MARK: - Camera Preview
 
     private var cameraPreview: some View {
-        Rectangle()
-            .fill(Color.gray.opacity(0.3))
-            .overlay(
-                Text("Camera Preview")
-                    .foregroundColor(.white.opacity(0.5))
-                    .font(.title2)
-            )
+        CameraPreviewView(session: viewModel.captureSession)
+            .background(Color.black)
     }
 
     // MARK: - Bottom Toolbar
@@ -112,7 +106,7 @@ struct CameraScreen: View {
     private var bottomToolbar: some View {
         HStack {
             // サムネイル
-            ThumbnailView(image: lastCapturedImage)
+            ThumbnailView(image: viewModel.lastCapturedImage)
                 .padding(.leading, 16)
 
             Spacer()
@@ -159,9 +153,6 @@ struct CameraScreen: View {
 
             // 撮影実行
             try await viewModel.capturePhoto()
-
-            // サムネイル更新（実際の実装では撮影した画像を取得）
-            // lastCapturedImage = capturedUIImage
         } catch {
             print("Failed to capture photo: \(error)")
         }

@@ -48,6 +48,7 @@
 		324252627282920212223242 /* IrisAnimationViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 223242526272829202122232 /* IrisAnimationViewTests.swift */; };
 		4A5B6C7D8E9F0A1B2C3D4E5F /* CameraScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B6C7D8E9F0A1B2C3D4E5F6A /* CameraScreen.swift */; };
 		6C7D8E9F0A1B2C3D4E5F6A7B /* CameraScreenTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D8E9F0A1B2C3D4E5F6A7B8C /* CameraScreenTests.swift */; };
+		AE1723CBE3AC2AD8BA41E69D /* CameraPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E309ED94AA063240745AEC /* CameraPreviewView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -104,6 +105,7 @@
 		223242526272829202122232 /* IrisAnimationViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IrisAnimationViewTests.swift; sourceTree = "<group>"; };
 		5B6C7D8E9F0A1B2C3D4E5F6A /* CameraScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraScreen.swift; sourceTree = "<group>"; };
 		7D8E9F0A1B2C3D4E5F6A7B8C /* CameraScreenTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraScreenTests.swift; sourceTree = "<group>"; };
+		04E309ED94AA063240745AEC /* CameraPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreviewView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -317,6 +319,7 @@
 				C1C2C3C4C5C6C7C8C9C0C1C2 /* ShutterButton.swift */,
 				E1E2E3E4E5E6E7E8E9E0E1E2 /* ThumbnailView.swift */,
 				A2B2C2D2E2F2021222324252 /* IrisAnimationView.swift */,
+				04E309ED94AA063240745AEC /* CameraPreviewView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -490,6 +493,7 @@
 				F1F2F3F4F5F6F7F8F9F0F1F2 /* ThumbnailView.swift in Sources */,
 				B2C2D2E2F202122232425262 /* IrisAnimationView.swift in Sources */,
 				4A5B6C7D8E9F0A1B2C3D4E5F /* CameraScreen.swift in Sources */,
+				AE1723CBE3AC2AD8BA41E69D /* CameraPreviewView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

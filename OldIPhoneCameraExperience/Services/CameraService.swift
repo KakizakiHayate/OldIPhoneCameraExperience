@@ -11,6 +11,9 @@ import UIKit
 
 /// カメラ操作を提供するプロトコル
 protocol CameraServiceProtocol {
+    /// カメラセッション（プレビュー用）
+    var captureSession: AVCaptureSession { get }
+
     /// カメラセッションの状態
     var isSessionRunning: Bool { get }
 
@@ -34,7 +37,7 @@ protocol CameraServiceProtocol {
 final class CameraService: NSObject, CameraServiceProtocol {
     // MARK: - Properties
 
-    private let captureSession = AVCaptureSession()
+    let captureSession = AVCaptureSession()
     private var currentDevice: AVCaptureDevice?
     private var photoOutput: AVCapturePhotoOutput?
     private var videoDataOutput: AVCaptureVideoDataOutput?
