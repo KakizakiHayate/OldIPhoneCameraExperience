@@ -28,6 +28,8 @@
 		D957EFBE9FEE0A8D9DDA06B2 /* CameraConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = D666FBEA7FBD263F5D8FBD84 /* CameraConfig.swift */; };
 		DFB107CC4FE7068FD83C45BF /* FilterConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DBC4E2F447AD3F5FB15B579 /* FilterConfig.swift */; };
 		EA4F1D73805BD2B41D994DD8 /* CameraModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01A192864744D16C969E2BFF /* CameraModelTests.swift */; };
+		F22EFB410D17AA9316BAD1B2 /* FilterService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F70819203A4B5 /* FilterService.swift */; };
+		E63493980956CC57D030E440 /* FilterServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F6A7B8C9D0E1F203142A5B6 /* FilterServiceTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,6 +66,8 @@
 		D666FBEA7FBD263F5D8FBD84 /* CameraConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraConfig.swift; sourceTree = "<group>"; };
 		EE3779F108A19C45C792808B /* CameraState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraState.swift; sourceTree = "<group>"; };
 		F9ED7CA7D11F49FAC9D51B78 /* ShakeEffect.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShakeEffect.swift; sourceTree = "<group>"; };
+		1A2B3C4D5E6F70819203A4B5 /* FilterService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterService.swift; sourceTree = "<group>"; };
+		5F6A7B8C9D0E1F203142A5B6 /* FilterServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterServiceTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,6 +120,7 @@
 			children = (
 				2535251CD7BB30F9EF2AFEE1 /* Core */,
 				C999DF3D11A9A655F29E2242 /* Models */,
+				7EA94002492146F6E83D6456 /* Services */,
 			);
 			name = OldIPhoneCameraExperienceTests;
 			path = OldIPhoneCameraExperienceTests;
@@ -148,6 +153,7 @@
 				A1B2C3D4E5F60033A1B2 /* Preview Content */,
 				578948AC6E4190B4F6C01CF3 /* Core */,
 				E09F2EAE86B75DD59499EC8F /* Models */,
+				D474CD77D24CA7A5F761D223 /* Services */,
 			);
 			path = OldIPhoneCameraExperience;
 			sourceTree = "<group>";
@@ -215,6 +221,22 @@
 			);
 			name = Models;
 			path = Models;
+			sourceTree = "<group>";
+		};
+		D474CD77D24CA7A5F761D223 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				1A2B3C4D5E6F70819203A4B5 /* FilterService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		7EA94002492146F6E83D6456 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				5F6A7B8C9D0E1F203142A5B6 /* FilterServiceTests.swift */,
+			);
+			path = Services;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -321,6 +343,7 @@
 				854BB1BCA7BE5B4FB6425440 /* ShakeEffectTests.swift in Sources */,
 				23970E3D03A3B4EBE8938AB4 /* CaptureResultTests.swift in Sources */,
 				EA4F1D73805BD2B41D994DD8 /* CameraModelTests.swift in Sources */,
+				E63493980956CC57D030E440 /* FilterServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -338,6 +361,7 @@
 				963D9F9C7FF03EE946B5D47E /* ShakeEffect.swift in Sources */,
 				BDB8BC170173E486556B6F2B /* CaptureResult.swift in Sources */,
 				C0B4415FB10A22D6F6BBF0C6 /* CameraModel.swift in Sources */,
+				F22EFB410D17AA9316BAD1B2 /* FilterService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
