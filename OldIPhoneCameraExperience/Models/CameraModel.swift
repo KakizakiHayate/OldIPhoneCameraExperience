@@ -8,7 +8,7 @@
 import Foundation
 
 /// 再現するiPhone機種の定義
-struct CameraModel {
+struct CameraModel: Equatable {
     /// 機種名（例: "iPhone 4"）
     let name: String
 

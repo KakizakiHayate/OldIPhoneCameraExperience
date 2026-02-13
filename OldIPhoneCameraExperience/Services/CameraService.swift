@@ -32,7 +32,6 @@ protocol CameraServiceProtocol {
 
 /// カメラ操作の実装
 final class CameraService: NSObject, CameraServiceProtocol {
-
     // MARK: - Properties
 
     private let captureSession = AVCaptureSession()
@@ -41,6 +40,8 @@ final class CameraService: NSObject, CameraServiceProtocol {
     private var videoDataOutput: AVCaptureVideoDataOutput?
     private var currentPosition: AVCaptureDevice.Position = CameraConfig.defaultPosition
     private var photoContinuation: CheckedContinuation<CIImage, Error>?
+    private var flashMode: AVCaptureDevice.FlashMode = .off
+    private let sessionQueue = DispatchQueue(label: "com.oldiPhonecamera.sessionQueue")
     private let videoDataOutputQueue = DispatchQueue(label: "com.oldiPhonecamera.videoDataOutput")
 
     var isSessionRunning: Bool {
@@ -52,23 +53,39 @@ final class CameraService: NSObject, CameraServiceProtocol {
     func startSession() async throws {
         // カメラ権限チェック
         let status = AVCaptureDevice.authorizationStatus(for: .video)
-        guard status == .authorized else {
-            if status == .notDetermined {
-                let granted = await AVCaptureDevice.requestAccess(for: .video)
-                guard granted else {
-                    throw CameraError.permissionDenied
-                }
-            } else {
+        if status == .notDetermined {
+            let granted = await AVCaptureDevice.requestAccess(for: .video)
+            guard granted else {
                 throw CameraError.permissionDenied
             }
+        } else if status != .authorized {
+            throw CameraError.permissionDenied
         }
 
-        // セッション構成
+        // セッション構成・開始をシリアルキューで実行
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            sessionQueue.async { [self] in
+                do {
+                    try configureSession()
+                    captureSession.startRunning()
+                    continuation.resume()
+                } catch {
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+
+    // MARK: - Private
+
+    private func configureSession() throws {
         captureSession.beginConfiguration()
         captureSession.sessionPreset = CameraConfig.sessionPreset
 
         // デバイス取得
-        guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: currentPosition) else {
+        guard let device = AVCaptureDevice.default(
+            .builtInWideAngleCamera, for: .video, position: currentPosition
+        ) else {
             captureSession.commitConfiguration()
             throw CameraError.deviceNotFound
         }
@@ -101,18 +118,19 @@ final class CameraService: NSObject, CameraServiceProtocol {
         }
 
         captureSession.commitConfiguration()
-
-        // セッション開始
-        await MainActor.run {
-            captureSession.startRunning()
-        }
     }
 
     func stopSession() {
-        captureSession.stopRunning()
+        sessionQueue.async { [self] in
+            captureSession.stopRunning()
+        }
     }
 
     func capturePhoto() async throws -> CIImage {
+        guard photoContinuation == nil else {
+            throw CameraError.captureInProgress
+        }
+
         guard let photoOutput = photoOutput else {
             throw CameraError.outputNotFound
         }
@@ -121,77 +139,81 @@ final class CameraService: NSObject, CameraServiceProtocol {
             photoContinuation = continuation
 
             let settings = AVCapturePhotoSettings()
-            settings.flashMode = currentDevice?.hasFlash == true && currentDevice?.isFlashAvailable == true ? .auto : .off
+            if currentDevice?.hasFlash == true, currentDevice?.isFlashAvailable == true {
+                settings.flashMode = flashMode
+            } else {
+                settings.flashMode = .off
+            }
             photoOutput.capturePhoto(with: settings, delegate: self)
         }
     }
 
     func setFlash(enabled: Bool) {
-        guard let device = currentDevice, device.hasFlash else {
-            return
-        }
-
-        do {
-            try device.lockForConfiguration()
-            if device.isTorchModeSupported(enabled ? .on : .off) {
-                device.torchMode = enabled ? .on : .off
-            }
-            device.unlockForConfiguration()
-        } catch {
-            print("Failed to set flash: \(error)")
-        }
+        flashMode = enabled ? .on : .off
     }
 
     func switchCamera() async throws {
-        captureSession.beginConfiguration()
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            sessionQueue.async { [self] in
+                captureSession.beginConfiguration()
 
-        // 現在の入力を削除
-        if let currentInput = captureSession.inputs.first as? AVCaptureDeviceInput {
-            captureSession.removeInput(currentInput)
-        }
+                // 現在の入力を削除
+                if let currentInput = captureSession.inputs.first as? AVCaptureDeviceInput {
+                    captureSession.removeInput(currentInput)
+                }
 
-        // 反対側のカメラを取得
-        let newPosition: AVCaptureDevice.Position = (currentPosition == .back) ? .front : .back
-        guard let newDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: newPosition) else {
-            captureSession.commitConfiguration()
-            throw CameraError.deviceNotFound
-        }
+                // 反対側のカメラを取得
+                let newPosition: AVCaptureDevice.Position = (currentPosition == .back) ? .front : .back
+                guard let newDevice = AVCaptureDevice.default(
+                    .builtInWideAngleCamera, for: .video, position: newPosition
+                ) else {
+                    captureSession.commitConfiguration()
+                    continuation.resume(throwing: CameraError.deviceNotFound)
+                    return
+                }
 
-        // 新しい入力を追加
-        do {
-            let newInput = try AVCaptureDeviceInput(device: newDevice)
-            if captureSession.canAddInput(newInput) {
-                captureSession.addInput(newInput)
-                currentDevice = newDevice
-                currentPosition = newPosition
+                // 新しい入力を追加
+                do {
+                    let newInput = try AVCaptureDeviceInput(device: newDevice)
+                    if captureSession.canAddInput(newInput) {
+                        captureSession.addInput(newInput)
+                        currentDevice = newDevice
+                        currentPosition = newPosition
+                    }
+                } catch {
+                    captureSession.commitConfiguration()
+                    continuation.resume(throwing: CameraError.inputFailed)
+                    return
+                }
+
+                captureSession.commitConfiguration()
+                continuation.resume()
             }
-        } catch {
-            captureSession.commitConfiguration()
-            throw CameraError.inputFailed
         }
-
-        captureSession.commitConfiguration()
     }
 }
 
 // MARK: - AVCapturePhotoCaptureDelegate
 
 extension CameraService: AVCapturePhotoCaptureDelegate {
-    func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
+    func photoOutput(
+        _: AVCapturePhotoOutput,
+        didFinishProcessingPhoto photo: AVCapturePhoto,
+        error: Error?
+    ) {
         if let error = error {
             photoContinuation?.resume(throwing: error)
             photoContinuation = nil
             return
         }
 
-        guard let imageData = photo.fileDataRepresentation(),
-              let uiImage = UIImage(data: imageData),
-              let ciImage = CIImage(image: uiImage) else {
+        guard let pixelBuffer = photo.pixelBuffer else {
             photoContinuation?.resume(throwing: CameraError.imageProcessingFailed)
             photoContinuation = nil
             return
         }
 
+        let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
         photoContinuation?.resume(returning: ciImage)
         photoContinuation = nil
     }
@@ -200,14 +222,17 @@ extension CameraService: AVCapturePhotoCaptureDelegate {
 // MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
 
 extension CameraService: AVCaptureVideoDataOutputSampleBufferDelegate {
-    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+    func captureOutput(
+        _: AVCaptureOutput,
+        didOutput sampleBuffer: CMSampleBuffer,
+        from _: AVCaptureConnection
+    ) {
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
             return
         }
 
-        let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+        _ = CIImage(cvPixelBuffer: pixelBuffer)
         // ここでフレームコールバックを通知する（Phase 2で実装予定）
-        // 現時点ではフレームを取得するだけ
     }
 }
 
@@ -219,4 +244,5 @@ enum CameraError: Error {
     case inputFailed
     case outputNotFound
     case imageProcessingFailed
+    case captureInProgress
 }
