@@ -35,6 +35,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer || true
+
       - name: Show Xcode version
         run: xcodebuild -version
 
@@ -46,10 +49,23 @@ jobs:
           fi
           echo "Test target found."
 
+      - name: Detect iOS Simulator destination
+        id: detect-destination
+        run: |
+          DEST=$(xcodebuild -scheme OldIPhoneCameraExperience -showdestinations 2>/dev/null \
+            | grep 'iOS Simulator' | grep 'iPhone' | head -1 \
+            | sed 's/.*{ //' | sed 's/ }$//')
+          if [ -z "$DEST" ]; then
+            echo "::error::No iOS Simulator destination found"
+            exit 1
+          fi
+          echo "destination=$DEST" >> "$GITHUB_OUTPUT"
+          echo "Detected destination: $DEST"
+
       - name: Run tests
         run: |
           xcodebuild test \
             -project OldIPhoneCameraExperience.xcodeproj \
             -scheme OldIPhoneCameraExperience \
-            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -destination '${{ steps.detect-destination.outputs.destination }}' \
             -quiet

@@ -8,10 +8,16 @@
 import Photos
 import UIKit
 
-/// フォトライブラリへの保存を提供するプロトコル
+/// フォトライブラリへの保存・権限管理を提供するプロトコル
 protocol PhotoLibraryServiceProtocol {
     /// 画像をフォトライブラリに保存する
     func saveToPhotoLibrary(_ image: UIImage) async throws
+    /// 現在の権限状態を確認する
+    func checkPermission() -> PermissionStatus
+    /// 権限をリクエストする
+    func requestPermission() async -> PermissionStatus
+    /// 最新の写真を取得する
+    func fetchLatestPhoto() async -> UIImage?
 }
 
 /// フォトライブラリへの保存の実装
@@ -38,16 +44,67 @@ final class PhotoLibraryService: PhotoLibraryServiceProtocol {
 
         // フォトライブラリに保存
         return try await withCheckedThrowingContinuation { continuation in
-            PHPhotoLibrary.shared().performChanges(
-                { PHAssetChangeRequest.creationRequestForAsset(from: image) },
-                completionHandler: { success, error in
-                    if success {
-                        continuation.resume()
-                    } else {
-                        continuation.resume(throwing: error ?? PhotoLibraryError.saveFailed)
-                    }
+            PHPhotoLibrary.shared().performChanges {
+                PHAssetChangeRequest.creationRequestForAsset(from: image)
+            } completionHandler: { success, error in
+                if success {
+                    continuation.resume()
+                } else {
+                    continuation.resume(throwing: error ?? PhotoLibraryError.saveFailed)
                 }
-            )
+            }
+        }
+    }
+
+    func checkPermission() -> PermissionStatus {
+        let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+        switch status {
+        case .authorized, .limited:
+            return .authorized
+        case .denied, .restricted:
+            return .denied
+        case .notDetermined:
+            return .notDetermined
+        @unknown default:
+            return .denied
+        }
+    }
+
+    func requestPermission() async -> PermissionStatus {
+        let status = await PHPhotoLibrary.requestAuthorization(for: .readWrite)
+        switch status {
+        case .authorized, .limited:
+            return .authorized
+        case .denied, .restricted:
+            return .denied
+        case .notDetermined:
+            return .notDetermined
+        @unknown default:
+            return .denied
+        }
+    }
+
+    func fetchLatestPhoto() async -> UIImage? {
+        let fetchOptions = PHFetchOptions()
+        fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+        fetchOptions.fetchLimit = 1
+
+        let assets = PHAsset.fetchAssets(with: .image, options: fetchOptions)
+        guard let latestAsset = assets.firstObject else { return nil }
+
+        return await withCheckedContinuation { continuation in
+            let options = PHImageRequestOptions()
+            options.deliveryMode = .highQualityFormat
+            options.isSynchronous = false
+
+            PHImageManager.default().requestImage(
+                for: latestAsset,
+                targetSize: CGSize(width: 200, height: 200),
+                contentMode: .aspectFill,
+                options: options
+            ) { image, _ in
+                continuation.resume(returning: image)
+            }
         }
     }
 }
