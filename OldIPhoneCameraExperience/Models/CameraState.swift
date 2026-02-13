@@ -9,10 +9,10 @@ import Foundation
 
 /// カメラの現在の動作状態を表すモデル
 struct CameraState {
-    let isFlashOn: Bool
-    let cameraPosition: CameraPosition
-    let isCapturing: Bool
-    let permissionStatus: PermissionStatus
+    var isFlashOn: Bool
+    var cameraPosition: CameraPosition
+    var isCapturing: Bool
+    var permissionStatus: PermissionStatus
 
     init(
         isFlashOn: Bool = false,

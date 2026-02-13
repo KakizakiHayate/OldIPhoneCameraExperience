@@ -5,10 +5,10 @@
 //  Created by Manus on 2026-02-13.
 //
 
-import XCTest
-import CoreImage
 import AVFoundation
+import CoreImage
 @testable import OldIPhoneCameraExperience
+import XCTest
 
 /// モックCameraService（テスト用）
 final class MockCameraService: CameraServiceProtocol {
@@ -39,7 +39,6 @@ final class MockCameraService: CameraServiceProtocol {
 }
 
 final class CameraServiceTests: XCTestCase {
-
     var sut: MockCameraService!
 
     override func setUp() {
@@ -53,6 +52,7 @@ final class CameraServiceTests: XCTestCase {
     }
 
     // MARK: - S-C1: startSessionでセッション開始
+
     func test_startSession_setsIsSessionRunningTrue() async throws {
         XCTAssertFalse(sut.isSessionRunning, "初期状態ではセッションは停止している必要があります")
 
@@ -62,6 +62,7 @@ final class CameraServiceTests: XCTestCase {
     }
 
     // MARK: - S-C2: stopSessionでセッション停止
+
     func test_stopSession_setsIsSessionRunningFalse() async throws {
         try await sut.startSession()
         XCTAssertTrue(sut.isSessionRunning)
@@ -72,6 +73,7 @@ final class CameraServiceTests: XCTestCase {
     }
 
     // MARK: - S-C3: setFlash(enabled: true)でフラッシュ設定
+
     func test_setFlash_enabledTrue_setsFlashOn() {
         sut.setFlash(enabled: true)
 
@@ -79,6 +81,7 @@ final class CameraServiceTests: XCTestCase {
     }
 
     // MARK: - S-C4: setFlash(enabled: false)でオフ
+
     func test_setFlash_enabledFalse_setsFlashOff() {
         sut.setFlash(enabled: true)
         sut.setFlash(enabled: false)
@@ -87,6 +90,7 @@ final class CameraServiceTests: XCTestCase {
     }
 
     // MARK: - S-C5: switchCameraでカメラ位置切替
+
     func test_switchCamera_togglesPosition() async throws {
         XCTAssertEqual(sut.currentPosition, .back, "初期状態では背面カメラである必要があります")
 
@@ -98,6 +102,7 @@ final class CameraServiceTests: XCTestCase {
     }
 
     // MARK: - S-C6: capturePhotoでCIImageが返される
+
     func test_capturePhoto_returnsCIImage() async throws {
         let image = try await sut.capturePhoto()
 
