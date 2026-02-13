@@ -70,19 +70,39 @@ final class CameraViewModelTests: XCTestCase {
         XCTAssertFalse(mockMotionService.isMonitoring, "stopCamera後はモーションモニタリングが停止されている必要があります")
     }
 
-    // MARK: - VM-C4: toggleFlashでフラッシュ切替
+    // MARK: - VM-C4: 初期状態でlastCapturedImageがnil
+
+    func test_initialState_lastCapturedImageIsNil() {
+        XCTAssertNil(sut.lastCapturedImage, "初期状態ではlastCapturedImageはnilである必要があります")
+    }
+
+    // MARK: - VM-C5: toggleFlashでフラッシュ状態が反転
 
     func test_toggleFlash_togglesFlashState() {
         XCTAssertFalse(sut.state.isFlashOn)
 
         sut.toggleFlash()
         XCTAssertTrue(sut.state.isFlashOn, "toggleFlash後はフラッシュがオンになる必要があります")
-
-        sut.toggleFlash()
-        XCTAssertFalse(sut.state.isFlashOn, "再度toggleFlash後はフラッシュがオフになる必要があります")
     }
 
-    // MARK: - VM-C5: switchCameraでカメラ位置切替
+    // MARK: - VM-C6: toggleFlashを2回呼ぶと元に戻る
+
+    func test_toggleFlash_twiceCancelsOut() {
+        sut.toggleFlash()
+        sut.toggleFlash()
+        XCTAssertFalse(sut.state.isFlashOn, "toggleFlashを2回呼ぶとフラッシュがオフに戻る必要があります")
+    }
+
+    // MARK: - VM-C7: toggleFlash呼び出し時にCameraService.setFlashが呼ばれる
+
+    func test_toggleFlash_callsCameraServiceSetFlash() {
+        sut.toggleFlash()
+
+        XCTAssertTrue(mockCameraService.setFlashCalled, "toggleFlash呼び出し時にCameraService.setFlashが呼ばれる必要があります")
+        XCTAssertTrue(mockCameraService.setFlashCalledWithValue, "setFlashにtrueが渡される必要があります")
+    }
+
+    // MARK: - VM-C8: switchCameraでカメラ位置切替
 
     func test_switchCamera_togglesCameraPosition() async throws {
         try await sut.startCamera()
@@ -95,7 +115,40 @@ final class CameraViewModelTests: XCTestCase {
         XCTAssertEqual(sut.state.cameraPosition, .back, "再度switchCamera後は背面カメラに戻る必要があります")
     }
 
-    // MARK: - VM-C6: capturePhotoで撮影処理が実行される
+    // MARK: - VM-C9: 前面カメラ切替時にフラッシュがオフ
+
+    func test_switchCamera_toFront_turnsOffFlash() async throws {
+        try await sut.startCamera()
+        sut.toggleFlash() // フラッシュをオンに
+        XCTAssertTrue(sut.state.isFlashOn)
+
+        try await sut.switchCamera() // 前面カメラへ
+
+        XCTAssertFalse(sut.state.isFlashOn, "前面カメラ切替時にフラッシュがオフになる必要があります")
+    }
+
+    // MARK: - VM-C10: switchCamera呼び出し時にCameraService.switchCameraが呼ばれる
+
+    func test_switchCamera_callsCameraServiceSwitchCamera() async throws {
+        try await sut.startCamera()
+
+        try await sut.switchCamera()
+
+        XCTAssertTrue(mockCameraService.switchCameraCalled, "switchCamera呼び出し時にCameraService.switchCameraが呼ばれる必要があります")
+    }
+
+    // MARK: - VM-C11: capturePhoto呼び出しでisCapturingがtrue
+
+    func test_capturePhoto_setsIsCapturingDuringCapture() async throws {
+        try await sut.startCamera()
+
+        // capturePhoto完了後はisCapturingがfalseに戻ることを確認
+        try await sut.capturePhoto()
+
+        XCTAssertFalse(sut.state.isCapturing, "撮影完了後はisCapturingがfalseに戻る必要があります")
+    }
+
+    // MARK: - VM-C12: capturePhoto完了後にisCapturingがfalse
 
     func test_capturePhoto_executesCapture() async throws {
         try await sut.startCamera()
@@ -103,17 +156,30 @@ final class CameraViewModelTests: XCTestCase {
         try await sut.capturePhoto()
 
         XCTAssertEqual(mockPhotoLibraryService.savedImages.count, 1, "撮影後は1枚の画像が保存されている必要があります")
+        XCTAssertFalse(sut.state.isCapturing, "撮影完了後はisCapturingがfalseに戻る必要があります")
     }
 
-    // MARK: - VM-C7: capturePhoto中はisCapturingがtrue
+    // MARK: - VM-C13: capturePhoto完了後にlastCapturedImageが更新
 
-    func test_capturePhoto_setsIsCapturingTrue() async throws {
+    func test_capturePhoto_updatesLastCapturedImage() async throws {
         try await sut.startCamera()
+        XCTAssertNil(sut.lastCapturedImage)
 
-        // 非同期処理のため、タイミングによってはテストが難しい
-        // ここでは撮影後にisCapturingがfalseに戻ることを確認
         try await sut.capturePhoto()
 
-        XCTAssertFalse(sut.state.isCapturing, "撮影完了後はisCapturingがfalseに戻る必要があります")
+        XCTAssertNotNil(sut.lastCapturedImage, "撮影完了後にlastCapturedImageが更新される必要があります")
+    }
+
+    // MARK: - VM-C14: カメラ権限拒否時にpermissionStatusがdenied
+
+    func test_startCamera_permissionDenied_setsStatusToDenied() async {
+        mockCameraService.shouldThrowOnStart = true
+
+        do {
+            try await sut.startCamera()
+            XCTFail("権限拒否時にはエラーがthrowされる必要があります")
+        } catch {
+            XCTAssertEqual(sut.state.permissionStatus, .denied, "権限拒否時にpermissionStatusが.deniedになる必要があります")
+        }
     }
 }
