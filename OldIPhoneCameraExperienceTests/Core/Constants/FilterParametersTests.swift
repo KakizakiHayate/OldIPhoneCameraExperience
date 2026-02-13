@@ -5,12 +5,12 @@
 //  Created by Manus on 2026-02-13.
 //
 
-import XCTest
 @testable import OldIPhoneCameraExperience
+import XCTest
 
 final class FilterParametersTests: XCTestCase {
-
     // MARK: - C-FP1: warmthShiftが正の値であること（暖色方向）
+
     func test_warmthShift_isPositiveValue() {
         XCTAssertGreaterThan(
             FilterParameters.warmthShift,
@@ -20,6 +20,7 @@ final class FilterParametersTests: XCTestCase {
     }
 
     // MARK: - C-FP2: cropRatioが0〜1の範囲であること
+
     func test_cropRatio_isWithinZeroToOneRange() {
         XCTAssertGreaterThan(
             FilterParameters.cropRatio,
@@ -34,6 +35,7 @@ final class FilterParametersTests: XCTestCase {
     }
 
     // MARK: - C-FP3: shakeShiftRangeの下限が上限より小さいこと
+
     func test_shakeShiftRange_lowerBoundIsLessThanUpperBound() {
         XCTAssertLessThan(
             FilterParameters.shakeShiftRange.lowerBound,

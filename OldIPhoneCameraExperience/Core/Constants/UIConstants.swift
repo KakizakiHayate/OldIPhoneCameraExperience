@@ -6,10 +6,10 @@
 //
 
 import CoreGraphics
+import Foundation
 
 /// UI関連の定数を管理する enum
 enum UIConstants {
-
     // MARK: - ツールバー
 
     /// トップツールバーの高さ

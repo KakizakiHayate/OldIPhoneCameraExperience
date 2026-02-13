@@ -5,12 +5,12 @@
 //  Created by Manus on 2026-02-13.
 //
 
-import XCTest
 @testable import OldIPhoneCameraExperience
+import XCTest
 
 final class CameraStateTests: XCTestCase {
-
     // MARK: - M-CS1: デフォルト値でCameraStateを生成する
+
     func test_defaultValues() {
         let state = CameraState()
 
@@ -21,6 +21,7 @@ final class CameraStateTests: XCTestCase {
     }
 
     // MARK: - M-CS2: フラッシュオンの状態を生成する
+
     func test_flashOn() {
         let state = CameraState(isFlashOn: true)
 
@@ -28,6 +29,7 @@ final class CameraStateTests: XCTestCase {
     }
 
     // MARK: - M-CS3: 前面カメラの状態を生成する
+
     func test_frontCamera() {
         let state = CameraState(cameraPosition: .front)
 
@@ -35,16 +37,17 @@ final class CameraStateTests: XCTestCase {
     }
 
     // MARK: - M-CS4: CameraPositionのcase数が2であること
-    func test_cameraPosition_hasTwoCases() {
-        let allCases: [CameraPosition] = [.front, .back]
 
-        XCTAssertEqual(allCases.count, 2, "CameraPositionは2つのケース（front, back）を持つ必要があります")
+    func test_cameraPosition_hasTwoCases() {
+        XCTAssertEqual(CameraPosition.allCases.count, 2, "CameraPositionは2つのケース（front, back）を持つ必要があります")
     }
 
     // MARK: - M-CS5: PermissionStatusのcase数が3であること
-    func test_permissionStatus_hasThreeCases() {
-        let allCases: [PermissionStatus] = [.notDetermined, .authorized, .denied]
 
-        XCTAssertEqual(allCases.count, 3, "PermissionStatusは3つのケース（notDetermined, authorized, denied）を持つ必要があります")
+    func test_permissionStatus_hasThreeCases() {
+        XCTAssertEqual(
+            PermissionStatus.allCases.count, 3,
+            "PermissionStatusは3つのケース（notDetermined, authorized, denied）を持つ必要があります"
+        )
     }
 }
