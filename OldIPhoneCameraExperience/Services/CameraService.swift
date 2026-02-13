@@ -13,7 +13,7 @@ import UIKit
 protocol CameraServiceProtocol {
     /// カメラセッション（プレビュー用）
     var captureSession: AVCaptureSession { get }
-    
+
     /// カメラセッションの状態
     var isSessionRunning: Bool { get }
 
