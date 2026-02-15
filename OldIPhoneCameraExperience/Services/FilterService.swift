@@ -115,10 +115,7 @@ final class FilterService: FilterServiceProtocol {
             .rotated(by: rotationRadians)
             .translatedBy(x: -centerX, y: -centerY)
         let combined = shiftTransform.concatenating(rotationTransform)
-        outputImage = outputImage.transformed(by: combined)
-
-        // 元の画像範囲でクロップ（白余白を除去）
-        outputImage = outputImage.cropped(to: originalExtent)
+        outputImage = outputImage.transformed(by: combined).cropped(to: originalExtent)
 
         // 2. モーションブラー
         if let motionBlurFilter = CIFilter(name: "CIMotionBlur") {
@@ -126,12 +123,9 @@ final class FilterService: FilterServiceProtocol {
             motionBlurFilter.setValue(effect.motionBlurRadius, forKey: kCIInputRadiusKey)
             motionBlurFilter.setValue(effect.motionBlurAngle * .pi / 180.0, forKey: kCIInputAngleKey)
             if let result = motionBlurFilter.outputImage {
-                outputImage = result
+                outputImage = result.cropped(to: originalExtent)
             }
         }
-
-        // モーションブラーでもextentが拡張されるため、再度クロップ
-        outputImage = outputImage.cropped(to: originalExtent)
 
         return outputImage
     }
