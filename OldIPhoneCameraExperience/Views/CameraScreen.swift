@@ -97,7 +97,7 @@ struct CameraScreen: View {
     // MARK: - Camera Preview
 
     private var cameraPreview: some View {
-        CameraPreviewView(session: viewModel.captureSession, cropRatio: FilterParameters.cropRatio)
+        CameraPreviewView(session: viewModel.captureSession)
             .background(Color.black)
     }
 

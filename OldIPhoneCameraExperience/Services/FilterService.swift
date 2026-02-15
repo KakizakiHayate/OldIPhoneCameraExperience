@@ -61,11 +61,9 @@ final class FilterService: FilterServiceProtocol {
     }
 
     func applyFilters(_ image: CIImage, config: FilterConfig) -> CIImage? {
-        guard var outputImage = applyWarmthFilter(image, config: config) else {
+        guard let outputImage = applyWarmthFilter(image, config: config) else {
             return nil
         }
-
-        outputImage = applyCrop(outputImage, config: config) ?? outputImage
 
         return outputImage
     }
