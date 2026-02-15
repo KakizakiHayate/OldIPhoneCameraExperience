@@ -84,46 +84,103 @@ final class FilterServiceTests: XCTestCase {
         }
     }
 
-    // MARK: - S-F5: 出力画像のアスペクト比が4:3
+    // MARK: - S-F5: クロップ後のアスペクト比が入力と同じ（クロップはアスペクト比を維持する）
 
-    func test_applyCrop_outputAspectRatio_is4to3() {
-        let result = sut.applyCrop(testImage, config: FilterConfig.iPhone4)
+    func test_applyCrop_preservesAspectRatio() {
+        let wideImage = CIImage(color: .white).cropped(to: CGRect(x: 0, y: 0, width: 4000, height: 3000))
+        let result = sut.applyCrop(wideImage, config: FilterConfig.iPhone4)
 
         XCTAssertNotNil(result)
         if let result = result {
-            let aspectRatio = result.extent.size.width / result.extent.size.height
-            let expected = 4.0 / 3.0
+            let inputAspect = wideImage.extent.size.width / wideImage.extent.size.height
+            let outputAspect = result.extent.size.width / result.extent.size.height
             XCTAssertEqual(
-                aspectRatio,
-                expected,
+                outputAspect,
+                inputAspect,
                 accuracy: 0.01,
-                "出力画像のアスペクト比は4:3である必要があります"
+                "クロップ後のアスペクト比は入力画像と同じである必要があります"
             )
         }
     }
 
-    // MARK: - S-F6: 出力画像の解像度が2592x1936
+    // MARK: - S-F6: クロップ後のサイズがcropRatio分だけ縮小されている
 
-    func test_applyCrop_outputResolution_is2592x1936() {
-        // より大きな入力画像を使用（クロップ後に2592x1936になるように）
+    func test_applyCrop_outputSizeMatchesCropRatio() {
         let largeImage = CIImage(color: .white).cropped(to: CGRect(x: 0, y: 0, width: 4000, height: 3000))
         let result = sut.applyCrop(largeImage, config: FilterConfig.iPhone4)
 
         XCTAssertNotNil(result)
         if let result = result {
+            let expectedWidth = 4000.0 * FilterConfig.iPhone4.cropRatio
+            let expectedHeight = 3000.0 * FilterConfig.iPhone4.cropRatio
             XCTAssertEqual(
                 result.extent.size.width,
-                CGFloat(FilterConfig.iPhone4.outputWidth),
+                CGFloat(expectedWidth),
                 accuracy: 1.0,
-                "出力画像の幅は2592pxである必要があります"
+                "出力画像の幅はcropRatio分だけ縮小される必要があります"
             )
             XCTAssertEqual(
                 result.extent.size.height,
-                CGFloat(FilterConfig.iPhone4.outputHeight),
+                CGFloat(expectedHeight),
                 accuracy: 1.0,
-                "出力画像の高さは1936pxである必要があります"
+                "出力画像の高さはcropRatio分だけ縮小される必要があります"
             )
         }
+    }
+
+    // MARK: - S-F-DS1: applyDownscaleで画像が5MP相当にスケーリングされる
+
+    func test_applyDownscale_scalesToiPhone4Resolution() throws {
+        // iPhone 12のカメラ出力に近い4032x3024の横長画像
+        let largeImage = CIImage(color: .white).cropped(
+            to: CGRect(x: 0, y: 0, width: 4032, height: 3024)
+        )
+        let result = try XCTUnwrap(sut.applyDownscale(largeImage, config: FilterConfig.iPhone4))
+
+        // 横長画像なのでoutputWidth=2592, outputHeight=1936がそのまま適用
+        // アスペクト比を維持するのでmin(scaleX, scaleY)で決まる
+        let expectedScale = min(
+            CGFloat(FilterConfig.iPhone4.outputWidth) / largeImage.extent.width,
+            CGFloat(FilterConfig.iPhone4.outputHeight) / largeImage.extent.height
+        )
+        let expectedWidth = largeImage.extent.width * expectedScale
+        let expectedHeight = largeImage.extent.height * expectedScale
+
+        XCTAssertEqual(result.extent.size.width, expectedWidth, accuracy: 1.0)
+        XCTAssertEqual(result.extent.size.height, expectedHeight, accuracy: 1.0)
+    }
+
+    // MARK: - S-F-DS2: applyDownscaleで縦長画像のwidth/heightが正しく入れ替わる
+
+    func test_applyDownscale_handlesPortraitImage() throws {
+        // 縦長画像（ポートレート）
+        let portraitImage = CIImage(color: .white).cropped(
+            to: CGRect(x: 0, y: 0, width: 3024, height: 4032)
+        )
+        let result = try XCTUnwrap(sut.applyDownscale(portraitImage, config: FilterConfig.iPhone4))
+
+        // 縦長なのでターゲットはwidth=1936, height=2592に入れ替わる
+        let targetWidth: CGFloat = 1936
+        let targetHeight: CGFloat = 2592
+        let expectedScale = min(targetWidth / portraitImage.extent.width, targetHeight / portraitImage.extent.height)
+        let expectedWidth = portraitImage.extent.width * expectedScale
+        let expectedHeight = portraitImage.extent.height * expectedScale
+
+        XCTAssertEqual(result.extent.size.width, expectedWidth, accuracy: 1.0)
+        XCTAssertEqual(result.extent.size.height, expectedHeight, accuracy: 1.0)
+    }
+
+    // MARK: - S-F-DS3: 既にターゲットサイズ以下の画像はスケーリングしない
+
+    func test_applyDownscale_skipsIfAlreadySmall() throws {
+        // ターゲットより小さい画像
+        let smallImage = CIImage(color: .white).cropped(
+            to: CGRect(x: 0, y: 0, width: 1000, height: 800)
+        )
+        let result = try XCTUnwrap(sut.applyDownscale(smallImage, config: FilterConfig.iPhone4))
+
+        XCTAssertEqual(result.extent.size.width, smallImage.extent.width, accuracy: 0.1)
+        XCTAssertEqual(result.extent.size.height, smallImage.extent.height, accuracy: 0.1)
     }
 
     // MARK: - S-F7: applyShakeEffectにCIImageとShakeEffectを渡すとnilでない結果が返る
@@ -166,8 +223,11 @@ final class FilterServiceTests: XCTestCase {
         XCTAssertNotNil(result1)
         XCTAssertNotNil(result2)
         if let r1 = result1, let r2 = result2 {
-            let extentsAreDifferent = r1.extent != r2.extent
-            XCTAssertTrue(extentsAreDifferent, "異なるShakeEffectを適用すると異なる結果が返る必要があります")
+            // 修正後はextentが常に同じ（元の範囲に固定）なので、ピクセルデータで比較する
+            let context = CIContext()
+            let data1 = context.tiffRepresentation(of: r1, format: .RGBA8, colorSpace: CGColorSpaceCreateDeviceRGB())
+            let data2 = context.tiffRepresentation(of: r2, format: .RGBA8, colorSpace: CGColorSpaceCreateDeviceRGB())
+            XCTAssertNotEqual(data1, data2, "異なるShakeEffectを適用すると異なるピクセルデータが返る必要があります")
         }
     }
 }

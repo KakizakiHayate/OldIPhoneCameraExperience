@@ -16,7 +16,10 @@ protocol FilterServiceProtocol {
     /// 画角クロップを適用する
     func applyCrop(_ image: CIImage, config: FilterConfig) -> CIImage?
 
-    /// すべてのフィルターを適用する（暖色系 → クロップ）
+    /// iPhone 4相当の解像度（5MP）にスケーリングする
+    func applyDownscale(_ image: CIImage, config: FilterConfig) -> CIImage?
+
+    /// すべてのフィルターを適用する（暖色系 → スケーリング）
     func applyFilters(_ image: CIImage, config: FilterConfig) -> CIImage?
 
     /// 手ブレシミュレーションを適用する
@@ -48,7 +51,7 @@ final class FilterService: FilterServiceProtocol {
     func applyCrop(_ image: CIImage, config: FilterConfig) -> CIImage? {
         let inputExtent = image.extent
 
-        // 1. クロップ率に基づいて中央部分を切り出す
+        // クロップ率に基づいて中央部分を切り出す（26mm→32mm画角変換）
         let cropRatio = CGFloat(config.cropRatio)
         let croppedWidth = inputExtent.width * cropRatio
         let croppedHeight = inputExtent.height * cropRatio
@@ -57,69 +60,73 @@ final class FilterService: FilterServiceProtocol {
         let cropY = (inputExtent.height - croppedHeight) / 2
         let cropRect = CGRect(x: cropX, y: cropY, width: croppedWidth, height: croppedHeight)
 
-        let croppedImage = image.cropped(to: cropRect)
+        return image.cropped(to: cropRect)
+    }
 
-        // 2. 出力解像度にスケーリング（Aspect Fill + 中央クロップ）
-        // 入力画像が縦向き（高さ＞幅）の場合、出力解像度の幅と高さを入れ替える
-        let isPortrait = croppedImage.extent.height > croppedImage.extent.width
-        let targetWidth = CGFloat(isPortrait ? config.outputHeight : config.outputWidth)
-        let targetHeight = CGFloat(isPortrait ? config.outputWidth : config.outputHeight)
+    func applyDownscale(_ image: CIImage, config: FilterConfig) -> CIImage? {
+        let inputExtent = image.extent
+        let targetWidth = CGFloat(config.outputWidth)
+        let targetHeight = CGFloat(config.outputHeight)
 
-        let scaleX = targetWidth / croppedImage.extent.width
-        let scaleY = targetHeight / croppedImage.extent.height
-        let scale = max(scaleX, scaleY)
+        // 入力画像の向きに合わせてターゲットサイズを決定
+        // 縦長画像（ポートレート）の場合はwidth/heightを入れ替える
+        let isPortrait = inputExtent.height > inputExtent.width
+        let finalTargetWidth = isPortrait ? min(targetWidth, targetHeight) : max(targetWidth, targetHeight)
+        let finalTargetHeight = isPortrait ? max(targetWidth, targetHeight) : min(targetWidth, targetHeight)
 
-        let scaledImage: CIImage
-        if let scaleFilter = CIFilter(name: "CILanczosScaleTransform") {
-            scaleFilter.setValue(croppedImage, forKey: kCIInputImageKey)
-            scaleFilter.setValue(scale, forKey: kCIInputScaleKey)
-            scaleFilter.setValue(1.0, forKey: kCIInputAspectRatioKey)
-            scaledImage = scaleFilter.outputImage ?? croppedImage
-        } else {
-            let transform = CGAffineTransform(scaleX: scale, y: scale)
-            scaledImage = croppedImage.transformed(by: transform)
+        // 既にターゲットサイズ以下ならスケーリング不要
+        if inputExtent.width <= finalTargetWidth, inputExtent.height <= finalTargetHeight {
+            return image
         }
 
-        // 中央クロップで目的の解像度に合わせる
-        let finalCropRect = CGRect(
-            x: scaledImage.extent.origin.x + (scaledImage.extent.width - targetWidth) / 2.0,
-            y: scaledImage.extent.origin.y + (scaledImage.extent.height - targetHeight) / 2.0,
-            width: targetWidth,
-            height: targetHeight
-        )
+        // アスペクト比を維持しながらターゲットサイズに収まるスケール率を計算
+        let scaleX = finalTargetWidth / inputExtent.width
+        let scaleY = finalTargetHeight / inputExtent.height
+        let scale = min(scaleX, scaleY)
 
-        return scaledImage.cropped(to: finalCropRect)
+        // CGAffineTransformでスケーリング（Lanczosと違いエッジアーティファクトが発生しない）
+        return image.transformed(by: CGAffineTransform(scaleX: scale, y: scale))
     }
 
     func applyFilters(_ image: CIImage, config: FilterConfig) -> CIImage? {
-        guard var outputImage = applyWarmthFilter(image, config: config) else {
+        // 1. 暖色系フィルター
+        guard let warmthImage = applyWarmthFilter(image, config: config) else {
             return nil
         }
 
-        outputImage = applyCrop(outputImage, config: config) ?? outputImage
+        // 2. iPhone 4相当の解像度にスケーリング
+        guard let outputImage = applyDownscale(warmthImage, config: config) else {
+            return nil
+        }
 
         return outputImage
     }
 
     func applyShakeEffect(_ image: CIImage, effect: ShakeEffect) -> CIImage? {
-        var outputImage = image
+        let originalExtent = image.extent
 
-        // 1. シフト（平行移動）
+        // 端ピクセルを無限に引き伸ばし、変換後のエッジに白線が出るのを防止する
+        var outputImage = image.clampedToExtent()
+
+        // 1. シフト（平行移動）+ 回転を適用し、元の範囲でクロップ
+        // 写真の中身がブレて見える効果を出しつつ、写真の矩形自体は維持する
         let shiftTransform = CGAffineTransform(translationX: effect.shiftX, y: effect.shiftY)
-        outputImage = outputImage.transformed(by: shiftTransform)
-
-        // 2. 回転（中心基準）
         let rotationRadians = effect.rotation * .pi / 180.0
-        let rotationTransform = CGAffineTransform(rotationAngle: rotationRadians)
-        outputImage = outputImage.transformed(by: rotationTransform)
+        let centerX = originalExtent.midX
+        let centerY = originalExtent.midY
+        let rotationTransform = CGAffineTransform(translationX: centerX, y: centerY)
+            .rotated(by: rotationRadians)
+            .translatedBy(x: -centerX, y: -centerY)
+        let combined = shiftTransform.concatenating(rotationTransform)
+        outputImage = outputImage.transformed(by: combined).cropped(to: originalExtent)
 
-        // 3. モーションブラー
+        // 2. モーションブラー
         if let motionBlurFilter = CIFilter(name: "CIMotionBlur") {
             motionBlurFilter.setValue(outputImage, forKey: kCIInputImageKey)
             motionBlurFilter.setValue(effect.motionBlurRadius, forKey: kCIInputRadiusKey)
             motionBlurFilter.setValue(effect.motionBlurAngle * .pi / 180.0, forKey: kCIInputAngleKey)
             if let result = motionBlurFilter.outputImage {
-                outputImage = result
+                outputImage = result.cropped(to: originalExtent)
             }
         }
 
