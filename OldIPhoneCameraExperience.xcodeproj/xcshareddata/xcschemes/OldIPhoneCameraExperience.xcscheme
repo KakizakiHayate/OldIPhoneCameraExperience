@@ -64,6 +64,16 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "A1B2C3D4E5F60040A1B2"
+            BuildableName = "OldIPhoneCameraExperience.app"
+            BlueprintName = "OldIPhoneCameraExperience"
+            ReferencedContainer = "container:OldIPhoneCameraExperience.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -71,6 +81,16 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "A1B2C3D4E5F60040A1B2"
+            BuildableName = "OldIPhoneCameraExperience.app"
+            BlueprintName = "OldIPhoneCameraExperience"
+            ReferencedContainer = "container:OldIPhoneCameraExperience.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">
