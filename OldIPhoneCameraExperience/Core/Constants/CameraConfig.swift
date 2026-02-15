@@ -16,8 +16,8 @@ enum CameraConfig {
     /// キャプチャセッションのプリセット
     static let sessionPreset: AVCaptureSession.Preset = .photo
 
-    /// プレビューのアスペクト比（4:3）
-    static let previewAspectRatio: CGFloat = 4.0 / 3.0
+    /// プレビューのアスペクト比（3:4 縦長 — 縦持ち専用アプリのため）
+    static let previewAspectRatio: CGFloat = 3.0 / 4.0
 
     /// ターゲットFPS
     static let targetFPS: Int = 30
