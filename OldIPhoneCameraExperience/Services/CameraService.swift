@@ -210,14 +210,25 @@ extension CameraService: AVCapturePhotoCaptureDelegate {
             return
         }
 
-        guard let pixelBuffer = photo.pixelBuffer else {
+        guard let data = photo.fileDataRepresentation(),
+              let ciImage = CIImage(data: data)
+        else {
             photoContinuation?.resume(throwing: CameraError.imageProcessingFailed)
             photoContinuation = nil
             return
         }
 
-        let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
-        photoContinuation?.resume(returning: ciImage)
+        // EXIF方向情報をピクセルデータに適用する
+        let orientedImage: CIImage
+        if let orientationValue = ciImage.properties[kCGImagePropertyOrientation as String] as? UInt32,
+           let orientation = CGImagePropertyOrientation(rawValue: orientationValue)
+        {
+            orientedImage = ciImage.oriented(orientation)
+        } else {
+            orientedImage = ciImage
+        }
+
+        photoContinuation?.resume(returning: orientedImage)
         photoContinuation = nil
     }
 }

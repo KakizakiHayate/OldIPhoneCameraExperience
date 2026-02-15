@@ -60,10 +60,10 @@ final class FilterService: FilterServiceProtocol {
         let croppedImage = image.cropped(to: cropRect)
 
         // 2. 出力解像度にスケーリング
-        // CILanczosScaleTransform: scale は均一スケーリング、aspectRatio は水平方向の追加スケール
-        // outputWidth = inputWidth * scale * aspectRatio, outputHeight = inputHeight * scale
-        let targetWidth = CGFloat(config.outputWidth)
-        let targetHeight = CGFloat(config.outputHeight)
+        // 入力画像が縦向き（高さ＞幅）の場合、出力解像度の幅と高さを入れ替える
+        let isPortrait = croppedImage.extent.height > croppedImage.extent.width
+        let targetWidth = CGFloat(isPortrait ? config.outputHeight : config.outputWidth)
+        let targetHeight = CGFloat(isPortrait ? config.outputWidth : config.outputHeight)
 
         let scaleX = targetWidth / croppedImage.extent.width
         let scaleY = targetHeight / croppedImage.extent.height
