@@ -102,18 +102,25 @@ final class FilterService: FilterServiceProtocol {
     }
 
     func applyShakeEffect(_ image: CIImage, effect: ShakeEffect) -> CIImage? {
+        let originalExtent = image.extent
         var outputImage = image
 
-        // 1. シフト（平行移動）
+        // 1. シフト（平行移動）+ 回転を適用し、元の範囲でクロップ
+        // 写真の中身がブレて見える効果を出しつつ、写真の矩形自体は維持する
         let shiftTransform = CGAffineTransform(translationX: effect.shiftX, y: effect.shiftY)
-        outputImage = outputImage.transformed(by: shiftTransform)
-
-        // 2. 回転（中心基準）
         let rotationRadians = effect.rotation * .pi / 180.0
-        let rotationTransform = CGAffineTransform(rotationAngle: rotationRadians)
-        outputImage = outputImage.transformed(by: rotationTransform)
+        let centerX = originalExtent.midX
+        let centerY = originalExtent.midY
+        let rotationTransform = CGAffineTransform(translationX: centerX, y: centerY)
+            .rotated(by: rotationRadians)
+            .translatedBy(x: -centerX, y: -centerY)
+        let combined = shiftTransform.concatenating(rotationTransform)
+        outputImage = outputImage.transformed(by: combined)
 
-        // 3. モーションブラー
+        // 元の画像範囲でクロップ（白余白を除去）
+        outputImage = outputImage.cropped(to: originalExtent)
+
+        // 2. モーションブラー
         if let motionBlurFilter = CIFilter(name: "CIMotionBlur") {
             motionBlurFilter.setValue(outputImage, forKey: kCIInputImageKey)
             motionBlurFilter.setValue(effect.motionBlurRadius, forKey: kCIInputRadiusKey)
@@ -122,6 +129,9 @@ final class FilterService: FilterServiceProtocol {
                 outputImage = result
             }
         }
+
+        // モーションブラーでもextentが拡張されるため、再度クロップ
+        outputImage = outputImage.cropped(to: originalExtent)
 
         return outputImage
     }
