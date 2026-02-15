@@ -355,12 +355,17 @@ Issueのテストケースに基づいて、**実装前に**テストコード�
 
 テストが通る最小限のコードを実装する。
 
+> **注意:** テスト実行（`xcodebuild test`）はClaude（AI）では実行不可。ビルド確認のみ行い、テスト実行はユーザーに依頼すること。
+
 ```bash
-# テスト実行で成功を確認
-xcodebuild test -scheme OldIPhoneCameraExperience -destination 'platform=iOS Simulator,name=iPhone 16'
+# ビルド確認（Claudeが実行可能）
+xcodebuild build -scheme OldIPhoneCameraExperience -destination 'platform=iOS Simulator,name=iPhone 16'
+
+# テスト実行（ユーザーが実機/シミュレータで確認）
+# xcodebuild test -scheme OldIPhoneCameraExperience -destination 'platform=iOS Simulator,name=iPhone 16'
 ```
 
-**すべてのテストが通ったら（Green）** → Phase 2.5へ
+**ビルドが通ったら** → Phase 2.5へ（テスト確認はユーザーに依頼）
 
 ---
 
@@ -373,8 +378,11 @@ xcodebuild test -scheme OldIPhoneCameraExperience -destination 'platform=iOS Sim
 - 可読性の向上
 
 ```bash
-# リファクタリング後もテストが通ることを確認
-xcodebuild test -scheme OldIPhoneCameraExperience -destination 'platform=iOS Simulator,name=iPhone 16'
+# ビルド確認（Claudeが実行可能）
+xcodebuild build -scheme OldIPhoneCameraExperience -destination 'platform=iOS Simulator,name=iPhone 16'
+
+# テスト実行（ユーザーが実機/シミュレータで確認）
+# xcodebuild test -scheme OldIPhoneCameraExperience -destination 'platform=iOS Simulator,name=iPhone 16'
 ```
 
 ---
@@ -393,21 +401,26 @@ xcodebuild test -scheme OldIPhoneCameraExperience -destination 'platform=iOS Sim
 # 1. ビルド確認
 xcodebuild build -scheme OldIPhoneCameraExperience -destination 'platform=iOS Simulator,name=iPhone 16'
 
-# 2. 全テスト実行
-xcodebuild test -scheme OldIPhoneCameraExperience -destination 'platform=iOS Simulator,name=iPhone 16'
-
-# 3. SwiftLint
+# 2. SwiftLint
 swiftlint
 
-# 4. SwiftFormat（コードフォーマット）
+# 3. SwiftFormat（コードフォーマット）
 swiftformat .
 ```
 
+> **⚠️ シミュレータ/実機を必要とするコマンドの禁止（重要）**
+>
+> Claude（AI）は iOSシミュレータや実機を操作できない。以下のコマンドは**実行しないこと**：
+> - `xcodebuild test`（シミュレータ上でテストを実行するため失敗する）
+> - `xcrun simctl` 系のコマンド全般
+> - その他シミュレータや実機への接続を前提とするコマンド
+>
+> テスト実行や実機確認はユーザーに依頼すること。Claudeが行うのは**ビルド確認（`xcodebuild build`）・SwiftLint・SwiftFormat**のみ。
+
 - Lintエラーがある場合は、**自動的に修正してOK**（ユーザー確認不要）
 - SwiftFormatによる整形差分がある場合は、**自動的にコミットしてOK**（ユーザー確認不要）
-- テストが失敗した場合は、修正してから次へ進む
 
-**すべて通過したら** コミット・PR作成へ進む。
+**ビルド・Lint・Formatがすべて通過したら** コミット・PR作成へ進む。テスト実行はユーザーに依頼する。
 
 ---
 
