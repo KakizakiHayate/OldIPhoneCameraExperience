@@ -140,11 +140,11 @@ final class FilterServiceTests: XCTestCase {
         // 横長画像なのでoutputWidth=2592, outputHeight=1936がそのまま適用
         // アスペクト比を維持するのでmin(scaleX, scaleY)で決まる
         let expectedScale = min(
-            CGFloat(FilterConfig.iPhone4.outputWidth) / 4032.0,
-            CGFloat(FilterConfig.iPhone4.outputHeight) / 3024.0
+            CGFloat(FilterConfig.iPhone4.outputWidth) / largeImage.extent.width,
+            CGFloat(FilterConfig.iPhone4.outputHeight) / largeImage.extent.height
         )
-        let expectedWidth = 4032.0 * expectedScale
-        let expectedHeight = 3024.0 * expectedScale
+        let expectedWidth = largeImage.extent.width * expectedScale
+        let expectedHeight = largeImage.extent.height * expectedScale
 
         XCTAssertEqual(result.extent.size.width, expectedWidth, accuracy: 1.0)
         XCTAssertEqual(result.extent.size.height, expectedHeight, accuracy: 1.0)
@@ -162,9 +162,9 @@ final class FilterServiceTests: XCTestCase {
         // 縦長なのでターゲットはwidth=1936, height=2592に入れ替わる
         let targetWidth: CGFloat = 1936
         let targetHeight: CGFloat = 2592
-        let expectedScale = min(targetWidth / 3024.0, targetHeight / 4032.0)
-        let expectedWidth = 3024.0 * expectedScale
-        let expectedHeight = 4032.0 * expectedScale
+        let expectedScale = min(targetWidth / portraitImage.extent.width, targetHeight / portraitImage.extent.height)
+        let expectedWidth = portraitImage.extent.width * expectedScale
+        let expectedHeight = portraitImage.extent.height * expectedScale
 
         XCTAssertEqual(result.extent.size.width, expectedWidth, accuracy: 1.0)
         XCTAssertEqual(result.extent.size.height, expectedHeight, accuracy: 1.0)
@@ -179,8 +179,8 @@ final class FilterServiceTests: XCTestCase {
         )
         let result = try XCTUnwrap(sut.applyDownscale(smallImage, config: FilterConfig.iPhone4))
 
-        XCTAssertEqual(result.extent.size.width, 1000, accuracy: 0.1)
-        XCTAssertEqual(result.extent.size.height, 800, accuracy: 0.1)
+        XCTAssertEqual(result.extent.size.width, smallImage.extent.width, accuracy: 0.1)
+        XCTAssertEqual(result.extent.size.height, smallImage.extent.height, accuracy: 0.1)
     }
 
     // MARK: - S-F7: applyShakeEffectにCIImageとShakeEffectを渡すとnilでない結果が返る
