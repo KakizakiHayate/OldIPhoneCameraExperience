@@ -69,18 +69,15 @@ final class FilterService: FilterServiceProtocol {
         let scaleY = targetHeight / croppedImage.extent.height
         let scale = max(scaleX, scaleY)
 
-        // 端ピクセルを引き伸ばし、Lanczosリサンプリング時のエッジの白線を防止する
-        let clampedImage = croppedImage.clampedToExtent()
-
         let scaledImage: CIImage
         if let scaleFilter = CIFilter(name: "CILanczosScaleTransform") {
-            scaleFilter.setValue(clampedImage, forKey: kCIInputImageKey)
+            scaleFilter.setValue(croppedImage, forKey: kCIInputImageKey)
             scaleFilter.setValue(scale, forKey: kCIInputScaleKey)
             scaleFilter.setValue(1.0, forKey: kCIInputAspectRatioKey)
             scaledImage = scaleFilter.outputImage ?? croppedImage
         } else {
             let transform = CGAffineTransform(scaleX: scale, y: scale)
-            scaledImage = clampedImage.transformed(by: transform)
+            scaledImage = croppedImage.transformed(by: transform)
         }
 
         // 中央クロップで目的の解像度に合わせる
