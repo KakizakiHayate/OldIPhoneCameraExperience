@@ -16,7 +16,10 @@ protocol FilterServiceProtocol {
     /// 画角クロップを適用する
     func applyCrop(_ image: CIImage, config: FilterConfig) -> CIImage?
 
-    /// すべてのフィルターを適用する（暖色系 → クロップ）
+    /// iPhone 4相当の解像度（5MP）にスケーリングする
+    func applyDownscale(_ image: CIImage, config: FilterConfig) -> CIImage?
+
+    /// すべてのフィルターを適用する（暖色系 → スケーリング）
     func applyFilters(_ image: CIImage, config: FilterConfig) -> CIImage?
 
     /// 手ブレシミュレーションを適用する
@@ -60,8 +63,39 @@ final class FilterService: FilterServiceProtocol {
         return image.cropped(to: cropRect)
     }
 
+    func applyDownscale(_ image: CIImage, config: FilterConfig) -> CIImage? {
+        let inputExtent = image.extent
+        let targetWidth = CGFloat(config.outputWidth)
+        let targetHeight = CGFloat(config.outputHeight)
+
+        // 入力画像の向きに合わせてターゲットサイズを決定
+        // 縦長画像（ポートレート）の場合はwidth/heightを入れ替える
+        let isPortrait = inputExtent.height > inputExtent.width
+        let finalTargetWidth = isPortrait ? min(targetWidth, targetHeight) : max(targetWidth, targetHeight)
+        let finalTargetHeight = isPortrait ? max(targetWidth, targetHeight) : min(targetWidth, targetHeight)
+
+        // 既にターゲットサイズ以下ならスケーリング不要
+        if inputExtent.width <= finalTargetWidth, inputExtent.height <= finalTargetHeight {
+            return image
+        }
+
+        // アスペクト比を維持しながらターゲットサイズに収まるスケール率を計算
+        let scaleX = finalTargetWidth / inputExtent.width
+        let scaleY = finalTargetHeight / inputExtent.height
+        let scale = min(scaleX, scaleY)
+
+        // CGAffineTransformでスケーリング（Lanczosと違いエッジアーティファクトが発生しない）
+        return image.transformed(by: CGAffineTransform(scaleX: scale, y: scale))
+    }
+
     func applyFilters(_ image: CIImage, config: FilterConfig) -> CIImage? {
-        guard let outputImage = applyWarmthFilter(image, config: config) else {
+        // 1. 暖色系フィルター
+        guard let warmthImage = applyWarmthFilter(image, config: config) else {
+            return nil
+        }
+
+        // 2. iPhone 4相当の解像度にスケーリング
+        guard let outputImage = applyDownscale(warmthImage, config: config) else {
             return nil
         }
 
