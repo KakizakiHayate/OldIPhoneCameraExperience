@@ -221,8 +221,7 @@ extension CameraService: AVCapturePhotoCaptureDelegate {
         // EXIF方向情報をピクセルデータに適用する
         let orientedImage: CIImage
         if let orientationValue = ciImage.properties[kCGImagePropertyOrientation as String] as? UInt32,
-           let orientation = CGImagePropertyOrientation(rawValue: orientationValue)
-        {
+           let orientation = CGImagePropertyOrientation(rawValue: orientationValue) {
             orientedImage = ciImage.oriented(orientation)
         } else {
             orientedImage = ciImage
