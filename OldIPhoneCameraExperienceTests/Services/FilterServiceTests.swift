@@ -166,8 +166,11 @@ final class FilterServiceTests: XCTestCase {
         XCTAssertNotNil(result1)
         XCTAssertNotNil(result2)
         if let r1 = result1, let r2 = result2 {
-            let extentsAreDifferent = r1.extent != r2.extent
-            XCTAssertTrue(extentsAreDifferent, "異なるShakeEffectを適用すると異なる結果が返る必要があります")
+            // 修正後はextentが常に同じ（元の範囲に固定）なので、ピクセルデータで比較する
+            let context = CIContext()
+            let data1 = context.tiffRepresentation(of: r1, format: .RGBA8, colorSpace: CGColorSpaceCreateDeviceRGB())
+            let data2 = context.tiffRepresentation(of: r2, format: .RGBA8, colorSpace: CGColorSpaceCreateDeviceRGB())
+            XCTAssertNotEqual(data1, data2, "異なるShakeEffectを適用すると異なるピクセルデータが返る必要があります")
         }
     }
 }

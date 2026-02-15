@@ -103,7 +103,9 @@ final class FilterService: FilterServiceProtocol {
 
     func applyShakeEffect(_ image: CIImage, effect: ShakeEffect) -> CIImage? {
         let originalExtent = image.extent
-        var outputImage = image
+
+        // 端ピクセルを無限に引き伸ばし、変換後のエッジに白線が出るのを防止する
+        var outputImage = image.clampedToExtent()
 
         // 1. シフト（平行移動）+ 回転を適用し、元の範囲でクロップ
         // 写真の中身がブレて見える効果を出しつつ、写真の矩形自体は維持する
