@@ -48,7 +48,7 @@ final class FilterService: FilterServiceProtocol {
     func applyCrop(_ image: CIImage, config: FilterConfig) -> CIImage? {
         let inputExtent = image.extent
 
-        // 1. クロップ率に基づいて中央部分を切り出す
+        // クロップ率に基づいて中央部分を切り出す（26mm→32mm画角変換）
         let cropRatio = CGFloat(config.cropRatio)
         let croppedWidth = inputExtent.width * cropRatio
         let croppedHeight = inputExtent.height * cropRatio
@@ -57,38 +57,7 @@ final class FilterService: FilterServiceProtocol {
         let cropY = (inputExtent.height - croppedHeight) / 2
         let cropRect = CGRect(x: cropX, y: cropY, width: croppedWidth, height: croppedHeight)
 
-        let croppedImage = image.cropped(to: cropRect)
-
-        // 2. 出力解像度にスケーリング（Aspect Fill + 中央クロップ）
-        // 入力画像が縦向き（高さ＞幅）の場合、出力解像度の幅と高さを入れ替える
-        let isPortrait = croppedImage.extent.height > croppedImage.extent.width
-        let targetWidth = CGFloat(isPortrait ? config.outputHeight : config.outputWidth)
-        let targetHeight = CGFloat(isPortrait ? config.outputWidth : config.outputHeight)
-
-        let scaleX = targetWidth / croppedImage.extent.width
-        let scaleY = targetHeight / croppedImage.extent.height
-        let scale = max(scaleX, scaleY)
-
-        let scaledImage: CIImage
-        if let scaleFilter = CIFilter(name: "CILanczosScaleTransform") {
-            scaleFilter.setValue(croppedImage, forKey: kCIInputImageKey)
-            scaleFilter.setValue(scale, forKey: kCIInputScaleKey)
-            scaleFilter.setValue(1.0, forKey: kCIInputAspectRatioKey)
-            scaledImage = scaleFilter.outputImage ?? croppedImage
-        } else {
-            let transform = CGAffineTransform(scaleX: scale, y: scale)
-            scaledImage = croppedImage.transformed(by: transform)
-        }
-
-        // 中央クロップで目的の解像度に合わせる
-        let finalCropRect = CGRect(
-            x: scaledImage.extent.origin.x + (scaledImage.extent.width - targetWidth) / 2.0,
-            y: scaledImage.extent.origin.y + (scaledImage.extent.height - targetHeight) / 2.0,
-            width: targetWidth,
-            height: targetHeight
-        )
-
-        return scaledImage.cropped(to: finalCropRect)
+        return image.cropped(to: cropRect)
     }
 
     func applyFilters(_ image: CIImage, config: FilterConfig) -> CIImage? {

@@ -84,44 +84,46 @@ final class FilterServiceTests: XCTestCase {
         }
     }
 
-    // MARK: - S-F5: 出力画像のアスペクト比が4:3
+    // MARK: - S-F5: クロップ後のアスペクト比が入力と同じ（クロップはアスペクト比を維持する）
 
-    func test_applyCrop_outputAspectRatio_is4to3() {
-        let result = sut.applyCrop(testImage, config: FilterConfig.iPhone4)
+    func test_applyCrop_preservesAspectRatio() {
+        let wideImage = CIImage(color: .white).cropped(to: CGRect(x: 0, y: 0, width: 4000, height: 3000))
+        let result = sut.applyCrop(wideImage, config: FilterConfig.iPhone4)
 
         XCTAssertNotNil(result)
         if let result = result {
-            let aspectRatio = result.extent.size.width / result.extent.size.height
-            let expected = 4.0 / 3.0
+            let inputAspect = wideImage.extent.size.width / wideImage.extent.size.height
+            let outputAspect = result.extent.size.width / result.extent.size.height
             XCTAssertEqual(
-                aspectRatio,
-                expected,
+                outputAspect,
+                inputAspect,
                 accuracy: 0.01,
-                "出力画像のアスペクト比は4:3である必要があります"
+                "クロップ後のアスペクト比は入力画像と同じである必要があります"
             )
         }
     }
 
-    // MARK: - S-F6: 出力画像の解像度が2592x1936
+    // MARK: - S-F6: クロップ後のサイズがcropRatio分だけ縮小されている
 
-    func test_applyCrop_outputResolution_is2592x1936() {
-        // より大きな入力画像を使用（クロップ後に2592x1936になるように）
+    func test_applyCrop_outputSizeMatchesCropRatio() {
         let largeImage = CIImage(color: .white).cropped(to: CGRect(x: 0, y: 0, width: 4000, height: 3000))
         let result = sut.applyCrop(largeImage, config: FilterConfig.iPhone4)
 
         XCTAssertNotNil(result)
         if let result = result {
+            let expectedWidth = 4000.0 * FilterConfig.iPhone4.cropRatio
+            let expectedHeight = 3000.0 * FilterConfig.iPhone4.cropRatio
             XCTAssertEqual(
                 result.extent.size.width,
-                CGFloat(FilterConfig.iPhone4.outputWidth),
+                CGFloat(expectedWidth),
                 accuracy: 1.0,
-                "出力画像の幅は2592pxである必要があります"
+                "出力画像の幅はcropRatio分だけ縮小される必要があります"
             )
             XCTAssertEqual(
                 result.extent.size.height,
-                CGFloat(FilterConfig.iPhone4.outputHeight),
+                CGFloat(expectedHeight),
                 accuracy: 1.0,
-                "出力画像の高さは1936pxである必要があります"
+                "出力画像の高さはcropRatio分だけ縮小される必要があります"
             )
         }
     }
