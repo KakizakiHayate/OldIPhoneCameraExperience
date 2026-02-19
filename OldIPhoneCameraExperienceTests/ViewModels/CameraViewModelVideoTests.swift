@@ -12,14 +12,14 @@ import XCTest
 final class CameraViewModelVideoTests: XCTestCase {
     var sut: CameraViewModel!
     var mockCameraService: MockCameraService!
-    var mockFilterService: FilterService!
+    var mockFilterService: MockFilterService!
     var mockPhotoLibraryService: MockPhotoLibraryService!
     var mockMotionService: MockMotionService!
 
     override func setUp() {
         super.setUp()
         mockCameraService = MockCameraService()
-        mockFilterService = FilterService()
+        mockFilterService = MockFilterService()
         mockPhotoLibraryService = MockPhotoLibraryService()
         mockMotionService = MockMotionService()
 
