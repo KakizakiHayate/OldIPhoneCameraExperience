@@ -10,6 +10,7 @@
 		02C079D53F1E1CADA2297D6F /* UIConstantsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD80C3C700C020BA4D273BAD /* UIConstantsTests.swift */; };
 		0617283940516273C8D9EAFB /* CameraViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172839405162B7C8D9EAFB0C /* CameraViewModelTests.swift */; };
 		122232425262728292021222 /* ThumbnailViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 021222324252627282920212 /* ThumbnailViewTests.swift */; };
+		13C6D62456883176CBB30A8F /* PhotoEditorServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0E95B6CE43D3888C1B37FE4 /* PhotoEditorServiceTests.swift */; };
 		1AC5E002B7612D199759980C /* AspectRatio.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBCB41F9F289C88F5EA787D6 /* AspectRatio.swift */; };
 		1F6408A5CC6DD44015FF277A /* CaptureModeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8610F87E33AF5EA94E62FDD1 /* CaptureModeTests.swift */; };
 		1FBB9321B75E4B69C35E72A8 /* FilterServiceAspectRatioTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE38F9BA0B717E63CBEDC0B8 /* FilterServiceAspectRatioTests.swift */; };
@@ -37,6 +38,7 @@
 		A1B2C3D4E5F60002A1B2 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60012A1B2 /* ContentView.swift */; };
 		A1B2C3D4E5F60003A1B2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60013A1B2 /* Assets.xcassets */; };
 		A1B2C3D4E5F60004A1B2 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60014A1B2 /* Preview Assets.xcassets */; };
+		AB107D236972BFF1152355F9 /* PhotoEditorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAF6F0D996505307A025CFE3 /* PhotoEditorService.swift */; };
 		AE1723CBE3AC2AD8BA41E69D /* CameraPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E309ED94AA063240745AEC /* CameraPreviewView.swift */; };
 		B1B2B3B4B5B6B7B8B9B0B1B2 /* ToolbarButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A2A3A4A5A6A7A8A9A0A1A2 /* ToolbarButton.swift */; };
 		B1E12DCC51E454A52BCC01AB /* FilterConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C69CB50BD0C3F18C32A9DF7F /* FilterConfigTests.swift */; };
@@ -46,6 +48,7 @@
 		BDB8BC170173E486556B6F2B /* CaptureResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 979D5FF9CC294CF1CD271B1E /* CaptureResult.swift */; };
 		C0B4415FB10A22D6F6BBF0C6 /* CameraModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB316BB04E98413BEA64D1C /* CameraModel.swift */; };
 		C2D3E4F5061728394051A6B7 /* MotionServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E4F506172839405162B7C8 /* MotionServiceTests.swift */; };
+		CFDB9C2DF41182174BD2646C /* EditorConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD6B686A9E2235DE7114DC25 /* EditorConstants.swift */; };
 		D11A42D11B2BC30C4143256A /* UIConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 362DF8AB68FD66687F8ACF7D /* UIConstants.swift */; };
 		D1D2D3D4D5D6D7D8D9D0D1D2 /* ShutterButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1C2C3C4C5C6C7C8C9C0C1C2 /* ShutterButton.swift */; };
 		D2E2F2021222324252627282 /* ToolbarButtonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D2E2F20212223242526272 /* ToolbarButtonTests.swift */; };
@@ -108,6 +111,7 @@
 		87D05C3400DB15E123F4CB9B /* CameraViewModelAspectRatioTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraViewModelAspectRatioTests.swift; sourceTree = "<group>"; };
 		979D5FF9CC294CF1CD271B1E /* CaptureResult.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CaptureResult.swift; sourceTree = "<group>"; };
 		9B0C1D2E3F405162A3B4C5D6 /* PhotoLibraryServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryServiceTests.swift; sourceTree = "<group>"; };
+		A0E95B6CE43D3888C1B37FE4 /* PhotoEditorServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhotoEditorServiceTests.swift; sourceTree = "<group>"; };
 		A1A2A3A4A5A6A7A8A9A0A1A2 /* ToolbarButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarButton.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60010A1B2 /* OldIPhoneCameraExperience.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OldIPhoneCameraExperience.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1B2C3D4E5F60011A1B2 /* OldIPhoneCameraExperienceApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OldIPhoneCameraExperienceApp.swift; sourceTree = "<group>"; };
@@ -122,10 +126,12 @@
 		AE38F9BA0B717E63CBEDC0B8 /* FilterServiceAspectRatioTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FilterServiceAspectRatioTests.swift; sourceTree = "<group>"; };
 		B1C2D3E4F50617283940A5B6 /* MotionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionService.swift; sourceTree = "<group>"; };
 		B520B638664763F6523960E3 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		BAF6F0D996505307A025CFE3 /* PhotoEditorService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhotoEditorService.swift; sourceTree = "<group>"; };
 		C1C2C3C4C5C6C7C8C9C0C1C2 /* ShutterButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShutterButton.swift; sourceTree = "<group>"; };
 		C2D2E2F20212223242526272 /* ToolbarButtonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarButtonTests.swift; sourceTree = "<group>"; };
 		C32E7A4F6E04359D35EEB906 /* CameraConfigTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraConfigTests.swift; sourceTree = "<group>"; };
 		C69CB50BD0C3F18C32A9DF7F /* FilterConfigTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FilterConfigTests.swift; sourceTree = "<group>"; };
+		CD6B686A9E2235DE7114DC25 /* EditorConstants.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EditorConstants.swift; sourceTree = "<group>"; };
 		D3E4F506172839405162B7C8 /* MotionServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionServiceTests.swift; sourceTree = "<group>"; };
 		D666FBEA7FBD263F5D8FBD84 /* CameraConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraConfig.swift; sourceTree = "<group>"; };
 		DBCB41F9F289C88F5EA787D6 /* AspectRatio.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AspectRatio.swift; sourceTree = "<group>"; };
@@ -265,6 +271,7 @@
 				7CAEFB2625C8E291998B3DCB /* FilterServiceVideoTests.swift */,
 				1A92CC9B08A64BB3CDC98D86 /* PhotoLibraryServiceVideoTests.swift */,
 				AE38F9BA0B717E63CBEDC0B8 /* FilterServiceAspectRatioTests.swift */,
+				A0E95B6CE43D3888C1B37FE4 /* PhotoEditorServiceTests.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -335,6 +342,7 @@
 				7757098C63292DEE1597FEDE /* FilterParameters.swift */,
 				D666FBEA7FBD263F5D8FBD84 /* CameraConfig.swift */,
 				362DF8AB68FD66687F8ACF7D /* UIConstants.swift */,
+				CD6B686A9E2235DE7114DC25 /* EditorConstants.swift */,
 			);
 			path = Constants;
 			sourceTree = "<group>";
@@ -370,6 +378,7 @@
 				3B4C5D6E7F809102A3B4C5D6 /* CameraService.swift */,
 				7F8A9B0C1D2E3F405162A3B4 /* PhotoLibraryService.swift */,
 				B1C2D3E4F50617283940A5B6 /* MotionService.swift */,
+				BAF6F0D996505307A025CFE3 /* PhotoEditorService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -513,6 +522,7 @@
 				F37E3C7B426D760BBE107F24 /* CameraViewModelAspectRatioTests.swift in Sources */,
 				6089DB032E4D5D4421480381 /* AspectRatioButtonTests.swift in Sources */,
 				E21F965F1CEE7612FDB3848F /* FlashButtonUITests.swift in Sources */,
+				13C6D62456883176CBB30A8F /* PhotoEditorServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -543,6 +553,8 @@
 				AE1723CBE3AC2AD8BA41E69D /* CameraPreviewView.swift in Sources */,
 				FD1213DA9FD929CF4CE35183 /* ZoomIndicator.swift in Sources */,
 				1AC5E002B7612D199759980C /* AspectRatio.swift in Sources */,
+				CFDB9C2DF41182174BD2646C /* EditorConstants.swift in Sources */,
+				AB107D236972BFF1152355F9 /* PhotoEditorService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
