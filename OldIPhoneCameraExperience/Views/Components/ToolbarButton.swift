@@ -10,11 +10,20 @@ import SwiftUI
 /// ツールバーボタン（iOS 4〜6風のスキューモーフィズムデザイン）
 struct ToolbarButton: View {
     let icon: String
+    let text: String?
     let action: () -> Void
     let isActive: Bool
 
     init(icon: String, isActive: Bool = false, action: @escaping () -> Void) {
         self.icon = icon
+        text = nil
+        self.isActive = isActive
+        self.action = action
+    }
+
+    init(text: String, isActive: Bool = false, action: @escaping () -> Void) {
+        icon = ""
+        self.text = text
         self.isActive = isActive
         self.action = action
     }
@@ -44,10 +53,16 @@ struct ToolbarButton: View {
                     )
                     .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 1)
 
-                // アイコン
-                Image(systemName: icon)
-                    .foregroundColor(.white)
-                    .font(.system(size: 18, weight: .medium))
+                // テキストまたはアイコン
+                if let text = text {
+                    Text(text)
+                        .foregroundColor(.white)
+                        .font(.system(size: 12, weight: .bold))
+                } else {
+                    Image(systemName: icon)
+                        .foregroundColor(.white)
+                        .font(.system(size: 18, weight: .medium))
+                }
             }
         }
     }
