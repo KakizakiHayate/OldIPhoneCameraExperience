@@ -29,11 +29,34 @@ struct FilterConfig: Equatable {
     /// クロップ率（1.0でクロップなし）
     let cropRatio: Double
 
-    /// 出力画像の幅（px）
-    let outputWidth: Int
+    /// アスペクト比（デフォルト: 4:3）
+    let aspectRatio: AspectRatio
 
-    /// 出力画像の高さ（px）
-    let outputHeight: Int
+    /// 出力画像の幅（px）— アスペクト比から自動計算
+    var outputWidth: Int {
+        aspectRatio.outputWidth
+    }
+
+    /// 出力画像の高さ（px）— アスペクト比から自動計算
+    var outputHeight: Int {
+        aspectRatio.outputHeight
+    }
+
+    init(
+        warmth: Double,
+        tint: Double,
+        saturation: Double,
+        highlightTintIntensity: Double,
+        cropRatio: Double,
+        aspectRatio: AspectRatio = .standard
+    ) {
+        self.warmth = warmth
+        self.tint = tint
+        self.saturation = saturation
+        self.highlightTintIntensity = highlightTintIntensity
+        self.cropRatio = cropRatio
+        self.aspectRatio = aspectRatio
+    }
 }
 
 // MARK: - Presets
@@ -45,8 +68,6 @@ extension FilterConfig {
         tint: 10,
         saturation: Double(FilterParameters.saturation),
         highlightTintIntensity: Double(FilterParameters.highlightTintAmount),
-        cropRatio: Double(FilterParameters.cropRatio),
-        outputWidth: FilterParameters.outputWidth,
-        outputHeight: FilterParameters.outputHeight
+        cropRatio: Double(FilterParameters.cropRatio)
     )
 }
