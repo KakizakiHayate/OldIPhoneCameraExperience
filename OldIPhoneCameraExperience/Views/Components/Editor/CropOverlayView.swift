@@ -13,6 +13,10 @@ struct CropOverlayView: View {
     let imageBounds: CGRect
     let cropMode: CropMode
 
+    /// ドラッグ開始時のcropRectを保存（累積translation対策）
+    @State private var dragStartRect: CGRect?
+    @State private var resizeStartRect: CGRect?
+
     private let handleSize: CGFloat = 20
     private let handleLineWidth: CGFloat = 3
     private let overlayOpacity: Double = 0.5
@@ -74,32 +78,38 @@ struct CropOverlayView: View {
     private var moveGesture: some Gesture {
         DragGesture()
             .onChanged { gesture in
-                let delta = CGSize(
-                    width: gesture.translation.width,
-                    height: gesture.translation.height
-                )
+                if dragStartRect == nil {
+                    dragStartRect = cropRect
+                }
+                guard let startRect = dragStartRect else { return }
                 cropRect = CropRectCalculator.moveRect(
-                    currentRect: cropRect,
-                    dragDelta: delta,
+                    currentRect: startRect,
+                    dragDelta: gesture.translation,
                     imageBounds: imageBounds
                 )
+            }
+            .onEnded { _ in
+                dragStartRect = nil
             }
     }
 
     private func resizeGesture(corner: CropCorner) -> some Gesture {
         DragGesture()
             .onChanged { gesture in
-                let delta = CGSize(
-                    width: gesture.translation.width,
-                    height: gesture.translation.height
-                )
+                if resizeStartRect == nil {
+                    resizeStartRect = cropRect
+                }
+                guard let startRect = resizeStartRect else { return }
                 cropRect = CropRectCalculator.resizeFromCorner(
-                    currentRect: cropRect,
+                    currentRect: startRect,
                     corner: corner,
-                    dragDelta: delta,
+                    dragDelta: gesture.translation,
                     cropMode: cropMode,
                     imageBounds: imageBounds
                 )
+            }
+            .onEnded { _ in
+                resizeStartRect = nil
             }
     }
 }

@@ -121,10 +121,15 @@ struct PhotoEditorScreen: View {
                 }
             }
             .onAppear {
+                let bounds = CGRect(
+                    origin: CGPoint(x: offset.width, y: offset.height),
+                    size: displaySize
+                )
+                viewModel.imageDisplayBounds = bounds
                 if viewModel.cropRect == nil {
                     viewModel.cropRect = CGRect(
-                        x: offset.width + displaySize.width * 0.1,
-                        y: offset.height + displaySize.height * 0.1,
+                        x: bounds.origin.x + displaySize.width * 0.1,
+                        y: bounds.origin.y + displaySize.height * 0.1,
                         width: displaySize.width * 0.8,
                         height: displaySize.height * 0.8
                     )

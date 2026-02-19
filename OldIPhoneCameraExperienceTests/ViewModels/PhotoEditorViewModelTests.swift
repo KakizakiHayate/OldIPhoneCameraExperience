@@ -437,6 +437,7 @@ final class PhotoEditorSaveTests: XCTestCase {
 
     func test_save_cropOnly_savesCroppedPhoto() async throws {
         // デフォルト調整値のまま
+        sut.imageDisplayBounds = CGRect(x: 0, y: 0, width: 200, height: 200)
         sut.cropRect = CGRect(x: 10, y: 10, width: 100, height: 80)
 
         try await sut.saveEditedPhoto()
@@ -449,6 +450,7 @@ final class PhotoEditorSaveTests: XCTestCase {
 
     func test_save_adjustmentsAndCrop_savesBoth() async throws {
         sut.brightness = 0.2
+        sut.imageDisplayBounds = CGRect(x: 0, y: 0, width: 200, height: 200)
         sut.cropRect = CGRect(x: 10, y: 10, width: 100, height: 80)
 
         try await sut.saveEditedPhoto()

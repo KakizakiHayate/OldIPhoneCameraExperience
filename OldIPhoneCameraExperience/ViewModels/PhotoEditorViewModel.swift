@@ -39,6 +39,8 @@ final class PhotoEditorViewModel: ObservableObject {
     @Published private(set) var previewImage: UIImage?
     @Published var cropRect: CGRect?
     @Published var cropMode: CropMode = .free
+    /// クロップオーバーレイ内の画像表示領域（ビュー座標）
+    var imageDisplayBounds: CGRect?
     @Published var selectedTab: EditorTab = .adjust
     @Published private(set) var isSaving: Bool = false
 
@@ -96,8 +98,8 @@ final class PhotoEditorViewModel: ObservableObject {
         ) else { return }
 
         let result: CIImage
-        if let cropRect {
-            result = photoEditorService.cropImage(adjusted, rect: cropRect) ?? adjusted
+        if let cropRect, let imageRect = convertToImageRect(cropRect, imageSize: adjusted.extent.size) {
+            result = photoEditorService.cropImage(adjusted, rect: imageRect) ?? adjusted
         } else {
             result = adjusted
         }
@@ -136,8 +138,8 @@ final class PhotoEditorViewModel: ObservableObject {
         }
 
         let result: CIImage
-        if let cropRect {
-            result = photoEditorService.cropImage(adjusted, rect: cropRect) ?? adjusted
+        if let cropRect, let imageRect = convertToImageRect(cropRect, imageSize: adjusted.extent.size) {
+            result = photoEditorService.cropImage(adjusted, rect: imageRect) ?? adjusted
         } else {
             result = adjusted
         }
@@ -151,6 +153,23 @@ final class PhotoEditorViewModel: ObservableObject {
     }
 
     // MARK: - Private Methods
+
+    /// ビュー座標のcropRectをCIImage座標に変換する
+    private func convertToImageRect(_ viewCropRect: CGRect, imageSize: CGSize) -> CGRect? {
+        guard let displayBounds = imageDisplayBounds else { return nil }
+        let transformer = CropCoordinateTransformer(
+            imageSize: imageSize,
+            viewSize: displayBounds.size
+        )
+        // ビュー内の画像オフセットを差し引いてから変換
+        let relativeRect = CGRect(
+            x: viewCropRect.origin.x - displayBounds.origin.x,
+            y: viewCropRect.origin.y - displayBounds.origin.y,
+            width: viewCropRect.width,
+            height: viewCropRect.height
+        )
+        return transformer.toImageRect(relativeRect)
+    }
 
     private func setupPreviewImage() {
         guard let ciImage = CIImage(image: sourceImage) else { return }
