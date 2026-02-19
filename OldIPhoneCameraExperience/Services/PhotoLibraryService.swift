@@ -12,6 +12,8 @@ import UIKit
 protocol PhotoLibraryServiceProtocol {
     /// 画像をフォトライブラリに保存する
     func saveToPhotoLibrary(_ image: UIImage) async throws
+    /// 動画ファイルをフォトライブラリに保存する
+    func saveVideoToPhotoLibrary(_ url: URL) async throws
     /// 現在の権限状態を確認する
     func checkPermission() -> PermissionStatus
     /// 権限をリクエストする
@@ -46,6 +48,36 @@ final class PhotoLibraryService: PhotoLibraryServiceProtocol {
         return try await withCheckedThrowingContinuation { continuation in
             PHPhotoLibrary.shared().performChanges {
                 PHAssetChangeRequest.creationRequestForAsset(from: image)
+            } completionHandler: { success, error in
+                if success {
+                    continuation.resume()
+                } else {
+                    continuation.resume(throwing: error ?? PhotoLibraryError.saveFailed)
+                }
+            }
+        }
+    }
+
+    func saveVideoToPhotoLibrary(_ url: URL) async throws {
+        let status = PHPhotoLibrary.authorizationStatus(for: .addOnly)
+
+        switch status {
+        case .authorized, .limited:
+            break
+        case .notDetermined:
+            let newStatus = await PHPhotoLibrary.requestAuthorization(for: .addOnly)
+            guard newStatus == .authorized || newStatus == .limited else {
+                throw PhotoLibraryError.permissionDenied
+            }
+        case .denied, .restricted:
+            throw PhotoLibraryError.permissionDenied
+        @unknown default:
+            throw PhotoLibraryError.permissionDenied
+        }
+
+        return try await withCheckedThrowingContinuation { continuation in
+            PHPhotoLibrary.shared().performChanges {
+                PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
             } completionHandler: { success, error in
                 if success {
                     continuation.resume()

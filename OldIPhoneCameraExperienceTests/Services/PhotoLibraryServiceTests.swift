@@ -12,6 +12,7 @@ import XCTest
 /// モックPhotoLibraryService（テスト用）
 final class MockPhotoLibraryService: PhotoLibraryServiceProtocol {
     var savedImages: [UIImage] = []
+    var savedVideoURLs: [URL] = []
     var shouldThrowError = false
     var permissionStatusToReturn: PermissionStatus = .authorized
     var latestPhotoToReturn: UIImage?
@@ -21,6 +22,13 @@ final class MockPhotoLibraryService: PhotoLibraryServiceProtocol {
             throw PhotoLibraryError.saveFailed
         }
         savedImages.append(image)
+    }
+
+    func saveVideoToPhotoLibrary(_ url: URL) async throws {
+        if shouldThrowError {
+            throw PhotoLibraryError.saveFailed
+        }
+        savedVideoURLs.append(url)
     }
 
     func checkPermission() -> PermissionStatus {

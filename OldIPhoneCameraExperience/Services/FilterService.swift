@@ -5,6 +5,7 @@
 //  Created by Manus on 2026-02-13.
 //
 
+import AVFoundation
 import CoreGraphics
 import CoreImage
 
@@ -24,11 +25,18 @@ protocol FilterServiceProtocol {
 
     /// 手ブレシミュレーションを適用する
     func applyShakeEffect(_ image: CIImage, effect: ShakeEffect) -> CIImage?
+
+    /// 動画ファイルに暖色フィルターを適用する
+    func applyFilterToVideo(inputURL: URL, config: FilterConfig) async throws -> URL
+
+    /// 動画フィルター処理中かどうか
+    var isProcessingVideo: Bool { get }
 }
 
 /// フィルター処理の実装
 final class FilterService: FilterServiceProtocol {
     private let context = CIContext()
+    private(set) var isProcessingVideo: Bool = false
 
     // MARK: - FilterServiceProtocol
 
@@ -102,6 +110,186 @@ final class FilterService: FilterServiceProtocol {
         return outputImage
     }
 
+    // MARK: - Video Filter
+
+    func applyFilterToVideo(inputURL: URL, config: FilterConfig) async throws -> URL {
+        guard FileManager.default.fileExists(atPath: inputURL.path) else {
+            throw FilterServiceError.fileNotFound
+        }
+
+        isProcessingVideo = true
+        defer { isProcessingVideo = false }
+
+        let asset = AVAsset(url: inputURL)
+        let outputURL = makeTemporaryOutputURL()
+
+        let (reader, readerVideoOutput, readerAudioOutput) = try await configureReader(for: asset)
+        let writerConfig = try await configureWriter(
+            for: asset, outputURL: outputURL, hasAudio: readerAudioOutput != nil
+        )
+
+        reader.startReading()
+        writerConfig.writer.startWriting()
+        writerConfig.writer.startSession(atSourceTime: .zero)
+
+        try await processVideoFrames(
+            readerOutput: readerVideoOutput,
+            writerAdaptor: writerConfig.pixelBufferAdaptor,
+            config: config,
+            frameSize: writerConfig.trackSize
+        )
+
+        if let audioOutput = readerAudioOutput, let audioInput = writerConfig.audioInput {
+            await copyAudioTrack(readerOutput: audioOutput, writerInput: audioInput)
+        }
+
+        await writerConfig.writer.finishWriting()
+
+        guard writerConfig.writer.status == .completed else {
+            throw FilterServiceError.videoProcessingFailed
+        }
+
+        return outputURL
+    }
+
+    private func makeTemporaryOutputURL() -> URL {
+        let tempDir = NSTemporaryDirectory()
+        let outputFileName = UUID().uuidString + "_filtered.mov"
+        return URL(fileURLWithPath: tempDir).appendingPathComponent(outputFileName)
+    }
+
+    private func configureReader(
+        for asset: AVAsset
+    ) async throws -> (AVAssetReader, AVAssetReaderTrackOutput, AVAssetReaderTrackOutput?) {
+        let reader = try AVAssetReader(asset: asset)
+
+        let videoTracks = try await asset.loadTracks(withMediaType: .video)
+        guard let videoTrack = videoTracks.first else {
+            throw FilterServiceError.noVideoTrack
+        }
+
+        let readerVideoSettings: [String: Any] = [
+            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
+        ]
+        let readerVideoOutput = AVAssetReaderTrackOutput(track: videoTrack, outputSettings: readerVideoSettings)
+        reader.add(readerVideoOutput)
+
+        var readerAudioOutput: AVAssetReaderTrackOutput?
+        let audioTracks = try await asset.loadTracks(withMediaType: .audio)
+        if let audioTrack = audioTracks.first {
+            let audioOutput = AVAssetReaderTrackOutput(track: audioTrack, outputSettings: nil)
+            reader.add(audioOutput)
+            readerAudioOutput = audioOutput
+        }
+
+        return (reader, readerVideoOutput, readerAudioOutput)
+    }
+
+    private func configureWriter(
+        for asset: AVAsset,
+        outputURL: URL,
+        hasAudio: Bool
+    ) async throws -> VideoWriterConfig {
+        let writer = try AVAssetWriter(outputURL: outputURL, fileType: .mov)
+
+        let videoTracks = try await asset.loadTracks(withMediaType: .video)
+        let trackSize = try await videoTracks.first!.load(.naturalSize)
+
+        let videoSettings: [String: Any] = [
+            AVVideoCodecKey: AVVideoCodecType.h264,
+            AVVideoWidthKey: trackSize.width,
+            AVVideoHeightKey: trackSize.height
+        ]
+        let writerVideoInput = AVAssetWriterInput(mediaType: .video, outputSettings: videoSettings)
+        let pixelBufferAdaptor = AVAssetWriterInputPixelBufferAdaptor(
+            assetWriterInput: writerVideoInput,
+            sourcePixelBufferAttributes: [
+                kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
+                kCVPixelBufferWidthKey as String: Int(trackSize.width),
+                kCVPixelBufferHeightKey as String: Int(trackSize.height)
+            ]
+        )
+        writer.add(writerVideoInput)
+
+        var writerAudioInput: AVAssetWriterInput?
+        if hasAudio {
+            let audioInput = AVAssetWriterInput(mediaType: .audio, outputSettings: nil)
+            writer.add(audioInput)
+            writerAudioInput = audioInput
+        }
+
+        return VideoWriterConfig(
+            writer: writer,
+            pixelBufferAdaptor: pixelBufferAdaptor,
+            audioInput: writerAudioInput,
+            trackSize: trackSize
+        )
+    }
+
+    private func processVideoFrames(
+        readerOutput: AVAssetReaderTrackOutput,
+        writerAdaptor: AVAssetWriterInputPixelBufferAdaptor,
+        config: FilterConfig,
+        frameSize: CGSize
+    ) async throws {
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            DispatchQueue.global(qos: .userInitiated).async { [self] in
+                while let sampleBuffer = readerOutput.copyNextSampleBuffer() {
+                    let presentationTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+
+                    guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
+                        continue
+                    }
+
+                    // CIImageに変換してフィルター適用
+                    let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+                    let filteredImage = applyWarmthFilter(ciImage, config: config) ?? ciImage
+
+                    // フィルター適用済みのピクセルバッファを作成
+                    var outputBuffer: CVPixelBuffer?
+                    CVPixelBufferCreate(
+                        nil,
+                        Int(frameSize.width),
+                        Int(frameSize.height),
+                        kCVPixelFormatType_32BGRA,
+                        nil,
+                        &outputBuffer
+                    )
+
+                    if let buffer = outputBuffer {
+                        context.render(filteredImage, to: buffer)
+
+                        while !writerAdaptor.assetWriterInput.isReadyForMoreMediaData {
+                            Thread.sleep(forTimeInterval: 0.01)
+                        }
+                        writerAdaptor.append(buffer, withPresentationTime: presentationTime)
+                    }
+                }
+
+                writerAdaptor.assetWriterInput.markAsFinished()
+                continuation.resume()
+            }
+        }
+    }
+
+    private func copyAudioTrack(
+        readerOutput: AVAssetReaderTrackOutput,
+        writerInput: AVAssetWriterInput
+    ) async {
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            DispatchQueue.global(qos: .userInitiated).async {
+                while let sampleBuffer = readerOutput.copyNextSampleBuffer() {
+                    while !writerInput.isReadyForMoreMediaData {
+                        Thread.sleep(forTimeInterval: 0.01)
+                    }
+                    writerInput.append(sampleBuffer)
+                }
+                writerInput.markAsFinished()
+                continuation.resume()
+            }
+        }
+    }
+
     func applyShakeEffect(_ image: CIImage, effect: ShakeEffect) -> CIImage? {
         let originalExtent = image.extent
 
@@ -132,4 +320,21 @@ final class FilterService: FilterServiceProtocol {
 
         return outputImage
     }
+}
+
+// MARK: - VideoWriterConfig
+
+struct VideoWriterConfig {
+    let writer: AVAssetWriter
+    let pixelBufferAdaptor: AVAssetWriterInputPixelBufferAdaptor
+    let audioInput: AVAssetWriterInput?
+    let trackSize: CGSize
+}
+
+// MARK: - FilterServiceError
+
+enum FilterServiceError: Error {
+    case fileNotFound
+    case noVideoTrack
+    case videoProcessingFailed
 }
