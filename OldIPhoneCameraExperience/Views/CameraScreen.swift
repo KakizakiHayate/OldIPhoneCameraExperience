@@ -215,13 +215,16 @@ struct CameraScreen: View {
 
             Spacer()
 
-            ToolbarButton(
-                icon: "bolt.fill",
-                isActive: viewModel.state.isFlashOn
-            ) {
-                viewModel.toggleFlash()
+            if !viewModel.shouldHideFlashButton {
+                ToolbarButton(
+                    icon: viewModel.flashIconName,
+                    isActive: viewModel.state.isFlashOn
+                ) {
+                    viewModel.toggleFlash()
+                }
+                .padding(.trailing, 16)
+                .transition(.opacity)
             }
-            .padding(.trailing, 16)
         }
         .padding(.horizontal, 16)
         .background(
