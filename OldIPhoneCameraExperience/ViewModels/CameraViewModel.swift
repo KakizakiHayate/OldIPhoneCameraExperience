@@ -105,6 +105,21 @@ final class CameraViewModel: ObservableObject {
         zoomFactor = actualFactor
     }
 
+    // MARK: - Flash/Torch UI
+
+    /// 現在のモードに応じたフラッシュ/トーチアイコン名
+    var flashIconName: String {
+        if captureMode == .video {
+            return state.isFlashOn ? "flashlight.on.fill" : "flashlight.off.fill"
+        }
+        return state.isFlashOn ? "bolt.fill" : "bolt.slash.fill"
+    }
+
+    /// 前面カメラ時はフラッシュボタンを非表示にする
+    var shouldHideFlashButton: Bool {
+        state.cameraPosition == .front
+    }
+
     // MARK: - Aspect Ratio
 
     /// アスペクト比を変更する（動画モード時は無効）

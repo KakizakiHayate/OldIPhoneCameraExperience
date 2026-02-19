@@ -31,20 +31,26 @@ struct ToolbarButton: View {
     var body: some View {
         Button(action: action) {
             ZStack {
-                // 背景（金属質感のグラデーション）
+                // 背景（ON: 黄色、OFF: 金属質感グラデーション）
                 RoundedRectangle(cornerRadius: 6)
                     .fill(
-                        LinearGradient(
-                            colors: isActive ? [
-                                Color(white: 0.4),
-                                Color(white: 0.3)
-                            ] : [
-                                Color(white: 0.5),
-                                Color(white: 0.4)
-                            ],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
+                        isActive
+                            ? LinearGradient(
+                                colors: [
+                                    Color(red: 1.0, green: 0.84, blue: 0.04),
+                                    Color(red: 0.9, green: 0.75, blue: 0.03)
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                            : LinearGradient(
+                                colors: [
+                                    Color(white: 0.5),
+                                    Color(white: 0.4)
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
                     )
                     .frame(width: 44, height: 32)
                     .overlay(
@@ -65,6 +71,7 @@ struct ToolbarButton: View {
                 }
             }
         }
+        .animation(.easeInOut(duration: 0.2), value: isActive)
     }
 }
 
