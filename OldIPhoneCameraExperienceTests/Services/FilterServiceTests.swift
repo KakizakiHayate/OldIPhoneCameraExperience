@@ -15,7 +15,6 @@ final class MockFilterService: FilterServiceProtocol {
     var applyWarmthFilterCalled = false
     var applyCropCalled = false
     var applyDownscaleCalled = false
-    var applyCropForAspectRatioCalled = false
     var applyFiltersCalled = false
     var applyShakeEffectCalled = false
     var applyFilterToVideoCalled = false
@@ -33,11 +32,6 @@ final class MockFilterService: FilterServiceProtocol {
 
     func applyDownscale(_ image: CIImage, config: FilterConfig) -> CIImage? {
         applyDownscaleCalled = true
-        return image
-    }
-
-    func applyCropForAspectRatio(_ image: CIImage, aspectRatio: AspectRatio) -> CIImage? {
-        applyCropForAspectRatioCalled = true
         return image
     }
 
