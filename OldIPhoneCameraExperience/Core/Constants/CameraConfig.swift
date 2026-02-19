@@ -32,4 +32,12 @@ enum CameraConfig {
 
     /// ズームアニメーション速度
     static let zoomAnimationRate: Float = 5.0
+
+    // MARK: - 動画設定
+
+    /// 動画撮影用のセッションプリセット（720p = iPhone 4相当）
+    static let videoPreset: AVCaptureSession.Preset = .hd1280x720
+
+    /// 動画のアスペクト比（16:9固定）
+    static let videoAspectRatio: CGFloat = 16.0 / 9.0
 }

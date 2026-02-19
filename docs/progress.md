@@ -34,7 +34,7 @@ Claudeは**実装を開始する前に必ずこのファイルを読み**、現�
 | **Phase 6** | #12 | 実機テスト・チューニング・App Store準備 | ✅ 完了 | #37 | 0/0 |
 | **Phase 7** | #40 | ズーム基盤 — CameraService + CameraViewModel | 🔵 進行中 | | 10/10 |
 | **Phase 7** | #41 | ズームUI — ピンチジェスチャー + インジケーター | 🔵 進行中 | | 12/12 |
-| **Phase 8** | #42 | 動画撮影基盤 — CameraService拡張 | 🔲 未着手 | | 0/17 |
+| **Phase 8** | #42 | 動画撮影基盤 — CameraService拡張 | 🔵 進行中 | | 17/17 |
 | **Phase 8** | #43 | 動画フィルター後処理 — FilterService拡張 | 🔲 未着手 | | 0/11 |
 | **Phase 8** | #44 | 動画撮影ViewModel + UI | 🔲 未着手 | | 0/22 |
 | **Phase 9** | #45 | アスペクト比モデル + Service対応 | 🔲 未着手 | | 0/17 |

@@ -20,6 +20,7 @@
 		5D5A93AD1FFDD5C8A5F9B1F2 /* CameraState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE3779F108A19C45C792808B /* CameraState.swift */; };
 		5E6F7A8B9C0D1E2F30415263 /* PhotoLibraryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8A9B0C1D2E3F405162A3B4 /* PhotoLibraryService.swift */; };
 		6C7D8E9F0A1B2C3D4E5F6A7B /* CameraScreenTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D8E9F0A1B2C3D4E5F6A7B8C /* CameraScreenTests.swift */; };
+		6C98A88A968A51C6AA63D652 /* CameraServiceVideoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD78D6131B72BF4F8D8AF24 /* CameraServiceVideoTests.swift */; };
 		711C6F2EB8D7C901705B1741 /* CameraScreenZoomTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FDFE62ED7C6691EE5FD05A1 /* CameraScreenZoomTests.swift */; };
 		854BB1BCA7BE5B4FB6425440 /* ShakeEffectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABE39405F49468ED6F34AC8F /* ShakeEffectTests.swift */; };
 		8A9B0C1D2E3F40516273A4B5 /* PhotoLibraryServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B0C1D2E3F405162A3B4C5D6 /* PhotoLibraryServiceTests.swift */; };
@@ -74,6 +75,7 @@
 		1A2B3C4D5E6F70819203A4B5 /* FilterService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterService.swift; sourceTree = "<group>"; };
 		223242526272829202122232 /* IrisAnimationViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IrisAnimationViewTests.swift; sourceTree = "<group>"; };
 		24AC33CF3464B72C40730464 /* ZoomIndicator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ZoomIndicator.swift; sourceTree = "<group>"; };
+		2AD78D6131B72BF4F8D8AF24 /* CameraServiceVideoTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraServiceVideoTests.swift; sourceTree = "<group>"; };
 		2DBC4E2F447AD3F5FB15B579 /* FilterConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FilterConfig.swift; sourceTree = "<group>"; };
 		2FDFE62ED7C6691EE5FD05A1 /* CameraScreenZoomTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraScreenZoomTests.swift; sourceTree = "<group>"; };
 		362DF8AB68FD66687F8ACF7D /* UIConstants.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UIConstants.swift; sourceTree = "<group>"; };
@@ -235,6 +237,7 @@
 				6D7E8F9001213243A5B6C7D8 /* CameraServiceTests.swift */,
 				9B0C1D2E3F405162A3B4C5D6 /* PhotoLibraryServiceTests.swift */,
 				D3E4F506172839405162B7C8 /* MotionServiceTests.swift */,
+				2AD78D6131B72BF4F8D8AF24 /* CameraServiceVideoTests.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -470,6 +473,7 @@
 				6C7D8E9F0A1B2C3D4E5F6A7B /* CameraScreenTests.swift in Sources */,
 				ED2B46479BF40ADF4B00CBE8 /* ZoomIndicatorTests.swift in Sources */,
 				711C6F2EB8D7C901705B1741 /* CameraScreenZoomTests.swift in Sources */,
+				6C98A88A968A51C6AA63D652 /* CameraServiceVideoTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

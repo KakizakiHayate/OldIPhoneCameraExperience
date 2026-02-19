@@ -20,6 +20,9 @@ protocol CameraServiceProtocol {
     /// 現在のズーム倍率
     var currentZoomFactor: CGFloat { get }
 
+    /// 録画中かどうか
+    var isRecording: Bool { get }
+
     /// カメラセッションを開始する
     func startSession() async throws
 
@@ -37,6 +40,21 @@ protocol CameraServiceProtocol {
 
     /// ズーム倍率を設定する（1.0〜5.0）
     func setZoom(factor: CGFloat)
+
+    /// 動画録画を開始する
+    func startRecording()
+
+    /// 動画録画を停止し、一時ファイルURLを返す
+    func stopRecording() async throws -> URL
+
+    /// トーチ（動画用フラッシュ）のオン/オフを設定する
+    func setTorch(enabled: Bool)
+
+    /// 動画モードに切り替える
+    func switchToVideoMode()
+
+    /// 写真モードに切り替える
+    func switchToPhotoMode()
 }
 
 /// カメラ操作の実装
@@ -47,12 +65,17 @@ final class CameraService: NSObject, CameraServiceProtocol {
     private var currentDevice: AVCaptureDevice?
     private var photoOutput: AVCapturePhotoOutput?
     private var videoDataOutput: AVCaptureVideoDataOutput?
+    private var movieFileOutput: AVCaptureMovieFileOutput?
+    private var audioInput: AVCaptureDeviceInput?
     private var currentPosition: AVCaptureDevice.Position = CameraConfig.defaultPosition
     private var photoContinuation: CheckedContinuation<CIImage, Error>?
+    private var recordingContinuation: CheckedContinuation<URL, Error>?
     private var flashMode: AVCaptureDevice.FlashMode = .off
+    private var torchRequested: Bool = false
     private let sessionQueue = DispatchQueue(label: "com.oldiPhonecamera.sessionQueue")
     private let videoDataOutputQueue = DispatchQueue(label: "com.oldiPhonecamera.videoDataOutput")
     private(set) var currentZoomFactor: CGFloat = CameraConfig.minZoomFactor
+    private(set) var isRecording: Bool = false
 
     var isSessionRunning: Bool {
         captureSession.isRunning
@@ -180,6 +203,112 @@ final class CameraService: NSObject, CameraServiceProtocol {
         }
     }
 
+    // MARK: - Video Recording
+
+    func startRecording() {
+        sessionQueue.async { [self] in
+            guard let movieOutput = movieFileOutput, !isRecording else { return }
+
+            let tempDir = NSTemporaryDirectory()
+            let fileName = UUID().uuidString + ".mov"
+            let outputURL = URL(fileURLWithPath: tempDir).appendingPathComponent(fileName)
+
+            movieOutput.startRecording(to: outputURL, recordingDelegate: self)
+            isRecording = true
+        }
+    }
+
+    func stopRecording() async throws -> URL {
+        guard isRecording else {
+            throw CameraError.notRecording
+        }
+
+        return try await withCheckedThrowingContinuation { continuation in
+            recordingContinuation = continuation
+            sessionQueue.async { [self] in
+                movieFileOutput?.stopRecording()
+            }
+        }
+    }
+
+    func setTorch(enabled: Bool) {
+        torchRequested = enabled
+        sessionQueue.async { [self] in
+            guard let device = currentDevice, device.hasTorch else { return }
+            do {
+                try device.lockForConfiguration()
+                device.torchMode = enabled ? .on : .off
+                device.unlockForConfiguration()
+            } catch {
+                // ロック取得失敗時は何もしない
+            }
+        }
+    }
+
+    func switchToVideoMode() {
+        sessionQueue.async { [self] in
+            guard !isRecording else { return }
+
+            captureSession.beginConfiguration()
+            captureSession.sessionPreset = CameraConfig.videoPreset
+
+            // MovieFileOutputを追加
+            if movieFileOutput == nil {
+                let movieOut = AVCaptureMovieFileOutput()
+                if captureSession.canAddOutput(movieOut) {
+                    captureSession.addOutput(movieOut)
+                    movieFileOutput = movieOut
+                }
+            }
+
+            // マイク入力を追加
+            addAudioInputIfPermitted()
+
+            captureSession.commitConfiguration()
+        }
+    }
+
+    func switchToPhotoMode() {
+        sessionQueue.async { [self] in
+            guard !isRecording else { return }
+
+            captureSession.beginConfiguration()
+            captureSession.sessionPreset = CameraConfig.sessionPreset
+
+            // MovieFileOutputを削除
+            if let movieOut = movieFileOutput {
+                captureSession.removeOutput(movieOut)
+                movieFileOutput = nil
+            }
+
+            // マイク入力を削除
+            if let audioIn = audioInput {
+                captureSession.removeInput(audioIn)
+                audioInput = nil
+            }
+
+            captureSession.commitConfiguration()
+        }
+    }
+
+    private func addAudioInputIfPermitted() {
+        guard audioInput == nil else { return }
+
+        let audioStatus = AVCaptureDevice.authorizationStatus(for: .audio)
+        guard audioStatus == .authorized else { return }
+
+        guard let audioDevice = AVCaptureDevice.default(for: .audio) else { return }
+        do {
+            let audioIn = try AVCaptureDeviceInput(device: audioDevice)
+            if captureSession.canAddInput(audioIn) {
+                captureSession.addInput(audioIn)
+                audioInput = audioIn
+            }
+        } catch {
+            // マイク入力追加失敗時は音声なしで続行
+        }
+    }
+
     func switchCamera() async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             sessionQueue.async { [self] in
@@ -215,10 +344,35 @@ final class CameraService: NSObject, CameraServiceProtocol {
                 }
 
                 self.currentZoomFactor = CameraConfig.minZoomFactor
+                self.torchRequested = false
                 captureSession.commitConfiguration()
                 continuation.resume()
             }
         }
+    }
+}
+
+// MARK: - AVCaptureFileOutputRecordingDelegate
+
+extension CameraService: AVCaptureFileOutputRecordingDelegate {
+    func fileOutput(
+        _: AVCaptureFileOutput,
+        didFinishRecordingTo outputFileURL: URL,
+        from _: [AVCaptureConnection],
+        error: Error?
+    ) {
+        isRecording = false
+
+        // 録画終了時にトーチをオフ
+        setTorch(enabled: false)
+        torchRequested = false
+
+        if let error = error {
+            recordingContinuation?.resume(throwing: error)
+        } else {
+            recordingContinuation?.resume(returning: outputFileURL)
+        }
+        recordingContinuation = nil
     }
 }
 
@@ -285,4 +439,5 @@ enum CameraError: Error {
     case outputNotFound
     case imageProcessingFailed
     case captureInProgress
+    case notRecording
 }
