@@ -21,4 +21,15 @@ enum CameraConfig {
 
     /// ターゲットFPS
     static let targetFPS: Int = 30
+
+    // MARK: - ズーム設定
+
+    /// 最小ズーム倍率
+    static let minZoomFactor: CGFloat = 1.0
+
+    /// 最大ズーム倍率（iPhone 4相当）
+    static let maxZoomFactor: CGFloat = 5.0
+
+    /// ズームアニメーション速度
+    static let zoomAnimationRate: Float = 5.0
 }

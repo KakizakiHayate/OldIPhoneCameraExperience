@@ -17,6 +17,9 @@ protocol CameraServiceProtocol {
     /// カメラセッションの状態
     var isSessionRunning: Bool { get }
 
+    /// 現在のズーム倍率
+    var currentZoomFactor: CGFloat { get }
+
     /// カメラセッションを開始する
     func startSession() async throws
 
@@ -31,6 +34,9 @@ protocol CameraServiceProtocol {
 
     /// 前面/背面カメラを切り替える
     func switchCamera() async throws
+
+    /// ズーム倍率を設定する（1.0〜5.0）
+    func setZoom(factor: CGFloat)
 }
 
 /// カメラ操作の実装
@@ -46,6 +52,7 @@ final class CameraService: NSObject, CameraServiceProtocol {
     private var flashMode: AVCaptureDevice.FlashMode = .off
     private let sessionQueue = DispatchQueue(label: "com.oldiPhonecamera.sessionQueue")
     private let videoDataOutputQueue = DispatchQueue(label: "com.oldiPhonecamera.videoDataOutput")
+    private(set) var currentZoomFactor: CGFloat = CameraConfig.minZoomFactor
 
     var isSessionRunning: Bool {
         captureSession.isRunning
@@ -155,6 +162,24 @@ final class CameraService: NSObject, CameraServiceProtocol {
         flashMode = enabled ? .on : .off
     }
 
+    func setZoom(factor: CGFloat) {
+        sessionQueue.async { [self] in
+            guard let device = currentDevice else { return }
+
+            let maxDeviceZoom = min(CameraConfig.maxZoomFactor, device.maxAvailableVideoZoomFactor)
+            let clampedFactor = min(max(factor, CameraConfig.minZoomFactor), maxDeviceZoom)
+
+            do {
+                try device.lockForConfiguration()
+                device.ramp(toVideoZoomFactor: clampedFactor, withRate: CameraConfig.zoomAnimationRate)
+                device.unlockForConfiguration()
+                currentZoomFactor = clampedFactor
+            } catch {
+                // ロック取得失敗時は何もしない
+            }
+        }
+    }
+
     func switchCamera() async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             sessionQueue.async { [self] in
@@ -189,6 +214,7 @@ final class CameraService: NSObject, CameraServiceProtocol {
                     return
                 }
 
+                self.currentZoomFactor = CameraConfig.minZoomFactor
                 captureSession.commitConfiguration()
                 continuation.resume()
             }
@@ -221,7 +247,8 @@ extension CameraService: AVCapturePhotoCaptureDelegate {
         // EXIF方向情報をピクセルデータに適用する
         let orientedImage: CIImage
         if let orientationValue = ciImage.properties[kCGImagePropertyOrientation as String] as? UInt32,
-           let orientation = CGImagePropertyOrientation(rawValue: orientationValue) {
+           let orientation = CGImagePropertyOrientation(rawValue: orientationValue)
+        {
             orientedImage = ciImage.oriented(orientation)
         } else {
             orientedImage = ciImage
