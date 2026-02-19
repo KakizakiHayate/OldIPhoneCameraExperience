@@ -17,9 +17,16 @@ final class MockCameraService: CameraServiceProtocol {
     var flashEnabled: Bool = false
     var currentPosition: AVCaptureDevice.Position = .back
     var currentZoomFactor: CGFloat = CameraConfig.minZoomFactor
+    var isRecording: Bool = false
 
     /// テスト用: デバイスの最大ズーム倍率（前面カメラ等で制限する場合に使用）
     var deviceMaxZoomFactor: CGFloat = CameraConfig.maxZoomFactor
+
+    // 動画関連プロパティ
+    var torchEnabled: Bool = false
+    var micPermissionGranted: Bool = true
+    var isAudioEnabled: Bool = false
+    var currentPreset: AVCaptureSession.Preset = CameraConfig.sessionPreset
 
     // 呼び出し追跡
     var setFlashCalled = false
@@ -29,6 +36,9 @@ final class MockCameraService: CameraServiceProtocol {
     var shouldThrowOnStart = false
     var setZoomCalled = false
     var setZoomCalledWithValue: CGFloat = 0
+    var startRecordingCalled = false
+    var stopRecordingCalled = false
+    var setTorchCalled = false
 
     func startSession() async throws {
         startSessionCalled = true
@@ -66,6 +76,48 @@ final class MockCameraService: CameraServiceProtocol {
         switchCameraCalled = true
         currentPosition = (currentPosition == .back) ? .front : .back
         currentZoomFactor = CameraConfig.minZoomFactor
+        torchEnabled = false
+    }
+
+    func startRecording() {
+        startRecordingCalled = true
+        isRecording = true
+        isAudioEnabled = micPermissionGranted
+        if currentPreset != CameraConfig.videoPreset {
+            currentPreset = CameraConfig.videoPreset
+        }
+    }
+
+    func stopRecording() async throws -> URL {
+        stopRecordingCalled = true
+        guard isRecording else {
+            throw CameraError.notRecording
+        }
+        isRecording = false
+        torchEnabled = false
+        let tempDir = NSTemporaryDirectory()
+        let fileName = UUID().uuidString + ".mov"
+        return URL(fileURLWithPath: tempDir).appendingPathComponent(fileName)
+    }
+
+    func setTorch(enabled: Bool) {
+        setTorchCalled = true
+        // 前面カメラにはトーチがない
+        if currentPosition == .front {
+            torchEnabled = false
+        } else {
+            torchEnabled = enabled
+        }
+    }
+
+    func switchToVideoMode() {
+        guard !isRecording else { return }
+        currentPreset = CameraConfig.videoPreset
+    }
+
+    func switchToPhotoMode() {
+        guard !isRecording else { return }
+        currentPreset = CameraConfig.sessionPreset
     }
 }
 
