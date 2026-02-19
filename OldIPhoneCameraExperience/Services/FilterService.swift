@@ -20,7 +20,10 @@ protocol FilterServiceProtocol {
     /// iPhone 4相当の解像度（5MP）にスケーリングする
     func applyDownscale(_ image: CIImage, config: FilterConfig) -> CIImage?
 
-    /// すべてのフィルターを適用する（暖色系 → スケーリング）
+    /// アスペクト比に合わせて中央クロップする
+    func applyCropForAspectRatio(_ image: CIImage, aspectRatio: AspectRatio) -> CIImage?
+
+    /// すべてのフィルターを適用する（暖色系 → アスペクト比クロップ → スケーリング）
     func applyFilters(_ image: CIImage, config: FilterConfig) -> CIImage?
 
     /// 手ブレシミュレーションを適用する
@@ -96,14 +99,48 @@ final class FilterService: FilterServiceProtocol {
         return image.transformed(by: CGAffineTransform(scaleX: scale, y: scale))
     }
 
+    func applyCropForAspectRatio(_ image: CIImage, aspectRatio: AspectRatio) -> CIImage? {
+        let extent = image.extent
+        let targetRatio = aspectRatio.portraitRatio
+        let currentRatio = extent.width / extent.height
+
+        // 既に同じアスペクト比の場合はそのまま返す
+        if abs(currentRatio - targetRatio) < 0.001 {
+            return image
+        }
+
+        let cropWidth: CGFloat
+        let cropHeight: CGFloat
+
+        if currentRatio > targetRatio {
+            // 入力が目標より横長 → 幅を狭める
+            cropHeight = extent.height
+            cropWidth = extent.height * targetRatio
+        } else {
+            // 入力が目標より縦長 → 高さを狭める
+            cropWidth = extent.width
+            cropHeight = extent.width / targetRatio
+        }
+
+        let cropX = extent.origin.x + (extent.width - cropWidth) / 2
+        let cropY = extent.origin.y + (extent.height - cropHeight) / 2
+
+        return image.cropped(to: CGRect(x: cropX, y: cropY, width: cropWidth, height: cropHeight))
+    }
+
     func applyFilters(_ image: CIImage, config: FilterConfig) -> CIImage? {
         // 1. 暖色系フィルター
         guard let warmthImage = applyWarmthFilter(image, config: config) else {
             return nil
         }
 
-        // 2. iPhone 4相当の解像度にスケーリング
-        guard let outputImage = applyDownscale(warmthImage, config: config) else {
+        // 2. アスペクト比クロップ
+        guard let croppedImage = applyCropForAspectRatio(warmthImage, aspectRatio: config.aspectRatio) else {
+            return nil
+        }
+
+        // 3. iPhone 4相当の解像度にスケーリング
+        guard let outputImage = applyDownscale(croppedImage, config: config) else {
             return nil
         }
 

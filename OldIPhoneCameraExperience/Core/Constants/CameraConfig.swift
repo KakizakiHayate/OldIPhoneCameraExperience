@@ -33,6 +33,11 @@ enum CameraConfig {
     /// ズームアニメーション速度
     static let zoomAnimationRate: Float = 5.0
 
+    // MARK: - アスペクト比
+
+    /// デフォルトのアスペクト比（写真モード）
+    static let defaultAspectRatio: AspectRatio = .standard
+
     // MARK: - 動画設定
 
     /// 動画撮影用のセッションプリセット（720p = iPhone 4相当）

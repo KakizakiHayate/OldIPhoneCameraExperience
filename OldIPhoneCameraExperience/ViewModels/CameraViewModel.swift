@@ -23,6 +23,7 @@ final class CameraViewModel: ObservableObject {
     @Published private(set) var isRecording: Bool = false
     @Published private(set) var recordingDuration: TimeInterval = 0
     @Published private(set) var isProcessingVideo: Bool = false
+    @Published private(set) var aspectRatio: AspectRatio = CameraConfig.defaultAspectRatio
 
     /// カメラセッション（プレビュー用）
     var captureSession: AVCaptureSession {
@@ -104,6 +105,14 @@ final class CameraViewModel: ObservableObject {
         zoomFactor = actualFactor
     }
 
+    // MARK: - Aspect Ratio
+
+    /// アスペクト比を変更する（動画モード時は無効）
+    func setAspectRatio(_ ratio: AspectRatio) {
+        guard captureMode == .photo else { return }
+        aspectRatio = ratio
+    }
+
     // MARK: - Mode Switching
 
     /// 動画モードに切り替える
@@ -173,7 +182,8 @@ final class CameraViewModel: ObservableObject {
         do {
             let rawImage = try await cameraService.capturePhoto()
 
-            guard let filteredImage = filterService.applyFilters(rawImage, config: currentModel.filterConfig) else {
+            let config = filterConfigWithCurrentAspectRatio()
+            guard let filteredImage = filterService.applyFilters(rawImage, config: config) else {
                 throw CameraViewModelError.filterFailed
             }
 
@@ -196,6 +206,18 @@ final class CameraViewModel: ObservableObject {
     }
 
     // MARK: - Private Methods
+
+    private func filterConfigWithCurrentAspectRatio() -> FilterConfig {
+        let base = currentModel.filterConfig
+        return FilterConfig(
+            warmth: base.warmth,
+            tint: base.tint,
+            saturation: base.saturation,
+            highlightTintIntensity: base.highlightTintIntensity,
+            cropRatio: base.cropRatio,
+            aspectRatio: aspectRatio
+        )
+    }
 
     private func convertToUIImage(_ ciImage: CIImage) -> UIImage? {
         guard let cgImage = ciContext.createCGImage(ciImage, from: ciImage.extent) else {
