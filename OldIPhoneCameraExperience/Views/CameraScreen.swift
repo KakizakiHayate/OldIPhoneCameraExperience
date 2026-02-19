@@ -46,6 +46,7 @@ struct CameraScreen: View {
                 ZStack(alignment: .bottom) {
                     cameraPreview
                         .aspectRatio(previewAspectRatio, contentMode: .fit)
+                        .animation(.easeInOut(duration: 0.3), value: viewModel.aspectRatio)
 
                     ZoomIndicator(
                         zoomFactor: viewModel.zoomFactor,
@@ -87,9 +88,10 @@ struct CameraScreen: View {
     // MARK: - Preview Aspect Ratio
 
     private var previewAspectRatio: CGFloat {
-        viewModel.captureMode == .video
-            ? 1.0 / CameraConfig.videoAspectRatio
-            : CameraConfig.previewAspectRatio
+        if viewModel.captureMode == .video {
+            return 1.0 / CameraConfig.videoAspectRatio
+        }
+        return viewModel.aspectRatio.portraitRatio
     }
 
     // MARK: - Pinch Gesture
@@ -201,6 +203,16 @@ struct CameraScreen: View {
 
     private var topToolbar: some View {
         HStack {
+            // アスペクト比切替ボタン（写真モード時のみ表示）
+            if viewModel.captureMode == .photo {
+                ToolbarButton(text: viewModel.aspectRatio.displayLabel) {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        viewModel.setAspectRatio(viewModel.aspectRatio.next())
+                    }
+                }
+                .padding(.leading, 16)
+            }
+
             Spacer()
 
             ToolbarButton(
