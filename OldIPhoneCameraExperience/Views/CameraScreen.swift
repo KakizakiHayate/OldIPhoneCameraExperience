@@ -14,6 +14,7 @@ struct CameraScreen: View {
     @State private var baseZoomFactor: CGFloat = 1.0
     @State private var isZoomIndicatorVisible = false
     @State private var zoomFadeTask: Task<Void, Never>?
+    @State private var recordingIndicatorOpacity: Double = 1.0
 
     init(
         cameraService: CameraServiceProtocol = CameraService(),
@@ -31,7 +32,6 @@ struct CameraScreen: View {
 
     var body: some View {
         ZStack {
-            // 背景: 黒
             Color.black
                 .ignoresSafeArea()
 
@@ -45,9 +45,8 @@ struct CameraScreen: View {
                 // カメラプレビュー + ズームインジケーター
                 ZStack(alignment: .bottom) {
                     cameraPreview
-                        .aspectRatio(CameraConfig.previewAspectRatio, contentMode: .fit)
+                        .aspectRatio(previewAspectRatio, contentMode: .fit)
 
-                    // ズーム倍率インジケーター
                     ZoomIndicator(
                         zoomFactor: viewModel.zoomFactor,
                         isVisible: isZoomIndicatorVisible
@@ -56,6 +55,11 @@ struct CameraScreen: View {
                     .allowsHitTesting(false)
                 }
                 .gesture(pinchGesture)
+
+                // モード切替ラベル
+                modeSwitchLabel
+                    .padding(.vertical, 8)
+                    .gesture(swipeGesture)
 
                 Spacer()
 
@@ -67,7 +71,7 @@ struct CameraScreen: View {
             // 虹彩絞りアニメーション
             IrisAnimationView(isAnimating: $isIrisAnimating)
         }
-        .statusBar(hidden: true) // レトロUI没入体験のためステータスバーを非表示
+        .statusBar(hidden: true)
         .task {
             do {
                 try await viewModel.startCamera()
@@ -78,6 +82,14 @@ struct CameraScreen: View {
         .onDisappear {
             viewModel.stopCamera()
         }
+    }
+
+    // MARK: - Preview Aspect Ratio
+
+    private var previewAspectRatio: CGFloat {
+        viewModel.captureMode == .video
+            ? 1.0 / CameraConfig.videoAspectRatio
+            : CameraConfig.previewAspectRatio
     }
 
     // MARK: - Pinch Gesture
@@ -92,6 +104,22 @@ struct CameraScreen: View {
             .onEnded { _ in
                 baseZoomFactor = viewModel.zoomFactor
                 scheduleZoomIndicatorFade()
+            }
+    }
+
+    // MARK: - Swipe Gesture
+
+    private var swipeGesture: some Gesture {
+        DragGesture(minimumDistance: 50)
+            .onEnded { value in
+                guard !viewModel.isRecording else { return }
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    if value.translation.width < -50 {
+                        viewModel.switchToVideoMode()
+                    } else if value.translation.width > 50 {
+                        viewModel.switchToPhotoMode()
+                    }
+                }
             }
     }
 
@@ -115,13 +143,66 @@ struct CameraScreen: View {
         }
     }
 
+    // MARK: - Mode Switch Label
+
+    private var modeSwitchLabel: some View {
+        Group {
+            if viewModel.isRecording {
+                recordingIndicator
+            } else {
+                HStack(spacing: 24) {
+                    modeLabel("写真", isSelected: viewModel.captureMode == .photo) {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            viewModel.switchToPhotoMode()
+                        }
+                    }
+                    modeLabel("ビデオ", isSelected: viewModel.captureMode == .video) {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            viewModel.switchToVideoMode()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func modeLabel(_ text: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(text)
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(isSelected ? .yellow : .white.opacity(0.6))
+        }
+    }
+
+    // MARK: - Recording Indicator
+
+    private var recordingIndicator: some View {
+        HStack(spacing: 8) {
+            Circle()
+                .fill(Color.red)
+                .frame(width: 8, height: 8)
+                .opacity(recordingIndicatorOpacity)
+                .onAppear {
+                    withAnimation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true)) {
+                        recordingIndicatorOpacity = 0.3
+                    }
+                }
+                .onDisappear {
+                    recordingIndicatorOpacity = 1.0
+                }
+
+            Text(viewModel.formattedRecordingDuration)
+                .font(.system(size: 14, weight: .medium, design: .monospaced))
+                .foregroundColor(.white)
+        }
+    }
+
     // MARK: - Top Toolbar
 
     private var topToolbar: some View {
         HStack {
             Spacer()
 
-            // フラッシュボタン
             ToolbarButton(
                 icon: "bolt.fill",
                 isActive: viewModel.state.isFlashOn
@@ -154,30 +235,32 @@ struct CameraScreen: View {
 
     private var bottomToolbar: some View {
         HStack {
-            // サムネイル
             ThumbnailView(image: viewModel.lastCapturedImage)
                 .padding(.leading, 16)
 
             Spacer()
 
-            // シャッターボタン
             ShutterButton(
                 action: {
                     Task {
-                        await capturePhoto()
+                        await handleShutterTap()
                     }
                 },
-                isCapturing: viewModel.state.isCapturing
+                isCapturing: viewModel.state.isCapturing,
+                captureMode: viewModel.captureMode,
+                isRecording: viewModel.isRecording,
+                isDisabled: viewModel.isProcessingVideo
             )
 
             Spacer()
 
-            // カメラ切り替えボタン
             ToolbarButton(icon: "arrow.triangle.2.circlepath.camera") {
                 Task {
                     try? await viewModel.switchCamera()
                 }
             }
+            .opacity(viewModel.isRecording ? 0.3 : 1.0)
+            .disabled(viewModel.isRecording)
             .padding(.trailing, 16)
         }
         .padding(.vertical, 16)
@@ -195,12 +278,25 @@ struct CameraScreen: View {
 
     // MARK: - Actions
 
+    private func handleShutterTap() async {
+        if viewModel.captureMode == .video {
+            if viewModel.isRecording {
+                do {
+                    try await viewModel.stopRecording()
+                } catch {
+                    print("Failed to stop recording: \(error)")
+                }
+            } else {
+                viewModel.startRecording()
+            }
+        } else {
+            await capturePhoto()
+        }
+    }
+
     private func capturePhoto() async {
         do {
-            // 虹彩絞りアニメーション開始
             isIrisAnimating = true
-
-            // 撮影実行
             try await viewModel.capturePhoto()
         } catch {
             print("Failed to capture photo: \(error)")
