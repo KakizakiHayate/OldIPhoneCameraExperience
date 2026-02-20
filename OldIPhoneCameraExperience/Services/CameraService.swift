@@ -38,8 +38,9 @@ protocol CameraServiceProtocol {
     /// 前面/背面カメラを切り替える
     func switchCamera() async throws
 
-    /// ズーム倍率を設定する（1.0〜5.0）
-    func setZoom(factor: CGFloat)
+    /// ズーム倍率を設定し、実際に適用された倍率を返す
+    @discardableResult
+    func setZoom(factor: CGFloat) -> CGFloat
 
     /// 動画録画を開始する
     func startRecording()
@@ -74,7 +75,14 @@ final class CameraService: NSObject, CameraServiceProtocol {
     private var torchRequested: Bool = false
     private let sessionQueue = DispatchQueue(label: "com.oldiPhonecamera.sessionQueue")
     private let videoDataOutputQueue = DispatchQueue(label: "com.oldiPhonecamera.videoDataOutput")
-    private(set) var currentZoomFactor: CGFloat = CameraConfig.minZoomFactor
+    private let zoomLock = NSLock()
+    private var _currentZoomFactor: CGFloat = CameraConfig.minZoomFactor
+
+    var currentZoomFactor: CGFloat {
+        get { zoomLock.lock(); defer { zoomLock.unlock() }; return _currentZoomFactor }
+        set { zoomLock.lock(); defer { zoomLock.unlock() }; _currentZoomFactor = newValue }
+    }
+
     private(set) var isRecording: Bool = false
 
     var isSessionRunning: Bool {
@@ -185,8 +193,10 @@ final class CameraService: NSObject, CameraServiceProtocol {
         flashMode = enabled ? .on : .off
     }
 
-    func setZoom(factor: CGFloat) {
-        sessionQueue.async { [self] in
+    @discardableResult
+    func setZoom(factor: CGFloat) -> CGFloat {
+        var actualFactor = factor
+        sessionQueue.sync { [self] in
             guard let device = currentDevice else { return }
 
             let maxDeviceZoom = min(CameraConfig.maxZoomFactor, device.maxAvailableVideoZoomFactor)
@@ -197,10 +207,12 @@ final class CameraService: NSObject, CameraServiceProtocol {
                 device.ramp(toVideoZoomFactor: clampedFactor, withRate: CameraConfig.zoomAnimationRate)
                 device.unlockForConfiguration()
                 currentZoomFactor = clampedFactor
+                actualFactor = clampedFactor
             } catch {
-                // ロック取得失敗時は何もしない
+                print("ズーム設定のためのデバイスロックに失敗しました: \(error)")
             }
         }
+        return actualFactor
     }
 
     // MARK: - Video Recording
@@ -219,14 +231,14 @@ final class CameraService: NSObject, CameraServiceProtocol {
     }
 
     func stopRecording() async throws -> URL {
-        guard isRecording else {
-            throw CameraError.notRecording
-        }
-
-        return try await withCheckedThrowingContinuation { continuation in
-            recordingContinuation = continuation
+        try await withCheckedThrowingContinuation { continuation in
             sessionQueue.async { [self] in
-                movieFileOutput?.stopRecording()
+                guard let movieOutput = movieFileOutput, isRecording else {
+                    continuation.resume(throwing: CameraError.notRecording)
+                    return
+                }
+                recordingContinuation = continuation
+                movieOutput.stopRecording()
             }
         }
     }
@@ -365,7 +377,6 @@ extension CameraService: AVCaptureFileOutputRecordingDelegate {
 
         // 録画終了時にトーチをオフ
         setTorch(enabled: false)
-        torchRequested = false
 
         if let error = error {
             recordingContinuation?.resume(throwing: error)

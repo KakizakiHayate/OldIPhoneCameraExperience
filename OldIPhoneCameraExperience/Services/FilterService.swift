@@ -132,15 +132,21 @@ final class FilterService: FilterServiceProtocol {
         writerConfig.writer.startWriting()
         writerConfig.writer.startSession(atSourceTime: .zero)
 
-        try await processVideoFrames(
-            readerOutput: readerVideoOutput,
-            writerAdaptor: writerConfig.pixelBufferAdaptor,
-            config: config,
-            frameSize: writerConfig.trackSize
-        )
-
-        if let audioOutput = readerAudioOutput, let audioInput = writerConfig.audioInput {
-            await copyAudioTrack(readerOutput: audioOutput, writerInput: audioInput)
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask {
+                try await self.processVideoFrames(
+                    readerOutput: readerVideoOutput,
+                    writerAdaptor: writerConfig.pixelBufferAdaptor,
+                    config: config,
+                    frameSize: writerConfig.trackSize
+                )
+            }
+            if let audioOutput = readerAudioOutput, let audioInput = writerConfig.audioInput {
+                group.addTask {
+                    await self.copyAudioTrack(readerOutput: audioOutput, writerInput: audioInput)
+                }
+            }
+            try await group.waitForAll()
         }
 
         await writerConfig.writer.finishWriting()
@@ -193,7 +199,10 @@ final class FilterService: FilterServiceProtocol {
         let writer = try AVAssetWriter(outputURL: outputURL, fileType: .mov)
 
         let videoTracks = try await asset.loadTracks(withMediaType: .video)
-        let trackSize = try await videoTracks.first!.load(.naturalSize)
+        guard let firstVideoTrack = videoTracks.first else {
+            throw FilterServiceError.noVideoTrack
+        }
+        let trackSize = try await firstVideoTrack.load(.naturalSize)
 
         let videoSettings: [String: Any] = [
             AVVideoCodecKey: AVVideoCodecType.h264,
@@ -230,44 +239,37 @@ final class FilterService: FilterServiceProtocol {
         readerOutput: AVAssetReaderTrackOutput,
         writerAdaptor: AVAssetWriterInputPixelBufferAdaptor,
         config: FilterConfig,
-        frameSize: CGSize
+        frameSize _: CGSize
     ) async throws {
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-            DispatchQueue.global(qos: .userInitiated).async { [self] in
-                while let sampleBuffer = readerOutput.copyNextSampleBuffer() {
+            let writerInput = writerAdaptor.assetWriterInput
+            let processingQueue = DispatchQueue(label: "com.oldiPhonecamera.videoProcessing")
+            writerInput.requestMediaDataWhenReady(on: processingQueue) { [self] in
+                while writerInput.isReadyForMoreMediaData {
+                    guard let sampleBuffer = readerOutput.copyNextSampleBuffer() else {
+                        writerInput.markAsFinished()
+                        continuation.resume()
+                        return
+                    }
                     let presentationTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
-
                     guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
                         continue
                     }
-
-                    // CIImageに変換してフィルター適用
                     let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
                     let filteredImage = applyWarmthFilter(ciImage, config: config) ?? ciImage
-
-                    // フィルター適用済みのピクセルバッファを作成
                     var outputBuffer: CVPixelBuffer?
-                    CVPixelBufferCreate(
-                        nil,
-                        Int(frameSize.width),
-                        Int(frameSize.height),
-                        kCVPixelFormatType_32BGRA,
-                        nil,
-                        &outputBuffer
-                    )
-
+                    if let pool = writerAdaptor.pixelBufferPool {
+                        CVPixelBufferPoolCreatePixelBuffer(nil, pool, &outputBuffer)
+                    }
                     if let buffer = outputBuffer {
-                        context.render(filteredImage, to: buffer)
-
-                        while !writerAdaptor.assetWriterInput.isReadyForMoreMediaData {
-                            Thread.sleep(forTimeInterval: 0.01)
+                        self.context.render(filteredImage, to: buffer)
+                        if !writerAdaptor.append(buffer, withPresentationTime: presentationTime) {
+                            writerInput.markAsFinished()
+                            continuation.resume()
+                            return
                         }
-                        writerAdaptor.append(buffer, withPresentationTime: presentationTime)
                     }
                 }
-
-                writerAdaptor.assetWriterInput.markAsFinished()
-                continuation.resume()
             }
         }
     }
@@ -277,15 +279,16 @@ final class FilterService: FilterServiceProtocol {
         writerInput: AVAssetWriterInput
     ) async {
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-            DispatchQueue.global(qos: .userInitiated).async {
-                while let sampleBuffer = readerOutput.copyNextSampleBuffer() {
-                    while !writerInput.isReadyForMoreMediaData {
-                        Thread.sleep(forTimeInterval: 0.01)
+            let audioQueue = DispatchQueue(label: "com.oldiPhonecamera.audioProcessing")
+            writerInput.requestMediaDataWhenReady(on: audioQueue) {
+                while writerInput.isReadyForMoreMediaData {
+                    guard let sampleBuffer = readerOutput.copyNextSampleBuffer() else {
+                        writerInput.markAsFinished()
+                        continuation.resume()
+                        return
                     }
                     writerInput.append(sampleBuffer)
                 }
-                writerInput.markAsFinished()
-                continuation.resume()
             }
         }
     }
