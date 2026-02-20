@@ -20,32 +20,32 @@ final class MockFilterService: FilterServiceProtocol {
     var applyFilterToVideoCalled = false
     var isProcessingVideo = false
 
-    func applyWarmthFilter(_ image: CIImage, config: FilterConfig) -> CIImage? {
+    func applyWarmthFilter(_ image: CIImage, config _: FilterConfig) -> CIImage? {
         applyWarmthFilterCalled = true
         return image
     }
 
-    func applyCrop(_ image: CIImage, config: FilterConfig) -> CIImage? {
+    func applyCrop(_ image: CIImage, config _: FilterConfig) -> CIImage? {
         applyCropCalled = true
         return image
     }
 
-    func applyDownscale(_ image: CIImage, config: FilterConfig) -> CIImage? {
+    func applyDownscale(_ image: CIImage, config _: FilterConfig) -> CIImage? {
         applyDownscaleCalled = true
         return image
     }
 
-    func applyFilters(_ image: CIImage, config: FilterConfig) -> CIImage? {
+    func applyFilters(_ image: CIImage, config _: FilterConfig) -> CIImage? {
         applyFiltersCalled = true
         return image
     }
 
-    func applyShakeEffect(_ image: CIImage, effect: ShakeEffect) -> CIImage? {
+    func applyShakeEffect(_ image: CIImage, effect _: ShakeEffect) -> CIImage? {
         applyShakeEffectCalled = true
         return image
     }
 
-    func applyFilterToVideo(inputURL: URL, config: FilterConfig) async throws -> URL {
+    func applyFilterToVideo(inputURL: URL, config _: FilterConfig) async throws -> URL {
         applyFilterToVideoCalled = true
         return inputURL
     }
