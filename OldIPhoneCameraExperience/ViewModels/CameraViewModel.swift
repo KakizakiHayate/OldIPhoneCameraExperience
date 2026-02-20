@@ -95,16 +95,14 @@ final class CameraViewModel: ObservableObject {
         state.cameraPosition = (state.cameraPosition == .back) ? .front : .back
         zoomFactor = CameraConfig.minZoomFactor
         if state.cameraPosition == .front, state.isFlashOn {
-            state.isFlashOn = false
-            cameraService.setFlash(enabled: false)
+            toggleFlash()
         }
     }
 
     /// ズーム倍率を設定する
     func setZoom(factor: CGFloat) {
-        let clamped = min(max(factor, CameraConfig.minZoomFactor), CameraConfig.maxZoomFactor)
-        zoomFactor = clamped
-        cameraService.setZoom(factor: clamped)
+        let actualFactor = cameraService.setZoom(factor: factor)
+        zoomFactor = actualFactor
     }
 
     // MARK: - Aspect Ratio
@@ -164,7 +162,6 @@ final class CameraViewModel: ObservableObject {
             )
             try await photoLibraryService.saveVideoToPhotoLibrary(filteredURL)
 
-            // 一時ファイル削除
             try? FileManager.default.removeItem(at: rawVideoURL)
             try? FileManager.default.removeItem(at: filteredURL)
 
