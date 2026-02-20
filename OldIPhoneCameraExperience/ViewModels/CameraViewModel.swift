@@ -85,16 +85,14 @@ final class CameraViewModel: ObservableObject {
         zoomFactor = CameraConfig.minZoomFactor
         // 前面カメラにはフラッシュがないため、自動的にオフにする
         if state.cameraPosition == .front, state.isFlashOn {
-            state.isFlashOn = false
-            cameraService.setFlash(enabled: false)
+            toggleFlash()
         }
     }
 
     /// ズーム倍率を設定する
     func setZoom(factor: CGFloat) {
-        let clamped = min(max(factor, CameraConfig.minZoomFactor), CameraConfig.maxZoomFactor)
-        zoomFactor = clamped
-        cameraService.setZoom(factor: clamped)
+        let actualFactor = cameraService.setZoom(factor: factor)
+        zoomFactor = actualFactor
     }
 
     /// 写真を撮影する

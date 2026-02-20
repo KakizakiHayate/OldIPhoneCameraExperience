@@ -53,11 +53,13 @@ final class MockCameraService: CameraServiceProtocol {
         flashEnabled = enabled
     }
 
-    func setZoom(factor: CGFloat) {
+    @discardableResult
+    func setZoom(factor: CGFloat) -> CGFloat {
         setZoomCalled = true
         setZoomCalledWithValue = factor
         let maxZoom = min(CameraConfig.maxZoomFactor, deviceMaxZoomFactor)
         currentZoomFactor = min(max(factor, CameraConfig.minZoomFactor), maxZoom)
+        return currentZoomFactor
     }
 
     func switchCamera() async throws {

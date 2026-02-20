@@ -35,8 +35,9 @@ protocol CameraServiceProtocol {
     /// 前面/背面カメラを切り替える
     func switchCamera() async throws
 
-    /// ズーム倍率を設定する（1.0〜5.0）
-    func setZoom(factor: CGFloat)
+    /// ズーム倍率を設定し、実際に適用された倍率を返す
+    @discardableResult
+    func setZoom(factor: CGFloat) -> CGFloat
 }
 
 /// カメラ操作の実装
@@ -52,7 +53,13 @@ final class CameraService: NSObject, CameraServiceProtocol {
     private var flashMode: AVCaptureDevice.FlashMode = .off
     private let sessionQueue = DispatchQueue(label: "com.oldiPhonecamera.sessionQueue")
     private let videoDataOutputQueue = DispatchQueue(label: "com.oldiPhonecamera.videoDataOutput")
-    private(set) var currentZoomFactor: CGFloat = CameraConfig.minZoomFactor
+    private let zoomLock = NSLock()
+    private var _currentZoomFactor: CGFloat = CameraConfig.minZoomFactor
+
+    var currentZoomFactor: CGFloat {
+        get { zoomLock.lock(); defer { zoomLock.unlock() }; return _currentZoomFactor }
+        set { zoomLock.lock(); defer { zoomLock.unlock() }; _currentZoomFactor = newValue }
+    }
 
     var isSessionRunning: Bool {
         captureSession.isRunning
@@ -162,8 +169,10 @@ final class CameraService: NSObject, CameraServiceProtocol {
         flashMode = enabled ? .on : .off
     }
 
-    func setZoom(factor: CGFloat) {
-        sessionQueue.async { [self] in
+    @discardableResult
+    func setZoom(factor: CGFloat) -> CGFloat {
+        var actualFactor = factor
+        sessionQueue.sync { [self] in
             guard let device = currentDevice else { return }
 
             let maxDeviceZoom = min(CameraConfig.maxZoomFactor, device.maxAvailableVideoZoomFactor)
@@ -174,10 +183,12 @@ final class CameraService: NSObject, CameraServiceProtocol {
                 device.ramp(toVideoZoomFactor: clampedFactor, withRate: CameraConfig.zoomAnimationRate)
                 device.unlockForConfiguration()
                 currentZoomFactor = clampedFactor
+                actualFactor = clampedFactor
             } catch {
-                // ロック取得失敗時は何もしない
+                print("ズーム設定のためのデバイスロックに失敗しました: \(error)")
             }
         }
+        return actualFactor
     }
 
     func switchCamera() async throws {
@@ -247,8 +258,7 @@ extension CameraService: AVCapturePhotoCaptureDelegate {
         // EXIF方向情報をピクセルデータに適用する
         let orientedImage: CIImage
         if let orientationValue = ciImage.properties[kCGImagePropertyOrientation as String] as? UInt32,
-           let orientation = CGImagePropertyOrientation(rawValue: orientationValue)
-        {
+           let orientation = CGImagePropertyOrientation(rawValue: orientationValue) {
             orientedImage = ciImage.oriented(orientation)
         } else {
             orientedImage = ciImage
