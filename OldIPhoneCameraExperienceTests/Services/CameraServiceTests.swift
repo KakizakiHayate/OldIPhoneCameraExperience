@@ -53,7 +53,6 @@ final class MockCameraService: CameraServiceProtocol {
     }
 
     func capturePhoto() async throws -> CIImage {
-        // テスト用のダミー画像を返す
         return CIImage(color: .white).cropped(to: CGRect(x: 0, y: 0, width: 100, height: 100))
     }
 
@@ -102,7 +101,6 @@ final class MockCameraService: CameraServiceProtocol {
 
     func setTorch(enabled: Bool) {
         setTorchCalled = true
-        // 前面カメラにはトーチがない
         if currentPosition == .front {
             torchEnabled = false
         } else {
@@ -138,9 +136,7 @@ final class CameraServiceTests: XCTestCase {
 
     func test_startSession_setsIsSessionRunningTrue() async throws {
         XCTAssertFalse(sut.isSessionRunning, "初期状態ではセッションは停止している必要があります")
-
         try await sut.startSession()
-
         XCTAssertTrue(sut.isSessionRunning, "startSession後はisSessionRunning == trueである必要があります")
     }
 
@@ -149,9 +145,7 @@ final class CameraServiceTests: XCTestCase {
     func test_stopSession_setsIsSessionRunningFalse() async throws {
         try await sut.startSession()
         XCTAssertTrue(sut.isSessionRunning)
-
         sut.stopSession()
-
         XCTAssertFalse(sut.isSessionRunning, "stopSession後はisSessionRunning == falseである必要があります")
     }
 
@@ -159,7 +153,6 @@ final class CameraServiceTests: XCTestCase {
 
     func test_setFlash_enabledTrue_setsFlashOn() {
         sut.setFlash(enabled: true)
-
         XCTAssertTrue(sut.flashEnabled, "setFlash(enabled: true)でフラッシュがオンになる必要があります")
     }
 
@@ -168,7 +161,6 @@ final class CameraServiceTests: XCTestCase {
     func test_setFlash_enabledFalse_setsFlashOff() {
         sut.setFlash(enabled: true)
         sut.setFlash(enabled: false)
-
         XCTAssertFalse(sut.flashEnabled, "setFlash(enabled: false)でフラッシュがオフになる必要があります")
     }
 
@@ -176,10 +168,8 @@ final class CameraServiceTests: XCTestCase {
 
     func test_switchCamera_togglesPosition() async throws {
         XCTAssertEqual(sut.currentPosition, .back, "初期状態では背面カメラである必要があります")
-
         try await sut.switchCamera()
         XCTAssertEqual(sut.currentPosition, .front, "switchCamera後は前面カメラである必要があります")
-
         try await sut.switchCamera()
         XCTAssertEqual(sut.currentPosition, .back, "再度switchCamera後は背面カメラに戻る必要があります")
     }
@@ -188,7 +178,6 @@ final class CameraServiceTests: XCTestCase {
 
     func test_capturePhoto_returnsCIImage() async throws {
         let image = try await sut.capturePhoto()
-
         XCTAssertNotNil(image, "capturePhotoはnilでないCIImageを返す必要があります")
         XCTAssertGreaterThan(image.extent.width, 0, "画像の幅は0より大きい必要があります")
         XCTAssertGreaterThan(image.extent.height, 0, "画像の高さは0より大きい必要があります")

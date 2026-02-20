@@ -177,7 +177,6 @@ final class CameraViewModel: ObservableObject {
             )
             try await photoLibraryService.saveVideoToPhotoLibrary(filteredURL)
 
-            // 一時ファイル削除
             try? FileManager.default.removeItem(at: rawVideoURL)
             try? FileManager.default.removeItem(at: filteredURL)
 
