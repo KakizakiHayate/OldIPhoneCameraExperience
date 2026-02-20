@@ -326,8 +326,8 @@ final class PhotoEditorCropOperationTests: XCTestCase {
     // MARK: - T-23.17: クロップ枠の四隅をドラッグ（自由モード）
 
     func test_cropCornerDrag_freeMode_resizesRect() {
-        let bounds = CGRect(x: 0, y: 0, width: 200, height: 150)
-        let currentRect = CGRect(x: 20, y: 20, width: 100, height: 80)
+        let bounds = CGRect(x: 0, y: 0, width: 300, height: 250)
+        let currentRect = CGRect(x: 20, y: 20, width: 150, height: 120)
         let result = CropRectCalculator.resizeFromCorner(
             currentRect: currentRect,
             corner: .bottomRight,
@@ -336,8 +336,8 @@ final class PhotoEditorCropOperationTests: XCTestCase {
             imageBounds: bounds
         )
 
-        XCTAssertEqual(result.width, 120, accuracy: 1.0, "幅が20増加する必要があります")
-        XCTAssertEqual(result.height, 90, accuracy: 1.0, "高さが10増加する必要があります")
+        XCTAssertEqual(result.width, 170, accuracy: 1.0, "幅が20増加する必要があります")
+        XCTAssertEqual(result.height, 130, accuracy: 1.0, "高さが10増加する必要があります")
     }
 
     // MARK: - T-23.18: クロップ枠内をドラッグ → 移動
