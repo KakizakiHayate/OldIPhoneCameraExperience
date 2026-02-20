@@ -102,9 +102,10 @@ final class FilterServiceAspectRatioTests: XCTestCase {
 
         XCTAssertNotNil(result)
         if let result = result {
-            XCTAssertEqual(Int(result.extent.width), 1936,
+            // CIFilterチェーンの浮動小数点誤差を許容するためaccuracyを使用
+            XCTAssertEqual(result.extent.width, 1936, accuracy: 1.0,
                            "1:1の出力幅は1936pxである必要があります")
-            XCTAssertEqual(Int(result.extent.height), 1936,
+            XCTAssertEqual(result.extent.height, 1936, accuracy: 1.0,
                            "1:1の出力高さは1936pxである必要があります")
         }
     }
@@ -126,9 +127,10 @@ final class FilterServiceAspectRatioTests: XCTestCase {
 
         XCTAssertNotNil(result)
         if let result = result {
-            XCTAssertEqual(Int(result.extent.width), 1458,
+            // CIFilterチェーンの浮動小数点誤差を許容するためaccuracyを使用
+            XCTAssertEqual(result.extent.width, 1458, accuracy: 1.0,
                            "16:9の出力幅（縦持ち）は1458pxである必要があります")
-            XCTAssertEqual(Int(result.extent.height), 2592,
+            XCTAssertEqual(result.extent.height, 2592, accuracy: 1.0,
                            "16:9の出力高さ（縦持ち）は2592pxである必要があります")
         }
     }
