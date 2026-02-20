@@ -13,11 +13,13 @@ struct CropCoordinateTransformer {
     let viewSize: CGSize
 
     private var scaleX: CGFloat {
-        imageSize.width / viewSize.width
+        guard viewSize.width > 0 else { return 1.0 }
+        return imageSize.width / viewSize.width
     }
 
     private var scaleY: CGFloat {
-        imageSize.height / viewSize.height
+        guard viewSize.height > 0 else { return 1.0 }
+        return imageSize.height / viewSize.height
     }
 
     /// ビュー座標の矩形を画像座標に変換する（Y軸反転）
