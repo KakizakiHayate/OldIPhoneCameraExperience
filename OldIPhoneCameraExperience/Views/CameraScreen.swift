@@ -15,6 +15,8 @@ struct CameraScreen: View {
     @State private var isZoomIndicatorVisible = false
     @State private var zoomFadeTask: Task<Void, Never>?
     @State private var recordingIndicatorOpacity: Double = 1.0
+    @State private var showErrorAlert = false
+    @State private var errorMessage = ""
 
     init(
         cameraService: CameraServiceProtocol = CameraService(),

@@ -33,7 +33,6 @@ struct ToolbarButton: View {
     var body: some View {
         Button(action: action) {
             ZStack {
-                // 背景（ON: 黄色、OFF: 金属質感グラデーション）
                 RoundedRectangle(cornerRadius: 6)
                     .fill(
                         isActive
@@ -61,7 +60,6 @@ struct ToolbarButton: View {
                     )
                     .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 1)
 
-                // テキストまたはアイコン
                 switch content {
                 case let .text(text):
                     Text(text)
