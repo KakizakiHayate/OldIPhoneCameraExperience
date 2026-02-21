@@ -107,7 +107,7 @@ struct CameraScreen: View {
     private func scheduleZoomIndicatorFade() {
         zoomFadeTask?.cancel()
         zoomFadeTask = Task {
-            try? await Task.sleep(nanoseconds: UInt64(UIConstants.zoomIndicatorFadeDelay * 1_000_000_000))
+            try? await Task.sleep(for: .seconds(UIConstants.zoomIndicatorFadeDelay))
             guard !Task.isCancelled else { return }
             withAnimation(.easeInOut(duration: UIConstants.zoomIndicatorFadeDuration)) {
                 isZoomIndicatorVisible = false
