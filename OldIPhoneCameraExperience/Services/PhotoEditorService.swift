@@ -25,30 +25,15 @@ protocol PhotoEditorServiceProtocol {
 /// 写真編集処理の実装
 final class PhotoEditorService: PhotoEditorServiceProtocol {
     func adjustBrightness(_ image: CIImage, value: Float) -> CIImage? {
-        let clamped = value.clamped(to: EditorConstants.brightnessRange)
-        return image.applyingFilter("CIColorControls", parameters: [
-            kCIInputBrightnessKey: clamped,
-            kCIInputContrastKey: EditorConstants.defaultContrast,
-            kCIInputSaturationKey: EditorConstants.defaultSaturation
-        ])
+        applyAdjustments(image, brightness: value, contrast: EditorConstants.defaultContrast, saturation: EditorConstants.defaultSaturation)
     }
 
     func adjustContrast(_ image: CIImage, value: Float) -> CIImage? {
-        let clamped = value.clamped(to: EditorConstants.contrastRange)
-        return image.applyingFilter("CIColorControls", parameters: [
-            kCIInputBrightnessKey: EditorConstants.defaultBrightness,
-            kCIInputContrastKey: clamped,
-            kCIInputSaturationKey: EditorConstants.defaultSaturation
-        ])
+        applyAdjustments(image, brightness: EditorConstants.defaultBrightness, contrast: value, saturation: EditorConstants.defaultSaturation)
     }
 
     func adjustSaturation(_ image: CIImage, value: Float) -> CIImage? {
-        let clamped = value.clamped(to: EditorConstants.saturationRange)
-        return image.applyingFilter("CIColorControls", parameters: [
-            kCIInputBrightnessKey: EditorConstants.defaultBrightness,
-            kCIInputContrastKey: EditorConstants.defaultContrast,
-            kCIInputSaturationKey: clamped
-        ])
+        applyAdjustments(image, brightness: EditorConstants.defaultBrightness, contrast: EditorConstants.defaultContrast, saturation: value)
     }
 
     func applyAdjustments(_ image: CIImage, brightness: Float, contrast: Float, saturation: Float) -> CIImage? {
@@ -66,8 +51,8 @@ final class PhotoEditorService: PhotoEditorServiceProtocol {
 
 // MARK: - Float Clamping
 
-private extension Float {
-    func clamped(to range: ClosedRange<Float>) -> Float {
-        min(max(self, range.lowerBound), range.upperBound)
+private extension Comparable {
+    func clamped(to range: ClosedRange<Self>) -> Self {
+        Swift.min(Swift.max(self, range.lowerBound), range.upperBound)
     }
 }

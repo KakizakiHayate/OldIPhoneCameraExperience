@@ -15,6 +15,8 @@ struct CameraScreen: View {
     @State private var isZoomIndicatorVisible = false
     @State private var zoomFadeTask: Task<Void, Never>?
     @State private var recordingIndicatorOpacity: Double = 1.0
+    @State private var showErrorAlert = false
+    @State private var errorMessage = ""
 
     init(
         cameraService: CameraServiceProtocol = CameraService(),
@@ -71,6 +73,11 @@ struct CameraScreen: View {
 
             // 虹彩絞りアニメーション
             IrisAnimationView(isAnimating: $isIrisAnimating)
+        }
+        .alert("エラー", isPresented: $showErrorAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage)
         }
         .statusBar(hidden: true)
         .task {
@@ -299,7 +306,8 @@ struct CameraScreen: View {
                 do {
                     try await viewModel.stopRecording()
                 } catch {
-                    print("Failed to stop recording: \(error)")
+                    errorMessage = "録画の保存に失敗しました"
+                    showErrorAlert = true
                 }
             } else {
                 viewModel.startRecording()
