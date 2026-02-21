@@ -145,25 +145,20 @@ final class CameraViewModel: ObservableObject {
         isRecording = false
 
         let rawVideoURL = try await cameraService.stopRecording()
+        defer { try? FileManager.default.removeItem(at: rawVideoURL) }
 
         isProcessingVideo = true
-        do {
-            let filteredURL = try await filterService.applyFilterToVideo(
-                inputURL: rawVideoURL, config: currentModel.filterConfig
-            )
-            try await photoLibraryService.saveVideoToPhotoLibrary(filteredURL)
-
-            // 一時ファイル削除
-            try? FileManager.default.removeItem(at: rawVideoURL)
-            try? FileManager.default.removeItem(at: filteredURL)
-
+        defer {
             isProcessingVideo = false
             recordingDuration = 0
-        } catch {
-            isProcessingVideo = false
-            recordingDuration = 0
-            throw error
         }
+
+        let filteredURL = try await filterService.applyFilterToVideo(
+            inputURL: rawVideoURL, config: currentModel.filterConfig
+        )
+        defer { try? FileManager.default.removeItem(at: filteredURL) }
+
+        try await photoLibraryService.saveVideoToPhotoLibrary(filteredURL)
     }
 
     /// 写真を撮影する
