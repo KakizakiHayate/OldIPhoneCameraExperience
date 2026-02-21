@@ -9,6 +9,56 @@ import CoreImage
 @testable import OldIPhoneCameraExperience
 import XCTest
 
+// MARK: - MockFilterService
+
+final class MockFilterService: FilterServiceProtocol {
+    var applyWarmthFilterCalled = false
+    var applyCropCalled = false
+    var applyDownscaleCalled = false
+    var applyCropForAspectRatioCalled = false
+    var applyFiltersCalled = false
+    var applyShakeEffectCalled = false
+    var applyFilterToVideoCalled = false
+    var isProcessingVideo = false
+
+    func applyWarmthFilter(_ image: CIImage, config _: FilterConfig) -> CIImage? {
+        applyWarmthFilterCalled = true
+        return image
+    }
+
+    func applyCrop(_ image: CIImage, config _: FilterConfig) -> CIImage? {
+        applyCropCalled = true
+        return image
+    }
+
+    func applyDownscale(_ image: CIImage, config _: FilterConfig) -> CIImage? {
+        applyDownscaleCalled = true
+        return image
+    }
+
+    func applyCropForAspectRatio(_ image: CIImage, aspectRatio _: AspectRatio) -> CIImage? {
+        applyCropForAspectRatioCalled = true
+        return image
+    }
+
+    func applyFilters(_ image: CIImage, config _: FilterConfig) -> CIImage? {
+        applyFiltersCalled = true
+        return image
+    }
+
+    func applyShakeEffect(_ image: CIImage, effect _: ShakeEffect) -> CIImage? {
+        applyShakeEffectCalled = true
+        return image
+    }
+
+    func applyFilterToVideo(inputURL: URL, config _: FilterConfig) async throws -> URL {
+        applyFilterToVideoCalled = true
+        return inputURL
+    }
+}
+
+// MARK: - FilterServiceTests
+
 final class FilterServiceTests: XCTestCase {
     var sut: FilterService!
     var testImage: CIImage!

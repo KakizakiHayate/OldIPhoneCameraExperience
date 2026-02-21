@@ -20,6 +20,9 @@ protocol CameraServiceProtocol {
     /// 現在のズーム倍率
     var currentZoomFactor: CGFloat { get }
 
+    /// 録画中かどうか
+    var isRecording: Bool { get }
+
     /// カメラセッションを開始する
     func startSession() async throws
 
@@ -38,6 +41,21 @@ protocol CameraServiceProtocol {
     /// ズーム倍率を設定し、実際に適用された倍率を返す
     @discardableResult
     func setZoom(factor: CGFloat) -> CGFloat
+
+    /// 動画録画を開始する
+    func startRecording()
+
+    /// 動画録画を停止し、一時ファイルURLを返す
+    func stopRecording() async throws -> URL
+
+    /// トーチ（動画用フラッシュ）のオン/オフを設定する
+    func setTorch(enabled: Bool)
+
+    /// 動画モードに切り替える
+    func switchToVideoMode()
+
+    /// 写真モードに切り替える
+    func switchToPhotoMode()
 }
 
 /// カメラ操作の実装
@@ -48,9 +66,13 @@ final class CameraService: NSObject, CameraServiceProtocol {
     private var currentDevice: AVCaptureDevice?
     private var photoOutput: AVCapturePhotoOutput?
     private var videoDataOutput: AVCaptureVideoDataOutput?
+    private var movieFileOutput: AVCaptureMovieFileOutput?
+    private var audioInput: AVCaptureDeviceInput?
     private var currentPosition: AVCaptureDevice.Position = CameraConfig.defaultPosition
     private var photoContinuation: CheckedContinuation<CIImage, Error>?
+    private var recordingContinuation: CheckedContinuation<URL, Error>?
     private var flashMode: AVCaptureDevice.FlashMode = .off
+    private var torchRequested: Bool = false
     private let sessionQueue = DispatchQueue(label: "com.oldiPhonecamera.sessionQueue")
     private let videoDataOutputQueue = DispatchQueue(label: "com.oldiPhonecamera.videoDataOutput")
     private let zoomLock = NSLock()
@@ -60,6 +82,7 @@ final class CameraService: NSObject, CameraServiceProtocol {
         get { zoomLock.lock(); defer { zoomLock.unlock() }; return _currentZoomFactor }
         set { zoomLock.lock(); defer { zoomLock.unlock() }; _currentZoomFactor = newValue }
     }
+    private(set) var isRecording: Bool = false
 
     var isSessionRunning: Bool {
         captureSession.isRunning
@@ -68,7 +91,6 @@ final class CameraService: NSObject, CameraServiceProtocol {
     // MARK: - CameraServiceProtocol
 
     func startSession() async throws {
-        // カメラ権限チェック
         let status = AVCaptureDevice.authorizationStatus(for: .video)
         if status == .notDetermined {
             let granted = await AVCaptureDevice.requestAccess(for: .video)
@@ -79,7 +101,6 @@ final class CameraService: NSObject, CameraServiceProtocol {
             throw CameraError.permissionDenied
         }
 
-        // セッション構成・開始をシリアルキューで実行
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             sessionQueue.async { [self] in
                 do {
@@ -99,7 +120,6 @@ final class CameraService: NSObject, CameraServiceProtocol {
         captureSession.beginConfiguration()
         captureSession.sessionPreset = CameraConfig.sessionPreset
 
-        // デバイス取得
         guard let device = AVCaptureDevice.default(
             .builtInWideAngleCamera, for: .video, position: currentPosition
         ) else {
@@ -108,7 +128,6 @@ final class CameraService: NSObject, CameraServiceProtocol {
         }
         currentDevice = device
 
-        // 入力追加
         do {
             let input = try AVCaptureDeviceInput(device: device)
             if captureSession.canAddInput(input) {
@@ -119,14 +138,12 @@ final class CameraService: NSObject, CameraServiceProtocol {
             throw CameraError.inputFailed
         }
 
-        // 写真出力追加
         let photoOut = AVCapturePhotoOutput()
         if captureSession.canAddOutput(photoOut) {
             captureSession.addOutput(photoOut)
             photoOutput = photoOut
         }
 
-        // ビデオデータ出力追加（リアルタイムプレビュー用）
         let videoOut = AVCaptureVideoDataOutput()
         videoOut.setSampleBufferDelegate(self, queue: videoDataOutputQueue)
         if captureSession.canAddOutput(videoOut) {
@@ -191,17 +208,116 @@ final class CameraService: NSObject, CameraServiceProtocol {
         return actualFactor
     }
 
+    // MARK: - Video Recording
+
+    func startRecording() {
+        sessionQueue.async { [self] in
+            guard let movieOutput = movieFileOutput, !isRecording else { return }
+
+            let tempDir = NSTemporaryDirectory()
+            let fileName = UUID().uuidString + ".mov"
+            let outputURL = URL(fileURLWithPath: tempDir).appendingPathComponent(fileName)
+
+            movieOutput.startRecording(to: outputURL, recordingDelegate: self)
+            isRecording = true
+        }
+    }
+
+    func stopRecording() async throws -> URL {
+        try await withCheckedThrowingContinuation { continuation in
+            sessionQueue.async { [self] in
+                guard let movieOutput = movieFileOutput, isRecording else {
+                    continuation.resume(throwing: CameraError.notRecording)
+                    return
+                }
+                recordingContinuation = continuation
+                movieOutput.stopRecording()
+            }
+        }
+    }
+
+    func setTorch(enabled: Bool) {
+        torchRequested = enabled
+        sessionQueue.async { [self] in
+            guard let device = currentDevice, device.hasTorch else { return }
+            do {
+                try device.lockForConfiguration()
+                device.torchMode = enabled ? .on : .off
+                device.unlockForConfiguration()
+            } catch {
+                // ロック取得失敗時は何もしない
+            }
+        }
+    }
+
+    func switchToVideoMode() {
+        sessionQueue.async { [self] in
+            guard !isRecording else { return }
+
+            captureSession.beginConfiguration()
+            captureSession.sessionPreset = CameraConfig.videoPreset
+
+            if movieFileOutput == nil {
+                let movieOut = AVCaptureMovieFileOutput()
+                if captureSession.canAddOutput(movieOut) {
+                    captureSession.addOutput(movieOut)
+                    movieFileOutput = movieOut
+                }
+            }
+
+            addAudioInputIfPermitted()
+            captureSession.commitConfiguration()
+        }
+    }
+
+    func switchToPhotoMode() {
+        sessionQueue.async { [self] in
+            guard !isRecording else { return }
+
+            captureSession.beginConfiguration()
+            captureSession.sessionPreset = CameraConfig.sessionPreset
+
+            if let movieOut = movieFileOutput {
+                captureSession.removeOutput(movieOut)
+                movieFileOutput = nil
+            }
+
+            if let audioIn = audioInput {
+                captureSession.removeInput(audioIn)
+                audioInput = nil
+            }
+
+            captureSession.commitConfiguration()
+        }
+    }
+
+    private func addAudioInputIfPermitted() {
+        guard audioInput == nil else { return }
+
+        let audioStatus = AVCaptureDevice.authorizationStatus(for: .audio)
+        guard audioStatus == .authorized else { return }
+
+        guard let audioDevice = AVCaptureDevice.default(for: .audio) else { return }
+        do {
+            let audioIn = try AVCaptureDeviceInput(device: audioDevice)
+            if captureSession.canAddInput(audioIn) {
+                captureSession.addInput(audioIn)
+                audioInput = audioIn
+            }
+        } catch {
+            // マイク入力追加失敗時は音声なしで続行
+        }
+    }
+
     func switchCamera() async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             sessionQueue.async { [self] in
                 captureSession.beginConfiguration()
 
-                // 現在の入力を削除
                 if let currentInput = captureSession.inputs.first as? AVCaptureDeviceInput {
                     captureSession.removeInput(currentInput)
                 }
 
-                // 反対側のカメラを取得
                 let newPosition: AVCaptureDevice.Position = (currentPosition == .back) ? .front : .back
                 guard let newDevice = AVCaptureDevice.default(
                     .builtInWideAngleCamera, for: .video, position: newPosition
@@ -211,7 +327,6 @@ final class CameraService: NSObject, CameraServiceProtocol {
                     return
                 }
 
-                // 新しい入力を追加
                 do {
                     let newInput = try AVCaptureDeviceInput(device: newDevice)
                     if captureSession.canAddInput(newInput) {
@@ -226,10 +341,34 @@ final class CameraService: NSObject, CameraServiceProtocol {
                 }
 
                 self.currentZoomFactor = CameraConfig.minZoomFactor
+                self.torchRequested = false
                 captureSession.commitConfiguration()
                 continuation.resume()
             }
         }
+    }
+}
+
+// MARK: - AVCaptureFileOutputRecordingDelegate
+
+extension CameraService: AVCaptureFileOutputRecordingDelegate {
+    func fileOutput(
+        _: AVCaptureFileOutput,
+        didFinishRecordingTo outputFileURL: URL,
+        from _: [AVCaptureConnection],
+        error: Error?
+    ) {
+        isRecording = false
+
+        // 録画終了時にトーチをオフ
+        setTorch(enabled: false)
+
+        if let error = error {
+            recordingContinuation?.resume(throwing: error)
+        } else {
+            recordingContinuation?.resume(returning: outputFileURL)
+        }
+        recordingContinuation = nil
     }
 }
 
@@ -255,7 +394,6 @@ extension CameraService: AVCapturePhotoCaptureDelegate {
             return
         }
 
-        // EXIF方向情報をピクセルデータに適用する
         let orientedImage: CIImage
         if let orientationValue = ciImage.properties[kCGImagePropertyOrientation as String] as? UInt32,
            let orientation = CGImagePropertyOrientation(rawValue: orientationValue) {
@@ -282,7 +420,6 @@ extension CameraService: AVCaptureVideoDataOutputSampleBufferDelegate {
         }
 
         _ = CIImage(cvPixelBuffer: pixelBuffer)
-        // ここでフレームコールバックを通知する（Phase 2で実装予定）
     }
 }
 
@@ -295,4 +432,5 @@ enum CameraError: Error {
     case outputNotFound
     case imageProcessingFailed
     case captureInProgress
+    case notRecording
 }

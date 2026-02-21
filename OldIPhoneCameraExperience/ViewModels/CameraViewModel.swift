@@ -6,6 +6,7 @@
 //
 
 import AVFoundation
+import Combine
 import CoreImage
 import Foundation
 import SwiftUI
@@ -18,6 +19,11 @@ final class CameraViewModel: ObservableObject {
     @Published private(set) var state: CameraState
     @Published private(set) var lastCapturedImage: UIImage?
     @Published private(set) var zoomFactor: CGFloat = CameraConfig.minZoomFactor
+    @Published private(set) var captureMode: CaptureMode = .photo
+    @Published private(set) var isRecording: Bool = false
+    @Published private(set) var recordingDuration: TimeInterval = 0
+    @Published private(set) var isProcessingVideo: Bool = false
+    @Published private(set) var aspectRatio: AspectRatio = CameraConfig.defaultAspectRatio
 
     /// カメラセッション（プレビュー用）
     var captureSession: AVCaptureSession {
@@ -35,6 +41,7 @@ final class CameraViewModel: ObservableObject {
 
     private let currentModel: CameraModel = .iPhone4
     private let ciContext = CIContext()
+    private var recordingTimer: AnyCancellable?
 
     // MARK: - Initialization
 
@@ -74,16 +81,19 @@ final class CameraViewModel: ObservableObject {
     /// フラッシュのオン/オフを切り替える
     func toggleFlash() {
         state.isFlashOn.toggle()
-        cameraService.setFlash(enabled: state.isFlashOn)
+        if captureMode == .video {
+            cameraService.setTorch(enabled: state.isFlashOn)
+        } else {
+            cameraService.setFlash(enabled: state.isFlashOn)
+        }
     }
 
     /// 前面/背面カメラを切り替える
     func switchCamera() async throws {
+        guard !isRecording else { return }
         try await cameraService.switchCamera()
         state.cameraPosition = (state.cameraPosition == .back) ? .front : .back
-        // カメラ切替時にズームをリセット
         zoomFactor = CameraConfig.minZoomFactor
-        // 前面カメラにはフラッシュがないため、自動的にオフにする
         if state.cameraPosition == .front, state.isFlashOn {
             toggleFlash()
         }
@@ -95,33 +105,107 @@ final class CameraViewModel: ObservableObject {
         zoomFactor = actualFactor
     }
 
+    // MARK: - Flash/Torch UI
+
+    /// 現在のモードに応じたフラッシュ/トーチアイコン名
+    var flashIconName: String {
+        if captureMode == .video {
+            return state.isFlashOn ? "flashlight.on.fill" : "flashlight.off.fill"
+        }
+        return state.isFlashOn ? "bolt.fill" : "bolt.slash.fill"
+    }
+
+    /// 前面カメラ時はフラッシュボタンを非表示にする
+    var shouldHideFlashButton: Bool {
+        state.cameraPosition == .front
+    }
+
+    // MARK: - Aspect Ratio
+
+    /// アスペクト比を変更する（動画モード時は無効）
+    func setAspectRatio(_ ratio: AspectRatio) {
+        guard captureMode == .photo else { return }
+        aspectRatio = ratio
+    }
+
+    // MARK: - Mode Switching
+
+    /// 動画モードに切り替える
+    func switchToVideoMode() {
+        guard captureMode != .video, !isRecording else { return }
+        captureMode = .video
+        cameraService.switchToVideoMode()
+        if state.isFlashOn {
+            cameraService.setTorch(enabled: true)
+        }
+    }
+
+    /// 写真モードに切り替える
+    func switchToPhotoMode() {
+        guard captureMode != .photo, !isRecording else { return }
+        captureMode = .photo
+        cameraService.switchToPhotoMode()
+        if state.isFlashOn {
+            cameraService.setTorch(enabled: false)
+            cameraService.setFlash(enabled: true)
+        }
+    }
+
+    // MARK: - Video Recording
+
+    /// 動画録画を開始する
+    func startRecording() {
+        guard captureMode == .video, !isRecording, !isProcessingVideo else { return }
+        cameraService.startRecording()
+        isRecording = true
+        recordingDuration = 0
+        startRecordingTimer()
+    }
+
+    /// 動画録画を停止し、フィルター適用後に保存する
+    func stopRecording() async throws {
+        guard isRecording else { return }
+        stopRecordingTimer()
+        isRecording = false
+
+        let rawVideoURL = try await cameraService.stopRecording()
+        defer { try? FileManager.default.removeItem(at: rawVideoURL) }
+
+        isProcessingVideo = true
+        defer {
+            isProcessingVideo = false
+            recordingDuration = 0
+        }
+
+        let filteredURL = try await filterService.applyFilterToVideo(
+            inputURL: rawVideoURL, config: currentModel.filterConfig
+        )
+        defer { try? FileManager.default.removeItem(at: filteredURL) }
+
+        try await photoLibraryService.saveVideoToPhotoLibrary(filteredURL)
+    }
+
     /// 写真を撮影する
     func capturePhoto() async throws {
         state.isCapturing = true
 
         do {
-            // 1. カメラから写真をキャプチャ
             let rawImage = try await cameraService.capturePhoto()
 
-            // 2. フィルターを適用
-            guard let filteredImage = filterService.applyFilters(rawImage, config: currentModel.filterConfig) else {
+            let config = filterConfigWithCurrentAspectRatio()
+            guard let filteredImage = filterService.applyFilters(rawImage, config: config) else {
                 throw CameraViewModelError.filterFailed
             }
 
-            // 3. 手ブレシミュレーションを適用
             let motion = motionService.getCurrentMotion()
             let shakeEffect = ShakeEffect.generate(from: motion)
             let finalImage = filterService.applyShakeEffect(filteredImage, effect: shakeEffect) ?? filteredImage
 
-            // 4. CIImage → UIImage 変換
             guard let uiImage = convertToUIImage(finalImage) else {
                 throw CameraViewModelError.imageConversionFailed
             }
 
-            // 5. フォトライブラリに保存
             try await photoLibraryService.saveToPhotoLibrary(uiImage)
-
-            // 6. 直近撮影画像を更新
             lastCapturedImage = uiImage
 
             state.isCapturing = false
@@ -133,11 +217,36 @@ final class CameraViewModel: ObservableObject {
 
     // MARK: - Private Methods
 
+    private func filterConfigWithCurrentAspectRatio() -> FilterConfig {
+        let base = currentModel.filterConfig
+        return FilterConfig(
+            warmth: base.warmth,
+            tint: base.tint,
+            saturation: base.saturation,
+            highlightTintIntensity: base.highlightTintIntensity,
+            cropRatio: base.cropRatio,
+            aspectRatio: aspectRatio
+        )
+    }
+
     private func convertToUIImage(_ ciImage: CIImage) -> UIImage? {
         guard let cgImage = ciContext.createCGImage(ciImage, from: ciImage.extent) else {
             return nil
         }
         return UIImage(cgImage: cgImage)
+    }
+
+    private func startRecordingTimer() {
+        recordingTimer = Timer.publish(every: 1.0, on: .main, in: .common)
+            .autoconnect()
+            .sink { [weak self] _ in
+                self?.recordingDuration += 1
+            }
+    }
+
+    private func stopRecordingTimer() {
+        recordingTimer?.cancel()
+        recordingTimer = nil
     }
 }
 
@@ -146,4 +255,21 @@ final class CameraViewModel: ObservableObject {
 enum CameraViewModelError: Error {
     case filterFailed
     case imageConversionFailed
+}
+
+// MARK: - Recording Duration Formatter
+
+extension CameraViewModel {
+    /// 録画時間をMM:SS（1時間以上はHH:MM:SS）形式でフォーマット
+    var formattedRecordingDuration: String {
+        let totalSeconds = Int(recordingDuration)
+        let hours = totalSeconds / 3600
+        let minutes = (totalSeconds % 3600) / 60
+        let seconds = totalSeconds % 60
+
+        if hours > 0 {
+            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
+        }
+        return String(format: "%02d:%02d", minutes, seconds)
+    }
 }

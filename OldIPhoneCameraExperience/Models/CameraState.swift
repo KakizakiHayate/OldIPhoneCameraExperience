@@ -33,6 +33,12 @@ enum CameraPosition: CaseIterable {
     case back
 }
 
+/// 撮影モード（写真/動画）
+enum CaptureMode: CaseIterable {
+    case photo
+    case video
+}
+
 /// カメラ権限の状態
 enum PermissionStatus: CaseIterable {
     case notDetermined // 未決定（初回起動前）
