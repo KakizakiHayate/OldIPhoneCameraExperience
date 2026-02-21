@@ -17,6 +17,7 @@ final class CameraViewModel: ObservableObject {
 
     @Published private(set) var state: CameraState
     @Published private(set) var lastCapturedImage: UIImage?
+    @Published private(set) var zoomFactor: CGFloat = CameraConfig.minZoomFactor
 
     /// カメラセッション（プレビュー用）
     var captureSession: AVCaptureSession {
@@ -80,11 +81,18 @@ final class CameraViewModel: ObservableObject {
     func switchCamera() async throws {
         try await cameraService.switchCamera()
         state.cameraPosition = (state.cameraPosition == .back) ? .front : .back
+        // カメラ切替時にズームをリセット
+        zoomFactor = CameraConfig.minZoomFactor
         // 前面カメラにはフラッシュがないため、自動的にオフにする
         if state.cameraPosition == .front, state.isFlashOn {
-            state.isFlashOn = false
-            cameraService.setFlash(enabled: false)
+            toggleFlash()
         }
+    }
+
+    /// ズーム倍率を設定する
+    func setZoom(factor: CGFloat) {
+        let actualFactor = cameraService.setZoom(factor: factor)
+        zoomFactor = actualFactor
     }
 
     /// 写真を撮影する

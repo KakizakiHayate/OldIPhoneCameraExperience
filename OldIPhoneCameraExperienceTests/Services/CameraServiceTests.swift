@@ -16,6 +16,10 @@ final class MockCameraService: CameraServiceProtocol {
     var isSessionRunning: Bool = false
     var flashEnabled: Bool = false
     var currentPosition: AVCaptureDevice.Position = .back
+    var currentZoomFactor: CGFloat = CameraConfig.minZoomFactor
+
+    /// テスト用: デバイスの最大ズーム倍率（前面カメラ等で制限する場合に使用）
+    var deviceMaxZoomFactor: CGFloat = CameraConfig.maxZoomFactor
 
     // 呼び出し追跡
     var setFlashCalled = false
@@ -23,6 +27,8 @@ final class MockCameraService: CameraServiceProtocol {
     var switchCameraCalled = false
     var startSessionCalled = false
     var shouldThrowOnStart = false
+    var setZoomCalled = false
+    var setZoomCalledWithValue: CGFloat = 0
 
     func startSession() async throws {
         startSessionCalled = true
@@ -47,9 +53,19 @@ final class MockCameraService: CameraServiceProtocol {
         flashEnabled = enabled
     }
 
+    @discardableResult
+    func setZoom(factor: CGFloat) -> CGFloat {
+        setZoomCalled = true
+        setZoomCalledWithValue = factor
+        let maxZoom = min(CameraConfig.maxZoomFactor, deviceMaxZoomFactor)
+        currentZoomFactor = min(max(factor, CameraConfig.minZoomFactor), maxZoom)
+        return currentZoomFactor
+    }
+
     func switchCamera() async throws {
         switchCameraCalled = true
         currentPosition = (currentPosition == .back) ? .front : .back
+        currentZoomFactor = CameraConfig.minZoomFactor
     }
 }
 

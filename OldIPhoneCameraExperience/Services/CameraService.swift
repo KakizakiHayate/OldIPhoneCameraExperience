@@ -17,6 +17,9 @@ protocol CameraServiceProtocol {
     /// カメラセッションの状態
     var isSessionRunning: Bool { get }
 
+    /// 現在のズーム倍率
+    var currentZoomFactor: CGFloat { get }
+
     /// カメラセッションを開始する
     func startSession() async throws
 
@@ -31,6 +34,10 @@ protocol CameraServiceProtocol {
 
     /// 前面/背面カメラを切り替える
     func switchCamera() async throws
+
+    /// ズーム倍率を設定し、実際に適用された倍率を返す
+    @discardableResult
+    func setZoom(factor: CGFloat) -> CGFloat
 }
 
 /// カメラ操作の実装
@@ -46,6 +53,13 @@ final class CameraService: NSObject, CameraServiceProtocol {
     private var flashMode: AVCaptureDevice.FlashMode = .off
     private let sessionQueue = DispatchQueue(label: "com.oldiPhonecamera.sessionQueue")
     private let videoDataOutputQueue = DispatchQueue(label: "com.oldiPhonecamera.videoDataOutput")
+    private let zoomLock = NSLock()
+    private var _currentZoomFactor: CGFloat = CameraConfig.minZoomFactor
+
+    var currentZoomFactor: CGFloat {
+        get { zoomLock.lock(); defer { zoomLock.unlock() }; return _currentZoomFactor }
+        set { zoomLock.lock(); defer { zoomLock.unlock() }; _currentZoomFactor = newValue }
+    }
 
     var isSessionRunning: Bool {
         captureSession.isRunning
@@ -155,6 +169,28 @@ final class CameraService: NSObject, CameraServiceProtocol {
         flashMode = enabled ? .on : .off
     }
 
+    @discardableResult
+    func setZoom(factor: CGFloat) -> CGFloat {
+        var actualFactor = factor
+        sessionQueue.sync { [self] in
+            guard let device = currentDevice else { return }
+
+            let maxDeviceZoom = min(CameraConfig.maxZoomFactor, device.maxAvailableVideoZoomFactor)
+            let clampedFactor = min(max(factor, CameraConfig.minZoomFactor), maxDeviceZoom)
+
+            do {
+                try device.lockForConfiguration()
+                device.ramp(toVideoZoomFactor: clampedFactor, withRate: CameraConfig.zoomAnimationRate)
+                device.unlockForConfiguration()
+                currentZoomFactor = clampedFactor
+                actualFactor = clampedFactor
+            } catch {
+                print("ズーム設定のためのデバイスロックに失敗しました: \(error)")
+            }
+        }
+        return actualFactor
+    }
+
     func switchCamera() async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             sessionQueue.async { [self] in
@@ -189,6 +225,7 @@ final class CameraService: NSObject, CameraServiceProtocol {
                     return
                 }
 
+                self.currentZoomFactor = CameraConfig.minZoomFactor
                 captureSession.commitConfiguration()
                 continuation.resume()
             }
