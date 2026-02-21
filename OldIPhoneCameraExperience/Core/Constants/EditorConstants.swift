@@ -32,4 +32,9 @@ enum EditorConstants {
 
     /// 彩度のデフォルト値
     static let defaultSaturation: Float = 1.0
+
+    // MARK: - クロップ
+
+    /// クロップ矩形の最小サイズ（px）
+    static let minimumCropSize: CGFloat = 100
 }
