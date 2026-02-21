@@ -44,4 +44,12 @@ enum UIConstants {
 
     /// 白フェード演出の時間（秒）
     static let flashFadeDuration: TimeInterval = 0.15
+
+    // MARK: - ズームインジケーター
+
+    /// ズームインジケーターの自動非表示遅延（秒）
+    static let zoomIndicatorFadeDelay: TimeInterval = 2.0
+
+    /// ズームインジケーターのフェードアウト時間（秒）
+    static let zoomIndicatorFadeDuration: TimeInterval = 0.3
 }

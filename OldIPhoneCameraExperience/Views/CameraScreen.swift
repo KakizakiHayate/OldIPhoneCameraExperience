@@ -11,6 +11,9 @@ import SwiftUI
 struct CameraScreen: View {
     @StateObject private var viewModel: CameraViewModel
     @State private var isIrisAnimating = false
+    @State private var baseZoomFactor: CGFloat = 1.0
+    @State private var isZoomIndicatorVisible = false
+    @State private var zoomFadeTask: Task<Void, Never>?
 
     init(
         cameraService: CameraServiceProtocol = CameraService(),
@@ -39,9 +42,20 @@ struct CameraScreen: View {
 
                 Spacer()
 
-                // カメラプレビュー（実装は後で追加）
-                cameraPreview
-                    .aspectRatio(CameraConfig.previewAspectRatio, contentMode: .fit)
+                // カメラプレビュー + ズームインジケーター
+                ZStack(alignment: .bottom) {
+                    cameraPreview
+                        .aspectRatio(CameraConfig.previewAspectRatio, contentMode: .fit)
+
+                    // ズーム倍率インジケーター
+                    ZoomIndicator(
+                        zoomFactor: viewModel.zoomFactor,
+                        isVisible: isZoomIndicatorVisible
+                    )
+                    .padding(.bottom, 16)
+                    .allowsHitTesting(false)
+                }
+                .gesture(pinchGesture)
 
                 Spacer()
 
@@ -63,6 +77,41 @@ struct CameraScreen: View {
         }
         .onDisappear {
             viewModel.stopCamera()
+        }
+    }
+
+    // MARK: - Pinch Gesture
+
+    private var pinchGesture: some Gesture {
+        MagnificationGesture()
+            .onChanged { scale in
+                let newZoom = baseZoomFactor * scale
+                viewModel.setZoom(factor: newZoom)
+                showZoomIndicator()
+            }
+            .onEnded { _ in
+                baseZoomFactor = viewModel.zoomFactor
+                scheduleZoomIndicatorFade()
+            }
+    }
+
+    // MARK: - Zoom Indicator Control
+
+    private func showZoomIndicator() {
+        zoomFadeTask?.cancel()
+        withAnimation {
+            isZoomIndicatorVisible = true
+        }
+    }
+
+    private func scheduleZoomIndicatorFade() {
+        zoomFadeTask?.cancel()
+        zoomFadeTask = Task {
+            try? await Task.sleep(for: .seconds(UIConstants.zoomIndicatorFadeDelay))
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeInOut(duration: UIConstants.zoomIndicatorFadeDuration)) {
+                isZoomIndicatorVisible = false
+            }
         }
     }
 
