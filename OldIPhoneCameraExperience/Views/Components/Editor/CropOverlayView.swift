@@ -27,20 +27,25 @@ struct CropOverlayView: View {
             ZStack {
                 // セミダークオーバーレイ（枠外）
                 darkOverlay(in: bounds)
+                    .allowsHitTesting(false)
 
-                // クロップ枠
+                // クロップ枠（移動ジェスチャー対象）
                 Rectangle()
-                    .stroke(Color.white, lineWidth: 1)
+                    .fill(Color.white.opacity(0.001))
                     .frame(width: cropRect.width, height: cropRect.height)
+                    .overlay(
+                        Rectangle()
+                            .stroke(Color.white, lineWidth: 1)
+                    )
                     .position(
                         x: cropRect.midX,
                         y: cropRect.midY
                     )
+                    .gesture(moveGesture)
 
                 // 四隅のハンドル
                 cornerHandles
             }
-            .gesture(moveGesture)
         }
     }
 
