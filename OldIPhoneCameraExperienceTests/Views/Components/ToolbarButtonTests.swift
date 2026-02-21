@@ -14,7 +14,11 @@ final class ToolbarButtonTests: XCTestCase {
     func test_toolbarButton_nonActiveState_canBeCreated() {
         let button = ToolbarButton(icon: "bolt.slash.fill", isActive: false, action: {})
 
-        XCTAssertEqual(button.icon, "bolt.slash.fill", "iconが正しく設定される必要があります")
+        if case let .icon(icon) = button.content {
+            XCTAssertEqual(icon, "bolt.slash.fill", "iconが正しく設定される必要があります")
+        } else {
+            XCTFail("ToolbarButton(icon:)のcontentは.iconである必要があります")
+        }
         XCTAssertFalse(button.isActive, "isActiveがfalseである必要があります")
     }
 
@@ -23,7 +27,11 @@ final class ToolbarButtonTests: XCTestCase {
     func test_toolbarButton_activeState_canBeCreated() {
         let button = ToolbarButton(icon: "bolt.fill", isActive: true, action: {})
 
-        XCTAssertEqual(button.icon, "bolt.fill", "iconが正しく設定される必要があります")
+        if case let .icon(icon) = button.content {
+            XCTAssertEqual(icon, "bolt.fill", "iconが正しく設定される必要があります")
+        } else {
+            XCTFail("ToolbarButton(icon:)のcontentは.iconである必要があります")
+        }
         XCTAssertTrue(button.isActive, "isActiveがtrueである必要があります")
     }
 
@@ -49,7 +57,15 @@ final class ToolbarButtonTests: XCTestCase {
         let flashButton = ToolbarButton(icon: flashIcon, action: {})
         let cameraButton = ToolbarButton(icon: cameraIcon, action: {})
 
-        XCTAssertEqual(flashButton.icon, flashIcon, "フラッシュアイコンが正しく設定される必要があります")
-        XCTAssertEqual(cameraButton.icon, cameraIcon, "カメラ切替アイコンが正しく設定される必要があります")
+        if case let .icon(icon) = flashButton.content {
+            XCTAssertEqual(icon, flashIcon, "フラッシュアイコンが正しく設定される必要があります")
+        } else {
+            XCTFail("flashButtonのcontentは.iconである必要があります")
+        }
+        if case let .icon(icon) = cameraButton.content {
+            XCTAssertEqual(icon, cameraIcon, "カメラ切替アイコンが正しく設定される必要があります")
+        } else {
+            XCTFail("cameraButtonのcontentは.iconである必要があります")
+        }
     }
 }
