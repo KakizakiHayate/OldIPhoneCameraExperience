@@ -1,0 +1,21 @@
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+*.xcworkspacedata
+xcuserdata/
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# macOS
+.DS_Store
+
+# Fastlane credentials
+fastlane/.env
+fastlane/report.xml
+fastlane/README.md
+
+# Claude Code
+.claude/settings.local.json

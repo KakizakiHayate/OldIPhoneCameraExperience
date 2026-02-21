@@ -1,0 +1,7 @@
+# 認証情報は .env ファイルから読み込む（.envはgitignore対象）
+git_url(ENV["MATCH_GIT_URL"] || "https://github.com/your-username/certificates.git")
+storage_mode("git")
+
+type("appstore")
+
+app_identifier(ENV["APP_IDENTIFIER"] || "com.example.app")
