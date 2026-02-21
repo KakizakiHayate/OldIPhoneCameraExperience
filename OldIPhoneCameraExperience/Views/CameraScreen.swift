@@ -17,6 +17,7 @@ struct CameraScreen: View {
     @State private var recordingIndicatorOpacity: Double = 1.0
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
+    @State private var showEditor = false
 
     init(
         cameraService: CameraServiceProtocol = CameraService(),
@@ -78,6 +79,11 @@ struct CameraScreen: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(errorMessage)
+        }
+        .fullScreenCover(isPresented: $showEditor) {
+            if let image = viewModel.lastCapturedImage {
+                PhotoEditorScreen(sourceImage: image)
+            }
         }
         .statusBar(hidden: true)
         .task {
@@ -258,6 +264,11 @@ struct CameraScreen: View {
     private var bottomToolbar: some View {
         HStack {
             ThumbnailView(image: viewModel.lastCapturedImage)
+                .onTapGesture {
+                    if viewModel.lastCapturedImage != nil {
+                        showEditor = true
+                    }
+                }
                 .padding(.leading, 16)
 
             Spacer()
