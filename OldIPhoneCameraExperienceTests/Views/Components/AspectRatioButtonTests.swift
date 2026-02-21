@@ -130,7 +130,11 @@ final class AspectRatioButtonTests: XCTestCase {
     func test_toolbarButton_textVariant_canBeCreated() {
         let button = ToolbarButton(text: "4:3", action: {})
 
-        XCTAssertEqual(button.text, "4:3",
-                       "テキスト表示のToolbarButtonが生成できる必要があります")
+        if case let .text(text) = button.content {
+            XCTAssertEqual(text, "4:3",
+                           "テキスト表示のToolbarButtonが生成できる必要があります")
+        } else {
+            XCTFail("ToolbarButton(text:)のcontentは.textである必要があります")
+        }
     }
 }
