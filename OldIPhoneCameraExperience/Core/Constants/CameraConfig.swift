@@ -24,8 +24,8 @@ enum CameraConfig {
 
     // MARK: - ズーム設定
 
-    /// 最小ズーム倍率
-    static let minZoomFactor: CGFloat = 1.0
+    /// 最小ズーム倍率（ultra-wideカメラ対応: 0.5x）
+    static let minZoomFactor: CGFloat = 0.5
 
     /// 最大ズーム倍率（iPhone 4相当）
     static let maxZoomFactor: CGFloat = 5.0

@@ -74,7 +74,7 @@ final class MockCameraService: CameraServiceProtocol {
     func switchCamera() async throws {
         switchCameraCalled = true
         currentPosition = (currentPosition == .back) ? .front : .back
-        currentZoomFactor = CameraConfig.minZoomFactor
+        currentZoomFactor = 1.0
         torchEnabled = false
     }
 

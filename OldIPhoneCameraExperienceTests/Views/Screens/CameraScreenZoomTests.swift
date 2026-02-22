@@ -77,17 +77,17 @@ final class CameraScreenZoomTests: XCTestCase {
         XCTAssertEqual(viewModel.zoomFactor, CameraConfig.maxZoomFactor, "最大5倍を超えるズームは5.0にクランプされる必要があります")
     }
 
-    // MARK: - T-14.4: 最小1倍を下回るピンチインはクランプされる
+    // MARK: - T-14.4: 最小0.5倍を下回るピンチインはクランプされる
 
     func test_pinchIn_belowMin_clampsToMin() {
         viewModel.setZoom(factor: 2.0)
         let baseZoom: CGFloat = 2.0
-        let pinchScale: CGFloat = 0.3
-        let newZoom = baseZoom * pinchScale // 0.6
+        let pinchScale: CGFloat = 0.2
+        let newZoom = baseZoom * pinchScale // 0.4
 
         viewModel.setZoom(factor: newZoom)
 
-        XCTAssertEqual(viewModel.zoomFactor, CameraConfig.minZoomFactor, "最小1倍を下回るズームは1.0にクランプされる必要があります")
+        XCTAssertEqual(viewModel.zoomFactor, CameraConfig.minZoomFactor, "最小0.5倍を下回るズームは0.5にクランプされる必要があります")
     }
 
     // MARK: - T-14.5: 2.0倍の状態から1.5倍のピンチアウトで3.0倍

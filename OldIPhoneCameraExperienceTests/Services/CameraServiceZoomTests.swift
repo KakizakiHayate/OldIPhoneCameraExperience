@@ -29,10 +29,10 @@ final class CameraServiceZoomTests: XCTestCase {
         XCTAssertEqual(sut.currentZoomFactor, 3.0, "setZoom(factor: 3.0)でzoomFactorが3.0に設定される必要があります")
     }
 
-    // MARK: - T-13.2: setZoom(factor: 0.5) で1.0にクランプされる
+    // MARK: - T-13.2: setZoom(factor: 0.3) で0.5にクランプされる
 
     func test_setZoom_factorBelowMin_clampsToMin() {
-        sut.setZoom(factor: 0.5)
+        sut.setZoom(factor: 0.3)
 
         XCTAssertEqual(sut.currentZoomFactor, CameraConfig.minZoomFactor, "下限以下の値は最小値にクランプされる必要があります")
     }
@@ -53,7 +53,7 @@ final class CameraServiceZoomTests: XCTestCase {
 
         try await sut.switchCamera()
 
-        XCTAssertEqual(sut.currentZoomFactor, CameraConfig.minZoomFactor, "カメラ切替後はzoomFactorが1.0にリセットされる必要があります")
+        XCTAssertEqual(sut.currentZoomFactor, 1.0, "カメラ切替後はzoomFactorが1.0にリセットされる必要があります")
     }
 
     // MARK: - T-13.5: 前面カメラのmaxが3.0の場合に5.0を指定すると3.0にクランプ
