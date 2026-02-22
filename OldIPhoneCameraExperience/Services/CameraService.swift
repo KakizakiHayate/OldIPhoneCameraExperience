@@ -309,7 +309,19 @@ final class CameraService: NSObject, CameraServiceProtocol {
         guard audioInput == nil else { return }
 
         let audioStatus = AVCaptureDevice.authorizationStatus(for: .audio)
-        guard audioStatus == .authorized else { return }
+        if audioStatus == .notDetermined {
+            // sessionQueue上なので同期的にリクエスト（結果を待ってから続行）
+            let semaphore = DispatchSemaphore(value: 0)
+            AVCaptureDevice.requestAccess(for: .audio) { _ in
+                semaphore.signal()
+            }
+            semaphore.wait()
+
+            let newStatus = AVCaptureDevice.authorizationStatus(for: .audio)
+            guard newStatus == .authorized else { return }
+        } else {
+            guard audioStatus == .authorized else { return }
+        }
 
         guard let audioDevice = AVCaptureDevice.default(for: .audio) else { return }
         do {

@@ -5,6 +5,7 @@
 //  Created by Manus on 2026-02-13.
 //
 
+import AudioToolbox
 import AVFoundation
 import Combine
 import CoreImage
@@ -156,6 +157,7 @@ final class CameraViewModel: ObservableObject {
     /// 動画録画を開始する
     func startRecording() {
         guard captureMode == .video, !isRecording, !isProcessingVideo else { return }
+        AudioServicesPlaySystemSound(1117)
         cameraService.startRecording()
         isRecording = true
         recordingDuration = 0
@@ -165,6 +167,7 @@ final class CameraViewModel: ObservableObject {
     /// 動画録画を停止し、フィルター適用後に保存する
     func stopRecording() async throws {
         guard isRecording else { return }
+        AudioServicesPlaySystemSound(1118)
         stopRecordingTimer()
         isRecording = false
 
