@@ -65,7 +65,6 @@ final class CameraService: NSObject, CameraServiceProtocol {
     let captureSession = AVCaptureSession()
     private var currentDevice: AVCaptureDevice?
     private var photoOutput: AVCapturePhotoOutput?
-    private var videoDataOutput: AVCaptureVideoDataOutput?
     private var movieFileOutput: AVCaptureMovieFileOutput?
     private var audioInput: AVCaptureDeviceInput?
     private var currentPosition: AVCaptureDevice.Position = CameraConfig.defaultPosition
@@ -74,7 +73,6 @@ final class CameraService: NSObject, CameraServiceProtocol {
     private var flashMode: AVCaptureDevice.FlashMode = .off
     private var torchRequested: Bool = false
     private let sessionQueue = DispatchQueue(label: "com.oldiPhonecamera.sessionQueue")
-    private let videoDataOutputQueue = DispatchQueue(label: "com.oldiPhonecamera.videoDataOutput")
     private let zoomLock = NSLock()
     private var _currentZoomFactor: CGFloat = CameraConfig.minZoomFactor
 
@@ -156,13 +154,6 @@ final class CameraService: NSObject, CameraServiceProtocol {
         if captureSession.canAddOutput(photoOut) {
             captureSession.addOutput(photoOut)
             photoOutput = photoOut
-        }
-
-        let videoOut = AVCaptureVideoDataOutput()
-        videoOut.setSampleBufferDelegate(self, queue: videoDataOutputQueue)
-        if captureSession.canAddOutput(videoOut) {
-            captureSession.addOutput(videoOut)
-            videoDataOutput = videoOut
         }
 
         let movieOut = AVCaptureMovieFileOutput()
@@ -417,22 +408,6 @@ extension CameraService: AVCapturePhotoCaptureDelegate {
 
         photoContinuation?.resume(returning: orientedImage)
         photoContinuation = nil
-    }
-}
-
-// MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
-
-extension CameraService: AVCaptureVideoDataOutputSampleBufferDelegate {
-    func captureOutput(
-        _: AVCaptureOutput,
-        didOutput sampleBuffer: CMSampleBuffer,
-        from _: AVCaptureConnection
-    ) {
-        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
-            return
-        }
-
-        _ = CIImage(cvPixelBuffer: pixelBuffer)
     }
 }
 
