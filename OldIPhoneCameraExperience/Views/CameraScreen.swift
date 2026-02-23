@@ -38,39 +38,14 @@ struct CameraScreen: View {
             Color.black
                 .ignoresSafeArea()
 
-            VStack(spacing: 0) {
-                // トップツールバー
-                topToolbar
-                    .frame(height: UIConstants.topToolbarHeight)
-
-                Spacer()
-
-                // カメラプレビュー + ズームインジケーター
-                ZStack(alignment: .bottom) {
-                    cameraPreview
-                        .aspectRatio(previewAspectRatio, contentMode: .fit)
-                        .animation(.easeInOut(duration: 0.3), value: viewModel.aspectRatio)
-
-                    ZoomIndicator(
-                        zoomFactor: viewModel.zoomFactor,
-                        isVisible: isZoomIndicatorVisible
-                    )
-                    .padding(.bottom, 16)
-                    .allowsHitTesting(false)
+            Group {
+                if isPhotoMode {
+                    photoModeLayout
+                } else {
+                    videoModeLayout
                 }
-                .gesture(pinchGesture)
-
-                // モード切替ラベル
-                modeSwitchLabel
-                    .padding(.vertical, 8)
-                    .gesture(swipeGesture)
-
-                Spacer()
-
-                // ボトムツールバー
-                bottomToolbar
-                    .frame(height: UIConstants.bottomToolbarHeight)
             }
+            .animation(.easeInOut(duration: 0.3), value: viewModel.captureMode)
 
             // 虹彩絞りアニメーション
             IrisAnimationView(isAnimating: $isIrisAnimating)
@@ -98,13 +73,81 @@ struct CameraScreen: View {
         }
     }
 
-    // MARK: - Preview Aspect Ratio
+    // MARK: - Mode Helpers
 
-    private var previewAspectRatio: CGFloat {
-        if viewModel.captureMode == .video {
-            return 1.0 / CameraConfig.videoAspectRatio
+    private var isPhotoMode: Bool {
+        viewModel.captureMode == .photo
+    }
+
+    // MARK: - Photo Mode Layout
+
+    /// 写真モード: VStackレイアウト（プレビュー上下に黒帯）
+    private var photoModeLayout: some View {
+        VStack(spacing: 0) {
+            topToolbar
+                .frame(height: UIConstants.topToolbarHeight)
+
+            Spacer(minLength: 0)
+
+            ZStack(alignment: .bottom) {
+                cameraPreview
+                    .aspectRatio(viewModel.aspectRatio.portraitRatio, contentMode: .fit)
+
+                ZoomIndicator(
+                    zoomFactor: viewModel.zoomFactor,
+                    isVisible: isZoomIndicatorVisible
+                )
+                .padding(.bottom, 16)
+                .allowsHitTesting(false)
+            }
+            .gesture(pinchGesture)
+            .simultaneousGesture(swipeGesture)
+
+            Spacer(minLength: 0)
+
+            zoomPresetButtons
+                .padding(.bottom, 12)
+
+            shutterRow
+
+            modeSwitchLabel
+                .padding(.vertical, 8)
         }
-        return viewModel.aspectRatio.portraitRatio
+        .animation(.easeInOut(duration: 0.3), value: viewModel.aspectRatio)
+    }
+
+    // MARK: - Video Mode Layout
+
+    /// ビデオモード: ZStackレイアウト（全画面プレビュー + オーバーレイコントロール）
+    private var videoModeLayout: some View {
+        ZStack {
+            cameraPreview
+                .ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                topToolbar
+                    .frame(height: UIConstants.topToolbarHeight)
+
+                Spacer()
+
+                ZoomIndicator(
+                    zoomFactor: viewModel.zoomFactor,
+                    isVisible: isZoomIndicatorVisible
+                )
+                .padding(.bottom, 16)
+                .allowsHitTesting(false)
+
+                zoomPresetButtons
+                    .padding(.bottom, 12)
+
+                shutterRow
+
+                modeSwitchLabel
+                    .padding(.vertical, 8)
+            }
+        }
+        .gesture(pinchGesture)
+        .simultaneousGesture(swipeGesture)
     }
 
     // MARK: - Pinch Gesture
@@ -128,12 +171,10 @@ struct CameraScreen: View {
         DragGesture(minimumDistance: 50)
             .onEnded { value in
                 guard !viewModel.isRecording else { return }
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    if value.translation.width < -50 {
-                        viewModel.switchToVideoMode()
-                    } else if value.translation.width > 50 {
-                        viewModel.switchToPhotoMode()
-                    }
+                if value.translation.width < -50 {
+                    viewModel.switchToVideoMode()
+                } else if value.translation.width > 50 {
+                    viewModel.switchToPhotoMode()
                 }
             }
     }
@@ -158,6 +199,86 @@ struct CameraScreen: View {
         }
     }
 
+    // MARK: - Top Toolbar
+
+    private var topToolbar: some View {
+        HStack {
+            if viewModel.captureMode == .photo {
+                // 写真モード: アスペクト比ボタン（左）
+                ToolbarButton(text: viewModel.aspectRatio.displayLabel) {
+                    viewModel.setAspectRatio(viewModel.aspectRatio.next())
+                }
+                .padding(.leading, 16)
+            } else {
+                // ビデオモード: 「HD」「30」バッジ（左）
+                videoInfoBadges
+                    .padding(.leading, 16)
+            }
+
+            Spacer()
+
+            if !viewModel.shouldHideFlashButton {
+                ToolbarButton(
+                    icon: viewModel.flashIconName,
+                    isActive: viewModel.state.isFlashOn
+                ) {
+                    viewModel.toggleFlash()
+                }
+                .padding(.trailing, 16)
+                .transition(.opacity)
+            }
+        }
+        .padding(.horizontal, 16)
+        .background(viewModel.captureMode == .photo ? Color.black : Color.clear)
+    }
+
+    // MARK: - Video Info Badges
+
+    private var videoInfoBadges: some View {
+        HStack(spacing: 6) {
+            videoBadge("HD")
+            videoBadge("30")
+        }
+    }
+
+    private func videoBadge(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 12, weight: .bold, design: .rounded))
+            .foregroundColor(.yellow)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.white.opacity(0.15))
+            )
+    }
+
+    // MARK: - Zoom Preset Buttons
+
+    private var zoomPresetButtons: some View {
+        HStack(spacing: 12) {
+            zoomPresetButton(label: "0.5", factor: 0.5)
+            zoomPresetButton(label: "1x", factor: 1.0)
+        }
+    }
+
+    private func zoomPresetButton(label: String, factor: CGFloat) -> some View {
+        let isSelected = abs(viewModel.zoomFactor - factor) < 0.05
+        return Button {
+            viewModel.setZoom(factor: factor)
+            baseZoomFactor = viewModel.zoomFactor
+        } label: {
+            Text(label)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(isSelected ? .yellow : .white)
+                .frame(width: 36, height: 36)
+                .background(
+                    Circle()
+                        .fill(isSelected ? Color.white.opacity(0.2) : Color.black.opacity(0.4))
+                )
+        }
+    }
+
     // MARK: - Mode Switch Label
 
     private var modeSwitchLabel: some View {
@@ -166,15 +287,11 @@ struct CameraScreen: View {
                 recordingIndicator
             } else {
                 HStack(spacing: 24) {
-                    modeLabel("写真", isSelected: viewModel.captureMode == .photo) {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            viewModel.switchToPhotoMode()
-                        }
-                    }
                     modeLabel("ビデオ", isSelected: viewModel.captureMode == .video) {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            viewModel.switchToVideoMode()
-                        }
+                        viewModel.switchToVideoMode()
+                    }
+                    modeLabel("写真", isSelected: viewModel.captureMode == .photo) {
+                        viewModel.switchToPhotoMode()
                     }
                 }
             }
@@ -212,46 +329,6 @@ struct CameraScreen: View {
         }
     }
 
-    // MARK: - Top Toolbar
-
-    private var topToolbar: some View {
-        HStack {
-            // アスペクト比切替ボタン（写真モード時のみ表示）
-            if viewModel.captureMode == .photo {
-                ToolbarButton(text: viewModel.aspectRatio.displayLabel) {
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        viewModel.setAspectRatio(viewModel.aspectRatio.next())
-                    }
-                }
-                .padding(.leading, 16)
-            }
-
-            Spacer()
-
-            if !viewModel.shouldHideFlashButton {
-                ToolbarButton(
-                    icon: viewModel.flashIconName,
-                    isActive: viewModel.state.isFlashOn
-                ) {
-                    viewModel.toggleFlash()
-                }
-                .padding(.trailing, 16)
-                .transition(.opacity)
-            }
-        }
-        .padding(.horizontal, 16)
-        .background(
-            LinearGradient(
-                colors: [
-                    Color(white: 0.2),
-                    Color(white: 0.15)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        )
-    }
-
     // MARK: - Camera Preview
 
     private var cameraPreview: some View {
@@ -259,9 +336,9 @@ struct CameraScreen: View {
             .background(Color.black)
     }
 
-    // MARK: - Bottom Toolbar
+    // MARK: - Shutter Row
 
-    private var bottomToolbar: some View {
+    private var shutterRow: some View {
         HStack {
             ThumbnailView(image: viewModel.lastCapturedImage)
                 .onTapGesture {
@@ -297,16 +374,6 @@ struct CameraScreen: View {
             .padding(.trailing, 16)
         }
         .padding(.vertical, 16)
-        .background(
-            LinearGradient(
-                colors: [
-                    Color(white: 0.15),
-                    Color(white: 0.1)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        )
     }
 
     // MARK: - Actions

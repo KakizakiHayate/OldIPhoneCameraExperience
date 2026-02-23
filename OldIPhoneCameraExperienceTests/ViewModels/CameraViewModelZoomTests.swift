@@ -40,7 +40,7 @@ final class CameraViewModelZoomTests: XCTestCase {
         super.tearDown()
     }
 
-    // MARK: - T-13.7: ViewModel初期化時のzoomFactorが1.0
+    // MARK: - T-13.7: ViewModel初期化時のzoomFactorが1.0（デバイスデフォルト）
 
     func test_initialState_zoomFactorIsOne() {
         XCTAssertEqual(sut.zoomFactor, 1.0, "初期状態ではzoomFactorが1.0である必要があります")

@@ -18,7 +18,7 @@ final class CameraViewModel: ObservableObject {
 
     @Published private(set) var state: CameraState
     @Published private(set) var lastCapturedImage: UIImage?
-    @Published private(set) var zoomFactor: CGFloat = CameraConfig.minZoomFactor
+    @Published private(set) var zoomFactor: CGFloat = 1.0
     @Published private(set) var captureMode: CaptureMode = .photo
     @Published private(set) var isRecording: Bool = false
     @Published private(set) var recordingDuration: TimeInterval = 0
@@ -93,7 +93,7 @@ final class CameraViewModel: ObservableObject {
         guard !isRecording else { return }
         try await cameraService.switchCamera()
         state.cameraPosition = (state.cameraPosition == .back) ? .front : .back
-        zoomFactor = CameraConfig.minZoomFactor
+        zoomFactor = 1.0
         if state.cameraPosition == .front, state.isFlashOn {
             toggleFlash()
         }

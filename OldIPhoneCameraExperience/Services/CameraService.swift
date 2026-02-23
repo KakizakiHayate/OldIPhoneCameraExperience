@@ -82,6 +82,7 @@ final class CameraService: NSObject, CameraServiceProtocol {
         get { zoomLock.lock(); defer { zoomLock.unlock() }; return _currentZoomFactor }
         set { zoomLock.lock(); defer { zoomLock.unlock() }; _currentZoomFactor = newValue }
     }
+
     private(set) var isRecording: Bool = false
 
     var isSessionRunning: Bool {
@@ -120,9 +121,22 @@ final class CameraService: NSObject, CameraServiceProtocol {
         captureSession.beginConfiguration()
         captureSession.sessionPreset = CameraConfig.sessionPreset
 
-        guard let device = AVCaptureDevice.default(
-            .builtInWideAngleCamera, for: .video, position: currentPosition
-        ) else {
+        // 背面カメラ: DualWideCamera（wide + ultra-wide）を優先し、なければWideAngleにフォールバック
+        // 前面カメラ: WideAngleCamera のみ（ultra-wideなし）
+        let device: AVCaptureDevice?
+        if currentPosition == .back {
+            device = AVCaptureDevice.default(
+                .builtInDualWideCamera, for: .video, position: .back
+            ) ?? AVCaptureDevice.default(
+                .builtInWideAngleCamera, for: .video, position: .back
+            )
+        } else {
+            device = AVCaptureDevice.default(
+                .builtInWideAngleCamera, for: .video, position: .front
+            )
+        }
+
+        guard let device else {
             captureSession.commitConfiguration()
             throw CameraError.deviceNotFound
         }
@@ -188,24 +202,24 @@ final class CameraService: NSObject, CameraServiceProtocol {
 
     @discardableResult
     func setZoom(factor: CGFloat) -> CGFloat {
-        var actualFactor = factor
-        sessionQueue.sync { [self] in
-            guard let device = currentDevice else { return }
+        guard let device = currentDevice else { return factor }
 
-            let maxDeviceZoom = min(CameraConfig.maxZoomFactor, device.maxAvailableVideoZoomFactor)
-            let clampedFactor = min(max(factor, CameraConfig.minZoomFactor), maxDeviceZoom)
+        let minZoom = max(CameraConfig.minZoomFactor, device.minAvailableVideoZoomFactor)
+        let maxZoom = min(CameraConfig.maxZoomFactor, device.maxAvailableVideoZoomFactor)
+        let clampedFactor = min(max(factor, minZoom), maxZoom)
 
+        currentZoomFactor = clampedFactor
+
+        sessionQueue.async { [self] in
             do {
                 try device.lockForConfiguration()
                 device.ramp(toVideoZoomFactor: clampedFactor, withRate: CameraConfig.zoomAnimationRate)
                 device.unlockForConfiguration()
-                currentZoomFactor = clampedFactor
-                actualFactor = clampedFactor
             } catch {
                 print("ズーム設定のためのデバイスロックに失敗しました: \(error)")
             }
         }
-        return actualFactor
+        return clampedFactor
     }
 
     // MARK: - Video Recording
@@ -319,9 +333,19 @@ final class CameraService: NSObject, CameraServiceProtocol {
                 }
 
                 let newPosition: AVCaptureDevice.Position = (currentPosition == .back) ? .front : .back
-                guard let newDevice = AVCaptureDevice.default(
-                    .builtInWideAngleCamera, for: .video, position: newPosition
-                ) else {
+                let newDevice: AVCaptureDevice?
+                if newPosition == .back {
+                    newDevice = AVCaptureDevice.default(
+                        .builtInDualWideCamera, for: .video, position: .back
+                    ) ?? AVCaptureDevice.default(
+                        .builtInWideAngleCamera, for: .video, position: .back
+                    )
+                } else {
+                    newDevice = AVCaptureDevice.default(
+                        .builtInWideAngleCamera, for: .video, position: .front
+                    )
+                }
+                guard let newDevice else {
                     captureSession.commitConfiguration()
                     continuation.resume(throwing: CameraError.deviceNotFound)
                     return
@@ -340,7 +364,7 @@ final class CameraService: NSObject, CameraServiceProtocol {
                     return
                 }
 
-                self.currentZoomFactor = CameraConfig.minZoomFactor
+                self.currentZoomFactor = 1.0
                 self.torchRequested = false
                 captureSession.commitConfiguration()
                 continuation.resume()
@@ -396,7 +420,8 @@ extension CameraService: AVCapturePhotoCaptureDelegate {
 
         let orientedImage: CIImage
         if let orientationValue = ciImage.properties[kCGImagePropertyOrientation as String] as? UInt32,
-           let orientation = CGImagePropertyOrientation(rawValue: orientationValue) {
+           let orientation = CGImagePropertyOrientation(rawValue: orientationValue)
+        {
             orientedImage = ciImage.oriented(orientation)
         } else {
             orientedImage = ciImage
