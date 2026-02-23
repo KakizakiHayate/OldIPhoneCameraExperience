@@ -18,6 +18,7 @@ struct CameraScreen: View {
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
     @State private var showEditor = false
+    @State private var displayedAspectRatio: CGFloat = CameraConfig.defaultAspectRatio.portraitRatio
 
     init(
         cameraService: CameraServiceProtocol = CameraService(),
@@ -50,7 +51,7 @@ struct CameraScreen: View {
                 // カメラプレビュー（常に1インスタンス、破棄されない）
                 ZStack(alignment: .bottom) {
                     cameraPreview
-                        .aspectRatio(previewAspectRatio, contentMode: .fit)
+                        .aspectRatio(displayedAspectRatio, contentMode: .fit)
 
                     ZoomIndicator(
                         zoomFactor: viewModel.zoomFactor,
@@ -75,7 +76,16 @@ struct CameraScreen: View {
                 modeSwitchLabel
                     .padding(.vertical, 8)
             }
-            .animation(.easeInOut(duration: 0.3), value: viewModel.aspectRatio)
+            .onChange(of: viewModel.captureMode) { _, _ in
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    displayedAspectRatio = previewAspectRatio
+                }
+            }
+            .onChange(of: viewModel.aspectRatio) { _, _ in
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    displayedAspectRatio = previewAspectRatio
+                }
+            }
 
             // 虹彩絞りアニメーション
             IrisAnimationView(isAnimating: $isIrisAnimating)
