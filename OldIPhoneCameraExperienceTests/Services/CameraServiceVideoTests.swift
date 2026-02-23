@@ -156,43 +156,40 @@ final class CameraServiceVideoTests: XCTestCase {
         XCTAssertFalse(sut.isAudioEnabled, "マイク拒否時は音声なしで録画する必要があります")
     }
 
-    // MARK: - T-15.15: 動画モード切替でプリセット変更
+    // MARK: - T-15.15: 動画モード切替でプリセットは変わらない（起動時に統一済み）
 
-    func test_switchToVideoMode_changesPreset() {
+    func test_switchToVideoMode_presetUnchanged() {
+        let originalPreset = sut.currentPreset
         sut.switchToVideoMode()
 
         XCTAssertEqual(
             sut.currentPreset,
-            CameraConfig.videoPreset,
-            "動画モードでプリセットが720pに変更される必要があります"
+            originalPreset,
+            "モード切替でプリセットは変更されない（起動時に統一済み）"
         )
     }
 
-    // MARK: - T-15.16: 写真モード切替でプリセット復元
+    // MARK: - T-15.16: 写真モード切替でプリセットは変わらない
 
-    func test_switchToPhotoMode_restoresPreset() {
+    func test_switchToPhotoMode_presetUnchanged() {
+        let originalPreset = sut.currentPreset
         sut.switchToVideoMode()
         sut.switchToPhotoMode()
 
+        XCTAssertEqual(
+            sut.currentPreset,
+            originalPreset,
+            "モード切替でプリセットは変更されない（起動時に統一済み）"
+        )
+    }
+
+    // MARK: - T-15.17: セッションプリセットは常に.photo
+
+    func test_sessionPreset_alwaysPhoto() {
         XCTAssertEqual(
             sut.currentPreset,
             CameraConfig.sessionPreset,
-            "写真モードでプリセットが.photoに復元される必要があります"
-        )
-    }
-
-    // MARK: - T-15.17: 録画中のモード切替は無効
-
-    func test_switchMode_duringRecording_isBlocked() {
-        sut.startRecording()
-        XCTAssertTrue(sut.isRecording)
-
-        sut.switchToPhotoMode()
-
-        XCTAssertEqual(
-            sut.currentPreset,
-            CameraConfig.videoPreset,
-            "録画中はモード切替が無効化される必要があります"
+            "セッションプリセットは常に.photoである必要があります"
         )
     }
 }

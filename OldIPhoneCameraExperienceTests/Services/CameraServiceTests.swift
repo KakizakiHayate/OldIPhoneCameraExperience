@@ -82,9 +82,6 @@ final class MockCameraService: CameraServiceProtocol {
         startRecordingCalled = true
         isRecording = true
         isAudioEnabled = micPermissionGranted
-        if currentPreset != CameraConfig.videoPreset {
-            currentPreset = CameraConfig.videoPreset
-        }
     }
 
     func stopRecording() async throws -> URL {
@@ -109,13 +106,11 @@ final class MockCameraService: CameraServiceProtocol {
     }
 
     func switchToVideoMode() {
-        guard !isRecording else { return }
-        currentPreset = CameraConfig.videoPreset
+        // セッション再構成は不要（起動時に全出力をセットアップ済み）
     }
 
     func switchToPhotoMode() {
-        guard !isRecording else { return }
-        currentPreset = CameraConfig.sessionPreset
+        // セッション再構成は不要（起動時に全出力をセットアップ済み）
     }
 }
 

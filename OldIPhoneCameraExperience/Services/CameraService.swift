@@ -165,6 +165,14 @@ final class CameraService: NSObject, CameraServiceProtocol {
             videoDataOutput = videoOut
         }
 
+        let movieOut = AVCaptureMovieFileOutput()
+        if captureSession.canAddOutput(movieOut) {
+            captureSession.addOutput(movieOut)
+            movieFileOutput = movieOut
+        }
+
+        addAudioInputIfPermitted()
+
         captureSession.commitConfiguration()
     }
 
@@ -265,44 +273,11 @@ final class CameraService: NSObject, CameraServiceProtocol {
     }
 
     func switchToVideoMode() {
-        sessionQueue.async { [self] in
-            guard !isRecording else { return }
-
-            captureSession.beginConfiguration()
-            captureSession.sessionPreset = CameraConfig.videoPreset
-
-            if movieFileOutput == nil {
-                let movieOut = AVCaptureMovieFileOutput()
-                if captureSession.canAddOutput(movieOut) {
-                    captureSession.addOutput(movieOut)
-                    movieFileOutput = movieOut
-                }
-            }
-
-            addAudioInputIfPermitted()
-            captureSession.commitConfiguration()
-        }
+        // セッション再構成は不要（起動時に全出力をセットアップ済み）
     }
 
     func switchToPhotoMode() {
-        sessionQueue.async { [self] in
-            guard !isRecording else { return }
-
-            captureSession.beginConfiguration()
-            captureSession.sessionPreset = CameraConfig.sessionPreset
-
-            if let movieOut = movieFileOutput {
-                captureSession.removeOutput(movieOut)
-                movieFileOutput = nil
-            }
-
-            if let audioIn = audioInput {
-                captureSession.removeInput(audioIn)
-                audioInput = nil
-            }
-
-            captureSession.commitConfiguration()
-        }
+        // セッション再構成は不要（起動時に全出力をセットアップ済み）
     }
 
     private func addAudioInputIfPermitted() {
