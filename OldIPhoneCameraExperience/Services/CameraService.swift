@@ -165,6 +165,14 @@ final class CameraService: NSObject, CameraServiceProtocol {
             videoDataOutput = videoOut
         }
 
+        let movieOut = AVCaptureMovieFileOutput()
+        if captureSession.canAddOutput(movieOut) {
+            captureSession.addOutput(movieOut)
+            movieFileOutput = movieOut
+        }
+
+        addAudioInputIfPermitted()
+
         captureSession.commitConfiguration()
     }
 
@@ -202,24 +210,25 @@ final class CameraService: NSObject, CameraServiceProtocol {
 
     @discardableResult
     func setZoom(factor: CGFloat) -> CGFloat {
-        guard let device = currentDevice else { return factor }
+        var actualFactor = factor
+        sessionQueue.sync { [self] in
+            guard let device = currentDevice else { return }
 
-        let minZoom = max(CameraConfig.minZoomFactor, device.minAvailableVideoZoomFactor)
-        let maxZoom = min(CameraConfig.maxZoomFactor, device.maxAvailableVideoZoomFactor)
-        let clampedFactor = min(max(factor, minZoom), maxZoom)
+            let minZoom = max(CameraConfig.minZoomFactor, device.minAvailableVideoZoomFactor)
+            let maxZoom = min(CameraConfig.maxZoomFactor, device.maxAvailableVideoZoomFactor)
+            let clampedFactor = min(max(factor, minZoom), maxZoom)
 
-        currentZoomFactor = clampedFactor
-
-        sessionQueue.async { [self] in
             do {
                 try device.lockForConfiguration()
                 device.ramp(toVideoZoomFactor: clampedFactor, withRate: CameraConfig.zoomAnimationRate)
                 device.unlockForConfiguration()
+                currentZoomFactor = clampedFactor
+                actualFactor = clampedFactor
             } catch {
                 print("ズーム設定のためのデバイスロックに失敗しました: \(error)")
             }
         }
-        return clampedFactor
+        return actualFactor
     }
 
     // MARK: - Video Recording
@@ -265,51 +274,30 @@ final class CameraService: NSObject, CameraServiceProtocol {
     }
 
     func switchToVideoMode() {
-        sessionQueue.async { [self] in
-            guard !isRecording else { return }
-
-            captureSession.beginConfiguration()
-            captureSession.sessionPreset = CameraConfig.videoPreset
-
-            if movieFileOutput == nil {
-                let movieOut = AVCaptureMovieFileOutput()
-                if captureSession.canAddOutput(movieOut) {
-                    captureSession.addOutput(movieOut)
-                    movieFileOutput = movieOut
-                }
-            }
-
-            addAudioInputIfPermitted()
-            captureSession.commitConfiguration()
-        }
+        // セッション再構成は不要（起動時に全出力をセットアップ済み）
     }
 
     func switchToPhotoMode() {
-        sessionQueue.async { [self] in
-            guard !isRecording else { return }
-
-            captureSession.beginConfiguration()
-            captureSession.sessionPreset = CameraConfig.sessionPreset
-
-            if let movieOut = movieFileOutput {
-                captureSession.removeOutput(movieOut)
-                movieFileOutput = nil
-            }
-
-            if let audioIn = audioInput {
-                captureSession.removeInput(audioIn)
-                audioInput = nil
-            }
-
-            captureSession.commitConfiguration()
-        }
+        // セッション再構成は不要（起動時に全出力をセットアップ済み）
     }
 
     private func addAudioInputIfPermitted() {
         guard audioInput == nil else { return }
 
         let audioStatus = AVCaptureDevice.authorizationStatus(for: .audio)
-        guard audioStatus == .authorized else { return }
+        if audioStatus == .notDetermined {
+            // sessionQueue上なので同期的にリクエスト（結果を待ってから続行）
+            let semaphore = DispatchSemaphore(value: 0)
+            AVCaptureDevice.requestAccess(for: .audio) { _ in
+                semaphore.signal()
+            }
+            semaphore.wait()
+
+            let newStatus = AVCaptureDevice.authorizationStatus(for: .audio)
+            guard newStatus == .authorized else { return }
+        } else {
+            guard audioStatus == .authorized else { return }
+        }
 
         guard let audioDevice = AVCaptureDevice.default(for: .audio) else { return }
         do {

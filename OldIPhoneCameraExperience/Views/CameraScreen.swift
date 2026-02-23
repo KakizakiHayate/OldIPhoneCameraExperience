@@ -18,6 +18,7 @@ struct CameraScreen: View {
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
     @State private var showEditor = false
+    @State private var displayedAspectRatio: CGFloat = CameraConfig.defaultAspectRatio.portraitRatio
 
     init(
         cameraService: CameraServiceProtocol = CameraService(),
@@ -38,14 +39,53 @@ struct CameraScreen: View {
             Color.black
                 .ignoresSafeArea()
 
-            Group {
+            VStack(spacing: 0) {
+                topToolbar
+                    .frame(height: UIConstants.topToolbarHeight)
+
+                // 黒帯（上）: 写真モードのみ表示
                 if isPhotoMode {
-                    photoModeLayout
-                } else {
-                    videoModeLayout
+                    Spacer(minLength: 0)
+                }
+
+                // カメラプレビュー（常に1インスタンス、破棄されない）
+                ZStack(alignment: .bottom) {
+                    cameraPreview
+                        .aspectRatio(displayedAspectRatio, contentMode: .fit)
+
+                    ZoomIndicator(
+                        zoomFactor: viewModel.zoomFactor,
+                        isVisible: isZoomIndicatorVisible
+                    )
+                    .padding(.bottom, 16)
+                    .allowsHitTesting(false)
+                }
+                .gesture(pinchGesture)
+                .simultaneousGesture(swipeGesture)
+
+                // 黒帯（下）: 写真モードのみ表示
+                if isPhotoMode {
+                    Spacer(minLength: 0)
+                }
+
+                zoomPresetButtons
+                    .padding(.bottom, 12)
+
+                shutterRow
+
+                modeSwitchLabel
+                    .padding(.vertical, 8)
+            }
+            .onChange(of: viewModel.captureMode) { _, _ in
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    displayedAspectRatio = previewAspectRatio
                 }
             }
-            .animation(.easeInOut(duration: 0.3), value: viewModel.captureMode)
+            .onChange(of: viewModel.aspectRatio) { _, _ in
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    displayedAspectRatio = previewAspectRatio
+                }
+            }
 
             // 虹彩絞りアニメーション
             IrisAnimationView(isAnimating: $isIrisAnimating)
@@ -79,75 +119,11 @@ struct CameraScreen: View {
         viewModel.captureMode == .photo
     }
 
-    // MARK: - Photo Mode Layout
-
-    /// 写真モード: VStackレイアウト（プレビュー上下に黒帯）
-    private var photoModeLayout: some View {
-        VStack(spacing: 0) {
-            topToolbar
-                .frame(height: UIConstants.topToolbarHeight)
-
-            Spacer(minLength: 0)
-
-            ZStack(alignment: .bottom) {
-                cameraPreview
-                    .aspectRatio(viewModel.aspectRatio.portraitRatio, contentMode: .fit)
-
-                ZoomIndicator(
-                    zoomFactor: viewModel.zoomFactor,
-                    isVisible: isZoomIndicatorVisible
-                )
-                .padding(.bottom, 16)
-                .allowsHitTesting(false)
-            }
-            .gesture(pinchGesture)
-            .simultaneousGesture(swipeGesture)
-
-            Spacer(minLength: 0)
-
-            zoomPresetButtons
-                .padding(.bottom, 12)
-
-            shutterRow
-
-            modeSwitchLabel
-                .padding(.vertical, 8)
+    private var previewAspectRatio: CGFloat {
+        if isPhotoMode {
+            return viewModel.aspectRatio.portraitRatio
         }
-        .animation(.easeInOut(duration: 0.3), value: viewModel.aspectRatio)
-    }
-
-    // MARK: - Video Mode Layout
-
-    /// ビデオモード: ZStackレイアウト（全画面プレビュー + オーバーレイコントロール）
-    private var videoModeLayout: some View {
-        ZStack {
-            cameraPreview
-                .ignoresSafeArea()
-
-            VStack(spacing: 0) {
-                topToolbar
-                    .frame(height: UIConstants.topToolbarHeight)
-
-                Spacer()
-
-                ZoomIndicator(
-                    zoomFactor: viewModel.zoomFactor,
-                    isVisible: isZoomIndicatorVisible
-                )
-                .padding(.bottom, 16)
-                .allowsHitTesting(false)
-
-                zoomPresetButtons
-                    .padding(.bottom, 12)
-
-                shutterRow
-
-                modeSwitchLabel
-                    .padding(.vertical, 8)
-            }
-        }
-        .gesture(pinchGesture)
-        .simultaneousGesture(swipeGesture)
+        return 1.0 / CameraConfig.videoAspectRatio
     }
 
     // MARK: - Pinch Gesture
@@ -228,7 +204,6 @@ struct CameraScreen: View {
                 .transition(.opacity)
             }
         }
-        .padding(.horizontal, 16)
         .background(viewModel.captureMode == .photo ? Color.black : Color.clear)
     }
 
@@ -257,8 +232,8 @@ struct CameraScreen: View {
 
     private var zoomPresetButtons: some View {
         HStack(spacing: 12) {
-            zoomPresetButton(label: "0.5", factor: 0.5)
-            zoomPresetButton(label: "1x", factor: 1.0)
+            zoomPresetButton(label: "0.5", factor: 1.0)
+            zoomPresetButton(label: "1x", factor: 2.0)
         }
     }
 

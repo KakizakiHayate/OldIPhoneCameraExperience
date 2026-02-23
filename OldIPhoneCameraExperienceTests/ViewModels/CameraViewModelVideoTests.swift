@@ -177,28 +177,30 @@ final class CameraViewModelVideoTests: XCTestCase {
         XCTAssertEqual(sut.formattedRecordingDuration, "00:00", "録画開始直後は00:00である必要があります")
     }
 
-    // MARK: - T-17.20: 動画モードのセッションプリセット変更
+    // MARK: - T-17.20: モード切替でプリセットは変わらない（起動時に統一済み）
 
-    func test_switchToVideoMode_changesPreset() {
+    func test_switchToVideoMode_presetUnchanged() {
+        let originalPreset = mockCameraService.currentPreset
         sut.switchToVideoMode()
 
         XCTAssertEqual(
             mockCameraService.currentPreset,
-            CameraConfig.videoPreset,
-            "動画モード切替でプリセットが720pに変更される必要があります"
+            originalPreset,
+            "モード切替でプリセットは変更されない（起動時に統一済み）"
         )
     }
 
-    // MARK: - T-17.22: 写真モードのセッションプリセット復元
+    // MARK: - T-17.22: 写真モード復帰でもプリセットは変わらない
 
-    func test_switchToPhotoMode_restoresPreset() {
+    func test_switchToPhotoMode_presetUnchanged() {
+        let originalPreset = mockCameraService.currentPreset
         sut.switchToVideoMode()
         sut.switchToPhotoMode()
 
         XCTAssertEqual(
             mockCameraService.currentPreset,
-            CameraConfig.sessionPreset,
-            "写真モード切替でプリセットが.photoに復元される必要があります"
+            originalPreset,
+            "モード切替でプリセットは変更されない（起動時に統一済み）"
         )
     }
 }

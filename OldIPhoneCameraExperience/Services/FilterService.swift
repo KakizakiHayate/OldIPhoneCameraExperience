@@ -228,6 +228,7 @@ final class FilterService: FilterServiceProtocol {
             throw FilterServiceError.noVideoTrack
         }
         let trackSize = try await firstVideoTrack.load(.naturalSize)
+        let preferredTransform = try await firstVideoTrack.load(.preferredTransform)
 
         let videoSettings: [String: Any] = [
             AVVideoCodecKey: AVVideoCodecType.h264,
@@ -235,6 +236,7 @@ final class FilterService: FilterServiceProtocol {
             AVVideoHeightKey: trackSize.height
         ]
         let writerVideoInput = AVAssetWriterInput(mediaType: .video, outputSettings: videoSettings)
+        writerVideoInput.transform = preferredTransform
         let pixelBufferAdaptor = AVAssetWriterInputPixelBufferAdaptor(
             assetWriterInput: writerVideoInput,
             sourcePixelBufferAttributes: [
