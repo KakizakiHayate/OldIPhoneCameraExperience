@@ -204,7 +204,6 @@ struct CameraScreen: View {
                 .transition(.opacity)
             }
         }
-        .padding(.horizontal, 16)
         .background(viewModel.captureMode == .photo ? Color.black : Color.clear)
     }
 
@@ -233,8 +232,8 @@ struct CameraScreen: View {
 
     private var zoomPresetButtons: some View {
         HStack(spacing: 12) {
-            zoomPresetButton(label: "0.5", factor: 0.5)
-            zoomPresetButton(label: "1x", factor: 1.0)
+            zoomPresetButton(label: "0.5", factor: 1.0)
+            zoomPresetButton(label: "1x", factor: 2.0)
         }
     }
 

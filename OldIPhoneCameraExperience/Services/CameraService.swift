@@ -210,24 +210,25 @@ final class CameraService: NSObject, CameraServiceProtocol {
 
     @discardableResult
     func setZoom(factor: CGFloat) -> CGFloat {
-        guard let device = currentDevice else { return factor }
+        var actualFactor = factor
+        sessionQueue.sync { [self] in
+            guard let device = currentDevice else { return }
 
-        let minZoom = max(CameraConfig.minZoomFactor, device.minAvailableVideoZoomFactor)
-        let maxZoom = min(CameraConfig.maxZoomFactor, device.maxAvailableVideoZoomFactor)
-        let clampedFactor = min(max(factor, minZoom), maxZoom)
+            let minZoom = max(CameraConfig.minZoomFactor, device.minAvailableVideoZoomFactor)
+            let maxZoom = min(CameraConfig.maxZoomFactor, device.maxAvailableVideoZoomFactor)
+            let clampedFactor = min(max(factor, minZoom), maxZoom)
 
-        currentZoomFactor = clampedFactor
-
-        sessionQueue.async { [self] in
             do {
                 try device.lockForConfiguration()
                 device.ramp(toVideoZoomFactor: clampedFactor, withRate: CameraConfig.zoomAnimationRate)
                 device.unlockForConfiguration()
+                currentZoomFactor = clampedFactor
+                actualFactor = clampedFactor
             } catch {
                 print("ズーム設定のためのデバイスロックに失敗しました: \(error)")
             }
         }
-        return clampedFactor
+        return actualFactor
     }
 
     // MARK: - Video Recording
