@@ -307,8 +307,11 @@ final class CameraService: NSObject, CameraServiceProtocol {
             sessionQueue.async { [self] in
                 captureSession.beginConfiguration()
 
-                if let currentInput = captureSession.inputs.first as? AVCaptureDeviceInput {
-                    captureSession.removeInput(currentInput)
+                let videoInput = captureSession.inputs
+                    .compactMap { $0 as? AVCaptureDeviceInput }
+                    .first { $0.device.hasMediaType(.video) }
+                if let videoInput {
+                    captureSession.removeInput(videoInput)
                 }
 
                 let newPosition: AVCaptureDevice.Position = (currentPosition == .back) ? .front : .back
@@ -332,11 +335,14 @@ final class CameraService: NSObject, CameraServiceProtocol {
 
                 do {
                     let newInput = try AVCaptureDeviceInput(device: newDevice)
-                    if captureSession.canAddInput(newInput) {
-                        captureSession.addInput(newInput)
-                        currentDevice = newDevice
-                        currentPosition = newPosition
+                    guard captureSession.canAddInput(newInput) else {
+                        captureSession.commitConfiguration()
+                        continuation.resume(throwing: CameraError.inputFailed)
+                        return
                     }
+                    captureSession.addInput(newInput)
+                    currentDevice = newDevice
+                    currentPosition = newPosition
                 } catch {
                     captureSession.commitConfiguration()
                     continuation.resume(throwing: CameraError.inputFailed)
