@@ -67,4 +67,24 @@ final class ShakeEffectTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(effect.motionBlurRadius, config.motionBlurRadiusRange.lowerBound)
         XCTAssertLessThanOrEqual(effect.motionBlurRadius, config.motionBlurRadiusRange.upperBound)
     }
+
+    // MARK: - iPhone 6 手ぶれ範囲テスト
+
+    func test_generate_iPhone6_shiftValues_areWithinRange() {
+        let config = FilterConfig.iPhone6
+        let effect = ShakeEffect.generate(from: nil, config: config)
+
+        XCTAssertGreaterThanOrEqual(effect.shiftX, config.shakeShiftRange.lowerBound)
+        XCTAssertLessThanOrEqual(effect.shiftX, config.shakeShiftRange.upperBound)
+        XCTAssertGreaterThanOrEqual(effect.shiftY, config.shakeShiftRange.lowerBound)
+        XCTAssertLessThanOrEqual(effect.shiftY, config.shakeShiftRange.upperBound)
+    }
+
+    func test_generate_iPhone6_motionBlurRadius_isWithinRange() {
+        let config = FilterConfig.iPhone6
+        let effect = ShakeEffect.generate(from: nil, config: config)
+
+        XCTAssertGreaterThanOrEqual(effect.motionBlurRadius, config.motionBlurRadiusRange.lowerBound)
+        XCTAssertLessThanOrEqual(effect.motionBlurRadius, config.motionBlurRadiusRange.upperBound)
+    }
 }
