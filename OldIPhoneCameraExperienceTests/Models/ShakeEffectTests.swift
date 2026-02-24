@@ -31,7 +31,7 @@ final class ShakeEffectTests: XCTestCase {
     // MARK: - M-SE2: generateメソッドでShakeEffectが生成されること
 
     func test_generate_returnsNonNilEffect() {
-        let effect = ShakeEffect.generate(from: nil)
+        let effect = ShakeEffect.generate(from: nil, config: .iPhone4)
 
         XCTAssertNotNil(effect, "generateメソッドはShakeEffectを生成する必要があります")
     }
@@ -39,32 +39,32 @@ final class ShakeEffectTests: XCTestCase {
     // MARK: - M-SE3: shiftX/shiftYが範囲内であること
 
     func test_generate_shiftValues_areWithinRange() {
-        let effect = ShakeEffect.generate(from: nil)
-        let range = FilterParameters.shakeShiftRange
+        let config = FilterConfig.iPhone4
+        let effect = ShakeEffect.generate(from: nil, config: config)
 
-        XCTAssertGreaterThanOrEqual(effect.shiftX, Double(range.lowerBound))
-        XCTAssertLessThanOrEqual(effect.shiftX, Double(range.upperBound))
-        XCTAssertGreaterThanOrEqual(effect.shiftY, Double(range.lowerBound))
-        XCTAssertLessThanOrEqual(effect.shiftY, Double(range.upperBound))
+        XCTAssertGreaterThanOrEqual(effect.shiftX, config.shakeShiftRange.lowerBound)
+        XCTAssertLessThanOrEqual(effect.shiftX, config.shakeShiftRange.upperBound)
+        XCTAssertGreaterThanOrEqual(effect.shiftY, config.shakeShiftRange.lowerBound)
+        XCTAssertLessThanOrEqual(effect.shiftY, config.shakeShiftRange.upperBound)
     }
 
     // MARK: - M-SE4: rotationが範囲内であること
 
     func test_generate_rotation_isWithinRange() {
-        let effect = ShakeEffect.generate(from: nil)
-        let range = FilterParameters.shakeRotationRange
+        let config = FilterConfig.iPhone4
+        let effect = ShakeEffect.generate(from: nil, config: config)
 
-        XCTAssertGreaterThanOrEqual(effect.rotation, Double(range.lowerBound))
-        XCTAssertLessThanOrEqual(effect.rotation, Double(range.upperBound))
+        XCTAssertGreaterThanOrEqual(effect.rotation, config.shakeRotationRange.lowerBound)
+        XCTAssertLessThanOrEqual(effect.rotation, config.shakeRotationRange.upperBound)
     }
 
     // MARK: - M-SE5: motionBlurRadiusが範囲内であること
 
     func test_generate_motionBlurRadius_isWithinRange() {
-        let effect = ShakeEffect.generate(from: nil)
-        let range = FilterParameters.motionBlurRadiusRange
+        let config = FilterConfig.iPhone4
+        let effect = ShakeEffect.generate(from: nil, config: config)
 
-        XCTAssertGreaterThanOrEqual(effect.motionBlurRadius, Double(range.lowerBound))
-        XCTAssertLessThanOrEqual(effect.motionBlurRadius, Double(range.upperBound))
+        XCTAssertGreaterThanOrEqual(effect.motionBlurRadius, config.motionBlurRadiusRange.lowerBound)
+        XCTAssertLessThanOrEqual(effect.motionBlurRadius, config.motionBlurRadiusRange.upperBound)
     }
 }

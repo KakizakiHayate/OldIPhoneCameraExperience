@@ -193,6 +193,12 @@ struct CameraScreen: View {
 
             Spacer()
 
+            modelSelector
+                .disabled(viewModel.isRecording)
+                .opacity(viewModel.isRecording ? 0.4 : 1.0)
+
+            Spacer()
+
             if !viewModel.shouldHideFlashButton {
                 ToolbarButton(
                     icon: viewModel.flashIconName,
@@ -205,6 +211,39 @@ struct CameraScreen: View {
             }
         }
         .background(viewModel.captureMode == .photo ? Color.black : Color.clear)
+    }
+
+    // MARK: - Model Selector
+
+    private var modelSelector: some View {
+        Menu {
+            ForEach(CameraModel.allModels, id: \.name) { model in
+                Button {
+                    viewModel.selectModel(model)
+                } label: {
+                    if model == viewModel.currentModel {
+                        Label(model.name, systemImage: "checkmark")
+                    } else {
+                        Text(model.name)
+                    }
+                }
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Text(viewModel.currentModel.name)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.white)
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundColor(.white.opacity(0.7))
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(
+                Capsule()
+                    .fill(Color.white.opacity(0.15))
+            )
+        }
     }
 
     // MARK: - Video Info Badges
