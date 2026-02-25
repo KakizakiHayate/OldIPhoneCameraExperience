@@ -100,17 +100,13 @@ struct FilterConfig: Equatable {
 
 extension FilterConfig {
     /// iPhone 4 のフィルター設定（MVP）
+    /// 手ブレ・解像度パラメータはinitのデフォルト値（iPhone 4相当）を使用
     static let iPhone4 = FilterConfig(
         warmth: Double(FilterParameters.warmthShift),
         tint: 10,
         saturation: Double(FilterParameters.saturation),
         highlightTintIntensity: Double(FilterParameters.highlightTintAmount),
-        cropRatio: Double(FilterParameters.cropRatio),
-        shakeShiftRange: FilterParameters.shakeShiftRange,
-        shakeRotationRange: FilterParameters.shakeRotationRange,
-        motionBlurRadiusRange: FilterParameters.motionBlurRadiusRange,
-        baseWidth: FilterParameters.outputWidth,
-        baseHeight: FilterParameters.outputHeight
+        cropRatio: Double(FilterParameters.cropRatio)
     )
 
     /// iPhone 6 のフィルター設定
