@@ -39,19 +39,18 @@ struct CameraScreen: View {
             Color.black
                 .ignoresSafeArea()
 
-            // VStackの子要素数を常に5つに固定し、CameraPreviewViewの構造的位置を安定させる
             VStack(spacing: 0) {
-                // Index 0: トップツールバー（写真モードのみスペースを占有）
                 topToolbar
                     .frame(height: isPhotoMode ? UIConstants.topToolbarHeight : 0)
                     .clipped()
                     .opacity(isPhotoMode ? 1 : 0)
 
-                // Index 1: 黒帯（上）
-                Spacer(minLength: 0)
-                    .frame(maxHeight: isPhotoMode ? .infinity : 0)
+                // 黒帯（上）: 写真モードのみ表示
+                if isPhotoMode {
+                    Spacer(minLength: 0)
+                }
 
-                // Index 2: カメラプレビュー（常に同一の構造的位置、インスタンス破棄を防止）
+                // カメラプレビュー（構造的位置はOptionalラッパーにより安定）
                 ZStack(alignment: .bottom) {
                     cameraPreview
                         .aspectRatio(
@@ -59,7 +58,6 @@ struct CameraScreen: View {
                             contentMode: .fit
                         )
 
-                    // ズームインジケーター: 常に構造的に存在し、写真モード時のみ表示
                     ZoomIndicator(
                         zoomFactor: viewModel.zoomFactor,
                         isVisible: isZoomIndicatorVisible && isPhotoMode
@@ -68,32 +66,26 @@ struct CameraScreen: View {
                     .allowsHitTesting(false)
                 }
                 .overlay {
-                    // ビデオモード: 全コントロールをプレビュー上にオーバーレイ
                     if !isPhotoMode {
                         videoOverlayControls
                     }
                 }
-                .frame(maxHeight: isPhotoMode ? nil : .infinity)
                 .clipped()
                 .gesture(pinchGesture)
                 .simultaneousGesture(swipeGesture)
 
-                // Index 3: 黒帯（下）
-                Spacer(minLength: 0)
-                    .frame(maxHeight: isPhotoMode ? .infinity : 0)
+                // 黒帯（下）: 写真モードのみ表示
+                if isPhotoMode {
+                    Spacer(minLength: 0)
+                }
 
-                // Index 4: 写真モード用ボトムコントロール
-                VStack(spacing: 0) {
+                if isPhotoMode {
                     zoomPresetButtons
                         .padding(.bottom, 12)
                     shutterRow
                     modeSwitchLabel
                         .padding(.vertical, 8)
                 }
-                .frame(maxHeight: isPhotoMode ? nil : 0)
-                .clipped()
-                .opacity(isPhotoMode ? 1 : 0)
-                .allowsHitTesting(isPhotoMode)
             }
             .animation(.easeInOut(duration: 0.3), value: viewModel.captureMode)
             .onChange(of: viewModel.captureMode) { _, _ in
