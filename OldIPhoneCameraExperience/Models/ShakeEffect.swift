@@ -30,12 +30,14 @@ struct ShakeEffect: Equatable {
 
 extension ShakeEffect {
     /// ジャイロスコープのデータからShakeEffectを生成する
-    /// - Parameter deviceMotion: CoreMotionから取得したデバイスの動き（nilの場合はランダム生成）
+    /// - Parameters:
+    ///   - deviceMotion: CoreMotionから取得したデバイスの動き（nilの場合はランダム生成）
+    ///   - config: フィルター設定（手ブレパラメータを含む）
     /// - Returns: ランダム要素を含む手ブレパラメータ
-    static func generate(from deviceMotion: CMDeviceMotion?) -> ShakeEffect {
-        let shiftRange = FilterParameters.shakeShiftRange
-        let rotationRange = FilterParameters.shakeRotationRange
-        let blurRange = FilterParameters.motionBlurRadiusRange
+    static func generate(from deviceMotion: CMDeviceMotion?, config: FilterConfig) -> ShakeEffect {
+        let shiftRange = config.shakeShiftRange
+        let rotationRange = config.shakeRotationRange
+        let blurRange = config.motionBlurRadiusRange
 
         let shiftX = Double.random(in: shiftRange)
         let shiftY = Double.random(in: shiftRange)

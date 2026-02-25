@@ -40,7 +40,7 @@ final class CameraViewModel: ObservableObject {
 
     // MARK: - Private Properties
 
-    private let currentModel: CameraModel = .iPhone4
+    @Published private(set) var currentModel: CameraModel = .iPhone4
     private let ciContext = CIContext()
     private var recordingTimer: AnyCancellable?
 
@@ -119,6 +119,14 @@ final class CameraViewModel: ObservableObject {
     /// 前面カメラ時はフラッシュボタンを非表示にする
     var shouldHideFlashButton: Bool {
         state.cameraPosition == .front
+    }
+
+    // MARK: - Model Selection
+
+    /// カメラモデルを切り替える（録画中は無効）
+    func selectModel(_ model: CameraModel) {
+        guard !isRecording else { return }
+        currentModel = model
     }
 
     // MARK: - Aspect Ratio
@@ -201,7 +209,7 @@ final class CameraViewModel: ObservableObject {
             }
 
             let motion = motionService.getCurrentMotion()
-            let shakeEffect = ShakeEffect.generate(from: motion)
+            let shakeEffect = ShakeEffect.generate(from: motion, config: config)
             let finalImage = filterService.applyShakeEffect(filteredImage, effect: shakeEffect) ?? filteredImage
 
             guard let uiImage = convertToUIImage(finalImage) else {
@@ -228,7 +236,12 @@ final class CameraViewModel: ObservableObject {
             saturation: base.saturation,
             highlightTintIntensity: base.highlightTintIntensity,
             cropRatio: base.cropRatio,
-            aspectRatio: aspectRatio
+            aspectRatio: aspectRatio,
+            shakeShiftRange: base.shakeShiftRange,
+            shakeRotationRange: base.shakeRotationRange,
+            motionBlurRadiusRange: base.motionBlurRadiusRange,
+            baseWidth: base.baseWidth,
+            baseHeight: base.baseHeight
         )
     }
 

@@ -45,8 +45,20 @@ extension CameraModel {
         isFree: true
     )
 
-    /// すべての機種一覧（Phase 2で拡張予定）
+    /// iPhone 6 のプリセット
+    static let iPhone6 = CameraModel(
+        name: "iPhone 6",
+        era: "iOS 8",
+        year: 2014,
+        megapixels: 8.0,
+        focalLength: 29.0,
+        filterConfig: .iPhone6,
+        isFree: true
+    )
+
+    /// すべての機種一覧
     static let allModels: [CameraModel] = [
-        .iPhone4
+        .iPhone4,
+        .iPhone6,
     ]
 }

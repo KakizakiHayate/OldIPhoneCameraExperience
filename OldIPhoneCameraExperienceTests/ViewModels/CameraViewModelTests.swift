@@ -182,4 +182,25 @@ final class CameraViewModelTests: XCTestCase {
             XCTAssertEqual(sut.state.permissionStatus, .denied, "権限拒否時にpermissionStatusが.deniedになる必要があります")
         }
     }
+
+    // MARK: - モデル切替テスト
+
+    func test_initialModel_isIPhone4() {
+        XCTAssertEqual(sut.currentModel, .iPhone4, "初期モデルはiPhone 4である必要があります")
+    }
+
+    func test_selectModel_changesToIPhone6() {
+        sut.selectModel(.iPhone6)
+
+        XCTAssertEqual(sut.currentModel, .iPhone6, "selectModel後はiPhone 6に切り替わる必要があります")
+    }
+
+    func test_selectModel_duringRecording_isBlocked() {
+        sut.switchToVideoMode()
+        sut.startRecording()
+
+        sut.selectModel(.iPhone6)
+
+        XCTAssertEqual(sut.currentModel, .iPhone4, "録画中はモデル切替が無効化される必要があります")
+    }
 }
