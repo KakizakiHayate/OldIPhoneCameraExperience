@@ -50,20 +50,27 @@ struct CameraScreen: View {
                     Spacer(minLength: 0)
                 }
 
-                // カメラプレビュー（構造的位置はOptionalラッパーにより安定）
-                ZStack(alignment: .bottom) {
-                    cameraPreview
-                        .aspectRatio(
-                            isPhotoMode ? displayedAspectRatio : nil,
-                            contentMode: .fit
-                        )
+                // カメラプレビュー: Color.clearでサイズを決定し、overlayでプレビューを配置
+                // cameraPreviewはoverlayに常駐するため構造的位置が安定し再生成されない
+                Group {
+                    if isPhotoMode {
+                        Color.clear
+                            .aspectRatio(displayedAspectRatio, contentMode: .fit)
+                    } else {
+                        Color.clear
+                    }
+                }
+                .overlay {
+                    ZStack(alignment: .bottom) {
+                        cameraPreview
 
-                    ZoomIndicator(
-                        zoomFactor: viewModel.zoomFactor,
-                        isVisible: isZoomIndicatorVisible && isPhotoMode
-                    )
-                    .padding(.bottom, 16)
-                    .allowsHitTesting(false)
+                        ZoomIndicator(
+                            zoomFactor: viewModel.zoomFactor,
+                            isVisible: isZoomIndicatorVisible && isPhotoMode
+                        )
+                        .padding(.bottom, 16)
+                        .allowsHitTesting(false)
+                    }
                 }
                 .overlay {
                     if !isPhotoMode {
