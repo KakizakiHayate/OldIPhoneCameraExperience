@@ -37,4 +37,26 @@ final class CameraModelTests: XCTestCase {
             "iPhone 4のfilterConfigはFilterConfig.iPhone4と一致する必要があります"
         )
     }
+
+    // MARK: - iPhone 6 プリセットテスト
+
+    func test_iPhone6_name() {
+        XCTAssertEqual(CameraModel.iPhone6.name, "iPhone 6")
+    }
+
+    func test_iPhone6_isFree() {
+        XCTAssertTrue(CameraModel.iPhone6.isFree)
+    }
+
+    func test_iPhone6_filterConfig_matchesPreset() {
+        XCTAssertEqual(CameraModel.iPhone6.filterConfig, FilterConfig.iPhone6)
+    }
+
+    // MARK: - allModels テスト
+
+    func test_allModels_containsBothModels() {
+        XCTAssertEqual(CameraModel.allModels.count, 2)
+        XCTAssertTrue(CameraModel.allModels.contains(.iPhone4))
+        XCTAssertTrue(CameraModel.allModels.contains(.iPhone6))
+    }
 }
