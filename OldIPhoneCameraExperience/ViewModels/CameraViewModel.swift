@@ -90,7 +90,7 @@ final class CameraViewModel: ObservableObject {
         }
         analytics.logFlashToggled(
             flashState: state.isFlashOn,
-            captureMode: captureMode == .photo ? "photo" : "video"
+            captureMode: captureMode.analyticsValue
         )
     }
 
@@ -104,7 +104,7 @@ final class CameraViewModel: ObservableObject {
             toggleFlash()
         }
         analytics.logCameraPositionSwitched(
-            newPosition: state.cameraPosition == .front ? "front" : "back"
+            newPosition: state.cameraPosition.analyticsValue
         )
     }
 
@@ -206,7 +206,7 @@ final class CameraViewModel: ObservableObject {
         try await photoLibraryService.saveVideoToPhotoLibrary(filteredURL)
         analytics.logVideoRecorded(
             cameraModel: currentModel.name,
-            cameraPosition: state.cameraPosition == .front ? "front" : "back",
+            cameraPosition: state.cameraPosition.analyticsValue,
             flashEnabled: state.isFlashOn,
             durationSeconds: recordingDuration
         )
@@ -236,7 +236,7 @@ final class CameraViewModel: ObservableObject {
             lastCapturedImage = uiImage
             analytics.logPhotoCaptured(
                 cameraModel: currentModel.name,
-                cameraPosition: state.cameraPosition == .front ? "front" : "back",
+                cameraPosition: state.cameraPosition.analyticsValue,
                 flashEnabled: state.isFlashOn,
                 aspectRatio: aspectRatio.displayLabel,
                 zoomFactor: zoomFactor

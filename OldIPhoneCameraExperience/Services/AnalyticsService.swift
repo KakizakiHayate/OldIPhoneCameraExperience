@@ -14,6 +14,42 @@ final class AnalyticsService {
 
     private init() {}
 
+    // MARK: - Event Names
+
+    private enum EventName {
+        static let photoCaptured = "photo_captured"
+        static let videoRecorded = "video_recorded"
+        static let cameraModelSelected = "camera_model_selected"
+        static let aspectRatioChanged = "aspect_ratio_changed"
+        static let cameraPositionSwitched = "camera_position_switched"
+        static let flashToggled = "flash_toggled"
+        static let photoEditorOpened = "photo_editor_opened"
+        static let photoSaved = "photo_saved"
+        static let cameraError = "camera_error"
+    }
+
+    // MARK: - Parameter Keys
+
+    private enum ParamKey {
+        static let cameraModel = "camera_model"
+        static let cameraPosition = "camera_position"
+        static let flashEnabled = "flash_enabled"
+        static let aspectRatio = "aspect_ratio"
+        static let zoomFactor = "zoom_factor"
+        static let durationSeconds = "duration_seconds"
+        static let modelName = "model_name"
+        static let newRatio = "new_ratio"
+        static let newPosition = "new_position"
+        static let flashState = "flash_state"
+        static let captureMode = "capture_mode"
+        static let brightness = "brightness"
+        static let contrast = "contrast"
+        static let saturation = "saturation"
+        static let cropApplied = "crop_applied"
+        static let errorType = "error_type"
+        static let errorDescription = "error_description"
+    }
+
     // MARK: - 撮影イベント
 
     func logPhotoCaptured(
@@ -23,12 +59,12 @@ final class AnalyticsService {
         aspectRatio: String,
         zoomFactor: CGFloat
     ) {
-        Analytics.logEvent("photo_captured", parameters: [
-            "camera_model": cameraModel,
-            "camera_position": cameraPosition,
-            "flash_enabled": flashEnabled,
-            "aspect_ratio": aspectRatio,
-            "zoom_factor": zoomFactor
+        Analytics.logEvent(EventName.photoCaptured, parameters: [
+            ParamKey.cameraModel: cameraModel,
+            ParamKey.cameraPosition: cameraPosition,
+            ParamKey.flashEnabled: flashEnabled,
+            ParamKey.aspectRatio: aspectRatio,
+            ParamKey.zoomFactor: zoomFactor
         ])
     }
 
@@ -38,62 +74,62 @@ final class AnalyticsService {
         flashEnabled: Bool,
         durationSeconds: TimeInterval
     ) {
-        Analytics.logEvent("video_recorded", parameters: [
-            "camera_model": cameraModel,
-            "camera_position": cameraPosition,
-            "flash_enabled": flashEnabled,
-            "duration_seconds": durationSeconds
+        Analytics.logEvent(EventName.videoRecorded, parameters: [
+            ParamKey.cameraModel: cameraModel,
+            ParamKey.cameraPosition: cameraPosition,
+            ParamKey.flashEnabled: flashEnabled,
+            ParamKey.durationSeconds: durationSeconds
         ])
     }
 
     // MARK: - カメラ設定イベント
 
     func logCameraModelSelected(modelName: String) {
-        Analytics.logEvent("camera_model_selected", parameters: [
-            "model_name": modelName
+        Analytics.logEvent(EventName.cameraModelSelected, parameters: [
+            ParamKey.modelName: modelName
         ])
     }
 
     func logAspectRatioChanged(newRatio: String) {
-        Analytics.logEvent("aspect_ratio_changed", parameters: [
-            "new_ratio": newRatio
+        Analytics.logEvent(EventName.aspectRatioChanged, parameters: [
+            ParamKey.newRatio: newRatio
         ])
     }
 
     func logCameraPositionSwitched(newPosition: String) {
-        Analytics.logEvent("camera_position_switched", parameters: [
-            "new_position": newPosition
+        Analytics.logEvent(EventName.cameraPositionSwitched, parameters: [
+            ParamKey.newPosition: newPosition
         ])
     }
 
     func logFlashToggled(flashState: Bool, captureMode: String) {
-        Analytics.logEvent("flash_toggled", parameters: [
-            "flash_state": flashState ? "on" : "off",
-            "capture_mode": captureMode
+        Analytics.logEvent(EventName.flashToggled, parameters: [
+            ParamKey.flashState: flashState ? "on" : "off",
+            ParamKey.captureMode: captureMode
         ])
     }
 
     // MARK: - 編集イベント
 
     func logPhotoEditorOpened() {
-        Analytics.logEvent("photo_editor_opened", parameters: nil)
+        Analytics.logEvent(EventName.photoEditorOpened, parameters: nil)
     }
 
     func logPhotoSaved(brightness: Float, contrast: Float, saturation: Float, cropApplied: Bool) {
-        Analytics.logEvent("photo_saved", parameters: [
-            "brightness": brightness,
-            "contrast": contrast,
-            "saturation": saturation,
-            "crop_applied": cropApplied
+        Analytics.logEvent(EventName.photoSaved, parameters: [
+            ParamKey.brightness: brightness,
+            ParamKey.contrast: contrast,
+            ParamKey.saturation: saturation,
+            ParamKey.cropApplied: cropApplied
         ])
     }
 
     // MARK: - エラーイベント
 
     func logCameraError(errorType: String, errorDescription: String) {
-        Analytics.logEvent("camera_error", parameters: [
-            "error_type": errorType,
-            "error_description": errorDescription
+        Analytics.logEvent(EventName.cameraError, parameters: [
+            ParamKey.errorType: errorType,
+            ParamKey.errorDescription: errorDescription
         ])
     }
 }
