@@ -14,8 +14,8 @@ final class CameraModelTests: XCTestCase {
     func test_iPhone4_name() {
         XCTAssertEqual(
             CameraModel.iPhone4.name,
-            "iPhone 4",
-            "iPhone 4プリセットのnameは\"iPhone 4\"である必要があります"
+            "4世代",
+            "iPhone 4プリセットのnameは\"4世代\"である必要があります"
         )
     }
 
@@ -41,7 +41,7 @@ final class CameraModelTests: XCTestCase {
     // MARK: - iPhone 6 プリセットテスト
 
     func test_iPhone6_name() {
-        XCTAssertEqual(CameraModel.iPhone6.name, "iPhone 6")
+        XCTAssertEqual(CameraModel.iPhone6.name, "6世代")
     }
 
     func test_iPhone6_isFree() {
