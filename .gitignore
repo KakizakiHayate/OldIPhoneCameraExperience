@@ -17,5 +17,8 @@ fastlane/.env
 fastlane/report.xml
 fastlane/README.md
 
+# Firebase
+GoogleService-Info.plist
+
 # Claude Code
 .claude/settings.local.json

@@ -57,6 +57,7 @@ final class PhotoEditorViewModel: ObservableObject {
 
     // MARK: - Private
 
+    private let analytics = AnalyticsService.shared
     private var debounceTask: Task<Void, Never>?
     private var previewCIImage: CIImage?
 
@@ -74,6 +75,7 @@ final class PhotoEditorViewModel: ObservableObject {
         self.debounceInterval = debounceInterval
 
         setupPreviewImage()
+        analytics.logPhotoEditorOpened()
     }
 
     // MARK: - Public Methods
@@ -150,6 +152,12 @@ final class PhotoEditorViewModel: ObservableObject {
 
         let uiImage = UIImage(cgImage: cgImage)
         try await photoLibraryService.saveToPhotoLibrary(uiImage)
+        analytics.logPhotoSaved(
+            brightness: brightness,
+            contrast: contrast,
+            saturation: saturation,
+            cropApplied: cropRect != nil
+        )
     }
 
     // MARK: - Private Methods
