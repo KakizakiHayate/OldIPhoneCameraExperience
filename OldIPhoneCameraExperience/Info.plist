@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>NSCameraUsageDescription</key>
-	<string>iPhone 4風の写真を撮影するためにカメラへのアクセスが必要です。</string>
+	<string>レトロな写真を撮影するためにカメラへのアクセスが必要です。</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>撮影した写真をカメラロールに保存するためにフォトライブラリへのアクセスが必要です。</string>
 	<key>NSMicrophoneUsageDescription</key>
