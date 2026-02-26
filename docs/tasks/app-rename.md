@@ -77,7 +77,28 @@ INFOPLIST_KEY_CFBundleDisplayName = "あのカメラ";
 - [ ] `CLAUDE.md` — プロジェクト概要のアプリ名を更新
 - [ ] その他ドキュメント内の旧アプリ名参照を更新
 
-### 5. プロジェクト構造のリネーム（任意・影響大）
+### 5. バンドルIDの変更（必須）
+
+`PRODUCT_BUNDLE_IDENTIFIER` に「iPhone」が含まれているため、商標違反の再リジェクトリスクがある。
+
+| ファイル | 変更内容 |
+|---------|---------|
+| `OldIPhoneCameraExperience.xcodeproj/project.pbxproj` | `com.h.dev.oldIPhoneCameraExperience` → `com.h.dev.anoCamera`（Debug・Release・Tests 計4箇所） |
+| `OldIPhoneCameraExperience.xcodeproj/project.pbxproj` | `PROVISIONING_PROFILE_SPECIFIER` も連動して更新 |
+| `fastlane/.env` | `APP_IDENTIFIER` の値を `com.h.dev.anoCamera` に変更 |
+| Apple Developer Console | 新しい App ID `com.h.dev.anoCamera` を登録 |
+| fastlane match | 新バンドルIDで証明書・Provisioning Profile を再生成 |
+
+- [x] pbxproj のバンドルID変更（Debug）
+- [x] pbxproj のバンドルID変更（Release）
+- [x] pbxproj のバンドルID変更（Tests Debug）
+- [x] pbxproj のバンドルID変更（Tests Release）
+- [x] PROVISIONING_PROFILE_SPECIFIER の更新
+- [ ] Apple Developer Console で新 App ID を登録（手動）
+- [ ] fastlane match で証明書を再生成（手動）
+- [ ] fastlane `.env` の `APP_IDENTIFIER` を更新（手動）
+
+### 6. プロジェクト構造のリネーム（任意・影響大）
 
 以下は変更の影響範囲が大きいため、必須ではない。必要に応じて判断する。
 
@@ -86,7 +107,7 @@ INFOPLIST_KEY_CFBundleDisplayName = "あのカメラ";
 - [ ] フォルダ名（`OldIPhoneCameraExperience/`）
 - [ ] GitHub リポジトリ名
 
-### 6. アプリアイコンの差し替え
+### 7. アプリアイコンの差し替え
 
 新しいアイコン画像が用意済み。
 
