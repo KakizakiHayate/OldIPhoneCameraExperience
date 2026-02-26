@@ -75,11 +75,11 @@
 		F22EFB410D17AA9316BAD1B2 /* FilterService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F70819203A4B5 /* FilterService.swift */; };
 		F37E3C7B426D760BBE107F24 /* CameraViewModelAspectRatioTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87D05C3400DB15E123F4CB9B /* CameraViewModelAspectRatioTests.swift */; };
 		F89D44B2401CE2AB9C8D4649 /* PhotoEditorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94020F75C47454C3EB54B3D1 /* PhotoEditorViewModel.swift */; };
-		FD1213DA9FD929CF4CE35183 /* ZoomIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24AC33CF3464B72C40730464 /* ZoomIndicator.swift */; };
 		FA00010000000000000001FA /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00020000000000000002FA /* AnalyticsService.swift */; };
 		FA00030000000000000003FA /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = FA00040000000000000004FA /* FirebaseAnalytics */; };
 		FA00050000000000000005FA /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = FA00060000000000000006FA /* FirebaseCrashlytics */; };
 		FA00080000000000000008FA /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FA00090000000000000009FA /* GoogleService-Info.plist */; };
+		FD1213DA9FD929CF4CE35183 /* ZoomIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24AC33CF3464B72C40730464 /* ZoomIndicator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -534,10 +534,10 @@
 				Base,
 			);
 			mainGroup = A1B2C3D4E5F60030A1B2;
-			productRefGroup = A1B2C3D4E5F60032A1B2 /* Products */;
 			packageReferences = (
 				FA00070000000000000007FA /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
+			productRefGroup = A1B2C3D4E5F60032A1B2 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -697,8 +697,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_IDENTITY = "Apple Distribution";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"OldIPhoneCameraExperience/Preview Content\"";
 				DEVELOPMENT_TEAM = N28L9FHHL4;
@@ -718,7 +718,7 @@
 				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.h.dev.anoCamera;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "match AppStore com.h.dev.anoCamera";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
