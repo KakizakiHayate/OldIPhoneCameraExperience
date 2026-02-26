@@ -31,12 +31,26 @@ struct CameraState {
 enum CameraPosition: CaseIterable {
     case front
     case back
+
+    var analyticsValue: String {
+        switch self {
+        case .front: "front"
+        case .back: "back"
+        }
+    }
 }
 
 /// 撮影モード（写真/動画）
 enum CaptureMode: CaseIterable {
     case photo
     case video
+
+    var analyticsValue: String {
+        switch self {
+        case .photo: "photo"
+        case .video: "video"
+        }
+    }
 }
 
 /// カメラ権限の状態

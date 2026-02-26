@@ -75,6 +75,10 @@
 		F22EFB410D17AA9316BAD1B2 /* FilterService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F70819203A4B5 /* FilterService.swift */; };
 		F37E3C7B426D760BBE107F24 /* CameraViewModelAspectRatioTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87D05C3400DB15E123F4CB9B /* CameraViewModelAspectRatioTests.swift */; };
 		F89D44B2401CE2AB9C8D4649 /* PhotoEditorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94020F75C47454C3EB54B3D1 /* PhotoEditorViewModel.swift */; };
+		FA00010000000000000001FA /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00020000000000000002FA /* AnalyticsService.swift */; };
+		FA00030000000000000003FA /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = FA00040000000000000004FA /* FirebaseAnalytics */; };
+		FA00050000000000000005FA /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = FA00060000000000000006FA /* FirebaseCrashlytics */; };
+		FA00080000000000000008FA /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FA00090000000000000009FA /* GoogleService-Info.plist */; };
 		FD1213DA9FD929CF4CE35183 /* ZoomIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24AC33CF3464B72C40730464 /* ZoomIndicator.swift */; };
 /* End PBXBuildFile section */
 
@@ -160,6 +164,8 @@
 		EE3779F108A19C45C792808B /* CameraState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraState.swift; sourceTree = "<group>"; };
 		F506172839405162B7C8D9EA /* CameraViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewModel.swift; sourceTree = "<group>"; };
 		F9ED7CA7D11F49FAC9D51B78 /* ShakeEffect.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShakeEffect.swift; sourceTree = "<group>"; };
+		FA00020000000000000002FA /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
+		FA00090000000000000009FA /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -167,6 +173,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FA00030000000000000003FA /* FirebaseAnalytics in Frameworks */,
+				FA00050000000000000005FA /* FirebaseCrashlytics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -345,6 +353,7 @@
 				A1B2C3D4E5F60011A1B2 /* OldIPhoneCameraExperienceApp.swift */,
 				A1B2C3D4E5F60012A1B2 /* ContentView.swift */,
 				A1B2C3D4E5F60013A1B2 /* Assets.xcassets */,
+				FA00090000000000000009FA /* GoogleService-Info.plist */,
 				A1B2C3D4E5F60033A1B2 /* Preview Content */,
 				578948AC6E4190B4F6C01CF3 /* Core */,
 				E09F2EAE86B75DD59499EC8F /* Models */,
@@ -423,6 +432,7 @@
 				7F8A9B0C1D2E3F405162A3B4 /* PhotoLibraryService.swift */,
 				B1C2D3E4F50617283940A5B6 /* MotionService.swift */,
 				BAF6F0D996505307A025CFE3 /* PhotoEditorService.swift */,
+				FA00020000000000000002FA /* AnalyticsService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -474,6 +484,10 @@
 			dependencies = (
 			);
 			name = OldIPhoneCameraExperience;
+			packageProductDependencies = (
+				FA00040000000000000004FA /* FirebaseAnalytics */,
+				FA00060000000000000006FA /* FirebaseCrashlytics */,
+			);
 			productName = OldIPhoneCameraExperience;
 			productReference = A1B2C3D4E5F60010A1B2 /* OldIPhoneCameraExperience.app */;
 			productType = "com.apple.product-type.application";
@@ -520,6 +534,9 @@
 				Base,
 			);
 			mainGroup = A1B2C3D4E5F60030A1B2;
+			packageReferences = (
+				FA00070000000000000007FA /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			productRefGroup = A1B2C3D4E5F60032A1B2 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -537,6 +554,7 @@
 			files = (
 				A1B2C3D4E5F60004A1B2 /* Preview Assets.xcassets in Resources */,
 				A1B2C3D4E5F60003A1B2 /* Assets.xcassets in Resources */,
+				FA00080000000000000008FA /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -627,6 +645,7 @@
 				B1404D329FAFDD9427DFB59B /* RetroSlider.swift in Sources */,
 				7AC949E20E29D107F6285759 /* RetroSegmentedControl.swift in Sources */,
 				5C2014CC446755471A28F603 /* CropOverlayView.swift in Sources */,
+				FA00010000000000000001FA /* AnalyticsService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -678,8 +697,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_IDENTITY = "Apple Distribution";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"OldIPhoneCameraExperience/Preview Content\"";
 				DEVELOPMENT_TEAM = N28L9FHHL4;
@@ -699,7 +718,7 @@
 				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.h.dev.anoCamera;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "match AppStore com.h.dev.anoCamera";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -891,6 +910,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		FA00070000000000000007FA /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		FA00040000000000000004FA /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FA00070000000000000007FA /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		FA00060000000000000006FA /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FA00070000000000000007FA /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = A1B2C3D4E5F60050A1B2 /* Project object */;
 }

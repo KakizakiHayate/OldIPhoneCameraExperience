@@ -42,6 +42,7 @@ final class CameraViewModel: ObservableObject {
 
     @Published private(set) var currentModel: CameraModel = .iPhone4
     private let ciContext = CIContext()
+    private let analytics = AnalyticsService.shared
     private var recordingTimer: AnyCancellable?
 
     // MARK: - Initialization
@@ -87,6 +88,10 @@ final class CameraViewModel: ObservableObject {
         } else {
             cameraService.setFlash(enabled: state.isFlashOn)
         }
+        analytics.logFlashToggled(
+            flashState: state.isFlashOn,
+            captureMode: captureMode.analyticsValue
+        )
     }
 
     /// 前面/背面カメラを切り替える
@@ -98,6 +103,9 @@ final class CameraViewModel: ObservableObject {
         if state.cameraPosition == .front, state.isFlashOn {
             toggleFlash()
         }
+        analytics.logCameraPositionSwitched(
+            newPosition: state.cameraPosition.analyticsValue
+        )
     }
 
     /// ズーム倍率を設定する
@@ -127,6 +135,7 @@ final class CameraViewModel: ObservableObject {
     func selectModel(_ model: CameraModel) {
         guard !isRecording else { return }
         currentModel = model
+        analytics.logCameraModelSelected(modelName: model.name)
     }
 
     // MARK: - Aspect Ratio
@@ -135,6 +144,7 @@ final class CameraViewModel: ObservableObject {
     func setAspectRatio(_ ratio: AspectRatio) {
         guard captureMode == .photo else { return }
         aspectRatio = ratio
+        analytics.logAspectRatioChanged(newRatio: ratio.displayLabel)
     }
 
     // MARK: - Mode Switching
@@ -194,6 +204,12 @@ final class CameraViewModel: ObservableObject {
         defer { try? FileManager.default.removeItem(at: filteredURL) }
 
         try await photoLibraryService.saveVideoToPhotoLibrary(filteredURL)
+        analytics.logVideoRecorded(
+            cameraModel: currentModel.name,
+            cameraPosition: state.cameraPosition.analyticsValue,
+            flashEnabled: state.isFlashOn,
+            durationSeconds: recordingDuration
+        )
     }
 
     /// 写真を撮影する
@@ -218,10 +234,21 @@ final class CameraViewModel: ObservableObject {
 
             try await photoLibraryService.saveToPhotoLibrary(uiImage)
             lastCapturedImage = uiImage
+            analytics.logPhotoCaptured(
+                cameraModel: currentModel.name,
+                cameraPosition: state.cameraPosition.analyticsValue,
+                flashEnabled: state.isFlashOn,
+                aspectRatio: aspectRatio.displayLabel,
+                zoomFactor: zoomFactor
+            )
 
             state.isCapturing = false
         } catch {
             state.isCapturing = false
+            analytics.logCameraError(
+                errorType: String(describing: type(of: error)),
+                errorDescription: error.localizedDescription
+            )
             throw error
         }
     }

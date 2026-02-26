@@ -36,7 +36,7 @@ struct CameraModel: Equatable {
 extension CameraModel {
     /// iPhone 4 のプリセット（MVP）
     static let iPhone4 = CameraModel(
-        name: "iPhone 4",
+        name: "4世代",
         era: "iOS 4-6",
         year: 2010,
         megapixels: 5.0,
@@ -47,7 +47,7 @@ extension CameraModel {
 
     /// iPhone 6 のプリセット
     static let iPhone6 = CameraModel(
-        name: "iPhone 6",
+        name: "6世代",
         era: "iOS 8",
         year: 2014,
         megapixels: 8.0,
