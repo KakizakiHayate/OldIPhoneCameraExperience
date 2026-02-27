@@ -41,25 +41,43 @@ struct CameraScreen: View {
 
             VStack(spacing: 0) {
                 topToolbar
-                    .frame(height: UIConstants.topToolbarHeight)
+                    .frame(height: isPhotoMode ? UIConstants.topToolbarHeight : 0)
+                    .clipped()
+                    .opacity(isPhotoMode ? 1 : 0)
 
                 // 黒帯（上）: 写真モードのみ表示
                 if isPhotoMode {
                     Spacer(minLength: 0)
                 }
 
-                // カメラプレビュー（常に1インスタンス、破棄されない）
-                ZStack(alignment: .bottom) {
-                    cameraPreview
-                        .aspectRatio(displayedAspectRatio, contentMode: .fit)
-
-                    ZoomIndicator(
-                        zoomFactor: viewModel.zoomFactor,
-                        isVisible: isZoomIndicatorVisible
-                    )
-                    .padding(.bottom, 16)
-                    .allowsHitTesting(false)
+                // カメラプレビュー: Color.clearでサイズを決定し、overlayでプレビューを配置
+                // cameraPreviewはoverlayに常駐するため構造的位置が安定し再生成されない
+                Group {
+                    if isPhotoMode {
+                        Color.clear
+                            .aspectRatio(displayedAspectRatio, contentMode: .fit)
+                    } else {
+                        Color.clear
+                    }
                 }
+                .overlay {
+                    ZStack(alignment: .bottom) {
+                        cameraPreview
+
+                        ZoomIndicator(
+                            zoomFactor: viewModel.zoomFactor,
+                            isVisible: isZoomIndicatorVisible && isPhotoMode
+                        )
+                        .padding(.bottom, 16)
+                        .allowsHitTesting(false)
+                    }
+                }
+                .overlay {
+                    if !isPhotoMode {
+                        videoOverlayControls
+                    }
+                }
+                .clipped()
                 .gesture(pinchGesture)
                 .simultaneousGesture(swipeGesture)
 
@@ -68,14 +86,15 @@ struct CameraScreen: View {
                     Spacer(minLength: 0)
                 }
 
-                zoomPresetButtons
-                    .padding(.bottom, 12)
-
-                shutterRow
-
-                modeSwitchLabel
-                    .padding(.vertical, 8)
+                if isPhotoMode {
+                    zoomPresetButtons
+                        .padding(.bottom, 12)
+                    shutterRow
+                    modeSwitchLabel
+                        .padding(.vertical, 8)
+                }
             }
+            .animation(.easeInOut(duration: 0.3), value: viewModel.captureMode)
             .onChange(of: viewModel.captureMode) { _, _ in
                 withAnimation(.easeInOut(duration: 0.3)) {
                     displayedAspectRatio = previewAspectRatio
@@ -124,6 +143,74 @@ struct CameraScreen: View {
             return viewModel.aspectRatio.portraitRatio
         }
         return 1.0 / CameraConfig.videoAspectRatio
+    }
+
+    // MARK: - Video Mode Overlay Controls
+
+    /// ビデオモード時にプレビュー上にオーバーレイするUI全体
+    private var videoOverlayControls: some View {
+        VStack(spacing: 0) {
+            topToolbar
+                .frame(height: UIConstants.topToolbarHeight)
+
+            Spacer()
+
+            ZoomIndicator(
+                zoomFactor: viewModel.zoomFactor,
+                isVisible: isZoomIndicatorVisible
+            )
+            .allowsHitTesting(false)
+            .padding(.bottom, 16)
+
+            zoomPresetButtons
+                .padding(.bottom, 16)
+
+            ShutterButton(
+                action: {
+                    Task {
+                        await handleShutterTap()
+                    }
+                },
+                isCapturing: viewModel.state.isCapturing,
+                captureMode: viewModel.captureMode,
+                isRecording: viewModel.isRecording,
+                isDisabled: viewModel.isProcessingVideo
+            )
+            .padding(.bottom, 16)
+
+            videoBottomRow
+                .padding(.bottom, 8)
+        }
+    }
+
+    // MARK: - Video Bottom Row
+
+    /// ビデオモード最下部: サムネイル + モード切替 + カメラ反転
+    private var videoBottomRow: some View {
+        HStack {
+            ThumbnailView(image: viewModel.lastCapturedImage)
+                .onTapGesture {
+                    if viewModel.lastCapturedImage != nil {
+                        showEditor = true
+                    }
+                }
+                .padding(.leading, 16)
+
+            Spacer()
+
+            modeSwitchLabel
+
+            Spacer()
+
+            ToolbarButton(icon: "arrow.triangle.2.circlepath.camera") {
+                Task {
+                    try? await viewModel.switchCamera()
+                }
+            }
+            .opacity(viewModel.isRecording ? 0.3 : 1.0)
+            .disabled(viewModel.isRecording)
+            .padding(.trailing, 16)
+        }
     }
 
     // MARK: - Pinch Gesture
@@ -180,13 +267,11 @@ struct CameraScreen: View {
     private var topToolbar: some View {
         HStack {
             if viewModel.captureMode == .photo {
-                // 写真モード: アスペクト比ボタン（左）
                 ToolbarButton(text: viewModel.aspectRatio.displayLabel) {
                     viewModel.setAspectRatio(viewModel.aspectRatio.next())
                 }
                 .padding(.leading, 16)
             } else {
-                // ビデオモード: 「HD」「30」バッジ（左）
                 videoInfoBadges
                     .padding(.leading, 16)
             }
@@ -350,7 +435,7 @@ struct CameraScreen: View {
             .background(Color.black)
     }
 
-    // MARK: - Shutter Row
+    // MARK: - Shutter Row (Photo Mode)
 
     private var shutterRow: some View {
         HStack {
